@@ -22,7 +22,8 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        {/* basename: the site is deployed under /portfolio/ on GitHub Pages */}
+        <BrowserRouter basename="/portfolio">
           <Layout>
             <Routes>
               <Route path="/" element={<Profile />} />
