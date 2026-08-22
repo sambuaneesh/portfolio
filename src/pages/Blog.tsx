@@ -102,6 +102,32 @@ export function Blog() {
     );
   }
 
+  // Nothing published yet - show a "coming soon" page instead of an empty
+  // list (admins still see the full editor UI below so they can add posts).
+  if (!isAdmin && blogPosts.length === 0) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
+        <Card className="bg-card border-border max-w-md w-full text-center">
+          <CardHeader>
+            <h1 className="text-3xl font-bold text-foreground">Blog Coming Soon</h1>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground">
+              I'm still working on my first posts. In the meantime, you can read
+              The Boring Blog.
+            </p>
+            <Button onClick={() => navigate("/")}>Back to Overview</Button>
+            <Button variant="outline" asChild>
+              <a href="https://theboringblog.netlify.app/" target="_blank" rel="noopener noreferrer">
+                Visit The Boring Blog <ExternalLink className="w-4 h-4 ml-2" />
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 fade-in">

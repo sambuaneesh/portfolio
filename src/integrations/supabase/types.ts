@@ -39,7 +39,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      achievements: {
+      aneesh_achievements: {
         Row: {
           certificate_url: string | null
           created_at: string
@@ -72,7 +72,7 @@ export type Database = {
         }
         Relationships: []
       }
-      admin_users: {
+      aneesh_admin_users: {
         Row: {
           created_at: string
           id: string
@@ -99,7 +99,7 @@ export type Database = {
         }
         Relationships: []
       }
-      blog_comments: {
+      aneesh_blog_comments: {
         Row: {
           author_email: string | null
           author_name: string
@@ -156,7 +156,7 @@ export type Database = {
           },
         ]
       }
-      blog_likes: {
+      aneesh_blog_likes: {
         Row: {
           blog_post_id: string
           created_at: string
@@ -188,7 +188,7 @@ export type Database = {
           },
         ]
       }
-      blog_posts: {
+      aneesh_blog_posts: {
         Row: {
           content: string
           created_at: string
@@ -236,7 +236,7 @@ export type Database = {
         }
         Relationships: []
       }
-      contact_messages: {
+      aneesh_contact_messages: {
         Row: {
           created_at: string
           email: string
@@ -269,7 +269,7 @@ export type Database = {
         }
         Relationships: []
       }
-      courses: {
+      aneesh_courses: {
         Row: {
           certificate_url: string | null
           completion_date: string | null
@@ -308,7 +308,7 @@ export type Database = {
         }
         Relationships: []
       }
-      education: {
+      aneesh_education: {
         Row: {
           coursework: string[] | null
           created_at: string
@@ -350,7 +350,7 @@ export type Database = {
         }
         Relationships: []
       }
-      experience: {
+      aneesh_experience: {
         Row: {
           company: string
           created_at: string
@@ -389,7 +389,7 @@ export type Database = {
         }
         Relationships: []
       }
-      languages: {
+      aneesh_languages: {
         Row: {
           created_at: string
           id: string
@@ -419,7 +419,7 @@ export type Database = {
         }
         Relationships: []
       }
-      personal_info: {
+      aneesh_personal_info: {
         Row: {
           avatar_url: string | null
           bio: string
@@ -518,7 +518,7 @@ export type Database = {
         }
         Relationships: []
       }
-      projects: {
+      aneesh_projects: {
         Row: {
           category: string | null
           created_at: string
@@ -581,7 +581,7 @@ export type Database = {
         }
         Relationships: []
       }
-      site_settings: {
+      aneesh_site_settings: {
         Row: {
           key: string
           updated_at: string
@@ -599,7 +599,7 @@ export type Database = {
         }
         Relationships: []
       }
-      skills: {
+      aneesh_skills: {
         Row: {
           category: string
           created_at: string
@@ -632,7 +632,7 @@ export type Database = {
         }
         Relationships: []
       }
-      task_requests: {
+      aneesh_task_requests: {
         Row: {
           additional_notes: string | null
           budget: string | null

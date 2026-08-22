@@ -1,4 +1,4 @@
-project_id = "xaxttdkmnnncepykpavc"
+project_id = "egqcfennzkzywarpxmwi"
 
 [functions.admin]
 # This function implements its own auth scheme (a self-issued JWT checked

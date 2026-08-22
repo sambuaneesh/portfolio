@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useTheme } from "@/providers/ThemeProvider";
 import { preventAccidentalDialogClose } from "@/lib/utils";
 import { ProjectsSkeleton } from "@/components/skeletons/pages";
 import { 
@@ -83,7 +82,7 @@ export function Projects() {
   // CRUD Functions
   const updateProject = async (id: string, updatedProject: Partial<Project>) => {
     try {
-      await adminApi.update('projects', id, updatedProject);
+      await adminApi.update('aneesh_projects', id, updatedProject);
 
       toast({
         title: "Success",
@@ -103,7 +102,7 @@ export function Projects() {
 
   const addProject = async (newProject: Omit<Project, 'id'>) => {
     try {
-      await adminApi.insert('projects', newProject);
+      await adminApi.insert('aneesh_projects', newProject);
 
       toast({
         title: "Success",
@@ -123,7 +122,7 @@ export function Projects() {
 
   const deleteProject = async (id: string) => {
     try {
-      await adminApi.remove('projects', id);
+      await adminApi.remove('aneesh_projects', id);
 
       toast({
         title: "Success",
@@ -425,17 +424,12 @@ interface ProjectCardProps {
 }
 
 function ProjectCard({ project, featured = false, isAdmin = false, onEdit, onDelete }: ProjectCardProps) {
-  const { theme } = useTheme();
-  
-  // Use provided image or fallback to logo based on theme
+  // Use provided image or fallback to the avatar
   const getImageUrl = () => {
     if (project.images?.[0]) return project.images[0];
     if (project.image_url) return project.image_url;
-    
-    // Fallback to logo based on theme
-    if (theme === 'light') return '/adk_dev_logo_dark.png';
-    if (theme === 'dark') return '/adk_dev_logo_light.png';
-    return '/adk_dev_logo_color.png'; // system default
+
+    return '/avatar.jpg'; // fallback placeholder
   };
   
   const imageUrl = getImageUrl();

@@ -79,9 +79,8 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { useSiteSettings } from "@/hooks/usePortfolioData";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-// Import logo images
-import logoDark from "@/assets/adk_dev_logo_dark.png"; // For light mode
-import logoLight from "@/assets/adk_dev_logo_light.png"; // For dark mode  
+// Import logo image
+import logo from "@/assets/avatar.jpg"; 
 import { DialogTitle } from "@radix-ui/react-dialog";
 
 export function Navigation() {
@@ -143,17 +142,11 @@ export function Navigation() {
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3 flex-shrink-0 group">
               {/* Responsive Logo - full size on desktop, medium on tablet, small on mobile */}
-              <div className="relative h-20 md:h-24 lg:h-28 w-auto max-w-56 md:max-w-64 lg:max-w-72 overflow-hidden rounded-lg flex items-center justify-center bg-transparent">
+              <div className="relative h-10 md:h-12 lg:h-14 w-auto aspect-square max-w-56 md:max-w-64 lg:max-w-72 overflow-hidden rounded-full flex items-center justify-center bg-transparent">
                 <img
-                  src={logoDark}
-                  alt="ADK Dev Logo"
-                  className="h-full w-auto object-contain object-center dark:opacity-0"
-                  style={{ imageRendering: 'auto' }}
-                />
-                <img
-                  src={logoLight}
-                  alt="ADK Dev Logo"
-                  className="absolute inset-0 h-full w-auto object-contain object-center opacity-0 dark:opacity-100"
+                  src={logo}
+                  alt="Aneesh Sambu"
+                  className="h-full w-full object-cover object-center"
                   style={{ imageRendering: 'auto' }}
                 />
               </div>

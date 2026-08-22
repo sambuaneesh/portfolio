@@ -39,7 +39,7 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 const password_hash = await bcrypt.hash(password, 10);
 
 const { error } = await supabase
-  .from('admin_users')
+  .from('aneesh_admin_users')
   .upsert({ username, password_hash, is_active: true }, { onConflict: 'username' });
 
 if (error) {

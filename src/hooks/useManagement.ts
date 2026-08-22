@@ -48,7 +48,7 @@ export function useContactMessages() {
     }
     try {
       setLoading(true);
-      setData(await adminApi.select<ContactMessage>('contact_messages'));
+      setData(await adminApi.select<ContactMessage>('aneesh_contact_messages'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -62,7 +62,7 @@ export function useContactMessages() {
 
   const createMessage = async (message: Omit<ContactMessage, 'id' | 'created_at' | 'updated_at' | 'status'>) => {
     const { error } = await supabase
-      .from('contact_messages')
+      .from('aneesh_contact_messages')
       .insert([message]);
 
     if (error) throw error;
@@ -70,12 +70,12 @@ export function useContactMessages() {
   };
 
   const updateMessage = async (id: string, updates: Partial<ContactMessage>) => {
-    await adminApi.update('contact_messages', id, updates);
+    await adminApi.update('aneesh_contact_messages', id, updates);
     await fetchMessages();
   };
 
   const deleteMessage = async (id: string) => {
-    await adminApi.remove('contact_messages', id);
+    await adminApi.remove('aneesh_contact_messages', id);
     await fetchMessages();
   };
 
@@ -99,7 +99,7 @@ export function useTaskRequests() {
     }
     try {
       setLoading(true);
-      setData(await adminApi.select<TaskRequest>('task_requests'));
+      setData(await adminApi.select<TaskRequest>('aneesh_task_requests'));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -112,17 +112,17 @@ export function useTaskRequests() {
   }, [fetchTaskRequests]);
 
   const createTaskRequest = async (request: Omit<TaskRequest, 'id' | 'created_at' | 'updated_at' | 'status'>) => {
-    const { error } = await supabase.from('task_requests').insert([request]);
+    const { error } = await supabase.from('aneesh_task_requests').insert([request]);
     if (error) throw error;
   };
 
   const updateTaskRequest = async (id: string, updates: Partial<TaskRequest>) => {
-    await adminApi.update('task_requests', id, updates);
+    await adminApi.update('aneesh_task_requests', id, updates);
     await fetchTaskRequests();
   };
 
   const deleteTaskRequest = async (id: string) => {
-    await adminApi.remove('task_requests', id);
+    await adminApi.remove('aneesh_task_requests', id);
     await fetchTaskRequests();
   };
 

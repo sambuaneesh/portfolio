@@ -14,15 +14,10 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const JWT_SECRET = Deno.env.get("ADMIN_JWT_SECRET")!;
 
-// Oracle image/document storage - configurable without touching code.
-// Upload and public-read happen to live on different hosts/domains today
-// (and the upload endpoint's own returned `url` has a domain bug), so the
-// public URL is built here from the known {fileType}/{appName}/{fileName}
-// path convention rather than trusted from the upload response.
-const ORACLE_UPLOAD_BASE_URL = Deno.env.get("ORACLE_UPLOAD_BASE_URL") ?? "https://supabase.dileepadari.dev";
-const ORACLE_PUBLIC_BASE_URL = Deno.env.get("ORACLE_PUBLIC_BASE_URL") ?? "https://mystorage.dileepadari.dev";
-const ORACLE_UPLOAD_API_KEY = Deno.env.get("ORACLE_UPLOAD_API_KEY") ?? "";
-const ORACLE_APP_NAME = Deno.env.get("ORACLE_APP_NAME") ?? "portfolio";
+// Image/document storage - a public Supabase Storage bucket created by the
+// baseline migration. Uploads use the service-role client; reads are public
+// via the bucket's read policy.
+const STORAGE_BUCKET = Deno.env.get("PORTFOLIO_STORAGE_BUCKET") ?? "aneesh-portfolio";
 
 const db = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
@@ -31,18 +26,18 @@ const JWT_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
 // Every table an admin is allowed to insert/update/delete through this
 // gateway. Deliberately explicit rather than accepting any table name.
 const WRITABLE_TABLES = new Set([
-  "personal_info", "education", "experience", "projects", "skills",
-  "achievements", "blog_posts", "courses", "contact_messages",
-  "blog_comments", "languages", "site_settings", "task_requests",
+  "aneesh_personal_info", "aneesh_education", "aneesh_experience", "aneesh_projects", "aneesh_skills",
+  "aneesh_achievements", "aneesh_blog_posts", "aneesh_courses", "aneesh_contact_messages",
+  "aneesh_blog_comments", "aneesh_languages", "aneesh_site_settings", "aneesh_task_requests",
 ]);
 
 // Tables where the admin needs to see rows the public anon key can't
 // (drafts, the contact inbox) - a small "select" operation on the same
 // gateway, service-role, bypasses RLS for these only.
 const ADMIN_READABLE_TABLES: Record<string, { column: string; ascending: boolean }> = {
-  blog_posts: { column: "created_at", ascending: false },
-  contact_messages: { column: "created_at", ascending: false },
-  task_requests: { column: "created_at", ascending: false },
+  aneesh_blog_posts: { column: "created_at", ascending: false },
+  aneesh_contact_messages: { column: "created_at", ascending: false },
+  aneesh_task_requests: { column: "created_at", ascending: false },
 };
 
 const CORS_HEADERS = {
@@ -125,7 +120,7 @@ async function handleLogin(req: Request): Promise<Response> {
   if (!username || !password) return json({ error: "Missing username/password" }, 400);
 
   const { data: user } = await db
-    .from("admin_users")
+    .from("aneesh_admin_users")
     .select("id, username, password_hash, is_active")
     .eq("username", username)
     .maybeSingle();
@@ -134,7 +129,7 @@ async function handleLogin(req: Request): Promise<Response> {
     return json({ error: "Invalid credentials" }, 401);
   }
 
-  await db.from("admin_users").update({ last_login_at: new Date().toISOString() }).eq("id", user.id);
+  await db.from("aneesh_admin_users").update({ last_login_at: new Date().toISOString() }).eq("id", user.id);
 
   const now = Math.floor(Date.now() / 1000);
   const token = await signJwt({
@@ -206,27 +201,28 @@ async function handleUpload(req: Request): Promise<Response> {
 
   const fileBuffer = await req.arrayBuffer();
 
-  const uploadRes = await fetch(`${ORACLE_UPLOAD_BASE_URL}/upload`, {
-    method: "POST",
-    headers: {
-      "x-upload-key": ORACLE_UPLOAD_API_KEY,
-      "x-file-type": fileType,
-      "x-app-name": ORACLE_APP_NAME,
-      "x-file-name": fileName,
-    },
-    body: fileBuffer,
-  });
+  // The client sends raw bytes as octet-stream, so derive a proper
+  // content-type from the extension (browsers refuse to inline-display
+  // images served as application/octet-stream).
+  const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+  const MIME_BY_EXT: Record<string, string> = {
+    png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif",
+    webp: "image/webp", svg: "image/svg+xml", avif: "image/avif",
+    pdf: "application/pdf", txt: "text/plain", md: "text/markdown",
+  };
+  const contentType = MIME_BY_EXT[ext] ?? "application/octet-stream";
+  const objectPath = `${fileType}/${fileName}`;
 
-  const result = await uploadRes.json().catch(() => ({}));
-  if (!uploadRes.ok || !result.success) {
-    return json({ error: result.error ?? "Upload to storage failed" }, 502);
+  const { error: uploadError } = await db.storage
+    .from(STORAGE_BUCKET)
+    .upload(objectPath, fileBuffer, { contentType, upsert: true });
+
+  if (uploadError) {
+    return json({ error: uploadError.message }, 502);
   }
 
-  // Built from the known path convention rather than trusting result.url -
-  // the upload endpoint returns a URL on the wrong domain (a bug on the
-  // Oracle server side, not worth depending on here).
-  const publicUrl = `${ORACLE_PUBLIC_BASE_URL}/${fileType}/${ORACLE_APP_NAME}/${fileName}`;
-  return json({ url: publicUrl });
+  const { data } = db.storage.from(STORAGE_BUCKET).getPublicUrl(objectPath);
+  return json({ url: data.publicUrl });
 }
 
 Deno.serve(async (req) => {

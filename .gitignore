@@ -30,4 +30,4 @@ dist-ssr
 bun.lockb
 
 # Raw DB dumps should never be committed (contains real user data)
-/portfolio_backup*
+/portfolio_backup*.admin-credentials.txt

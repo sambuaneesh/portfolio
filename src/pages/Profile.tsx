@@ -45,8 +45,8 @@ import { usePersonalInfo, useEducation, useExperience, useSkills, useAchievement
 import { useAdmin } from "@/hooks/useAdmin";
 import { adminApi } from "@/lib/adminApi";
 import { ImageUploadField } from "@/components/ImageUploadField";
-import profileAvatar from "@/assets/dileepadari.png";
-import portfolio from "@/assets/portfolio.pdf";
+import profileAvatar from "@/assets/avatar.jpg";
+import resumePdf from "@/assets/resume.pdf";
 
 // Icon choices available for "About Me" highlight cards - a fixed set
 // (stored as a string key in personal_info.highlights) rather than a full
@@ -91,7 +91,7 @@ export function Profile() {
   // Update functions
   const updatePersonalInfo = async (updatedInfo: Partial<typeof personalInfo>) => {
     try {
-      await adminApi.update('personal_info', personalInfo.id, updatedInfo);
+      await adminApi.update('aneesh_personal_info', personalInfo.id, updatedInfo);
 
       toast({
         title: "Success",
@@ -111,7 +111,7 @@ export function Profile() {
 
   const updateEducation = async (id: string, updatedEducation: Partial<Education>) => {
     try {
-      await adminApi.update('education', id, updatedEducation);
+      await adminApi.update('aneesh_education', id, updatedEducation);
 
       toast({
         title: "Success",
@@ -131,7 +131,7 @@ export function Profile() {
 
   const updateExperience = async (id: string, updatedExperience: Partial<Experience>) => {
     try {
-      await adminApi.update('experience', id, updatedExperience);
+      await adminApi.update('aneesh_experience', id, updatedExperience);
 
       toast({
         title: "Success",
@@ -151,7 +151,7 @@ export function Profile() {
 
   const updateSkill = async (id: string, updatedSkill: Partial<Skill>) => {
     try {
-      await adminApi.update('skills', id, updatedSkill);
+      await adminApi.update('aneesh_skills', id, updatedSkill);
 
       toast({
         title: "Success",
@@ -171,7 +171,7 @@ export function Profile() {
 
   const updateAchievement = async (id: string, updatedAchievement: Partial<Achievement>) => {
     try {
-      await adminApi.update('achievements', id, updatedAchievement);
+      await adminApi.update('aneesh_achievements', id, updatedAchievement);
 
       toast({
         title: "Success",
@@ -191,7 +191,7 @@ export function Profile() {
 
   const updateCourse = async (id: string, updatedCourse: Partial<Course>) => {
     try {
-      await adminApi.update('courses', id, updatedCourse);
+      await adminApi.update('aneesh_courses', id, updatedCourse);
 
       toast({
         title: "Success",
@@ -212,7 +212,7 @@ export function Profile() {
   // Add functions
   const addExperience = async (newExperience: Omit<Experience, 'id'>) => {
     try {
-      await adminApi.insert('experience', newExperience);
+      await adminApi.insert('aneesh_experience', newExperience);
 
       toast({
         title: "Success",
@@ -232,7 +232,7 @@ export function Profile() {
 
   const addSkill = async (newSkill: Omit<Skill, 'id'>) => {
     try {
-      await adminApi.insert('skills', newSkill);
+      await adminApi.insert('aneesh_skills', newSkill);
 
       toast({
         title: "Success",
@@ -252,7 +252,7 @@ export function Profile() {
 
   const addEducation = async (newEducation: Omit<Education, 'id'>) => {
     try {
-      await adminApi.insert('education', newEducation);
+      await adminApi.insert('aneesh_education', newEducation);
 
       toast({
         title: "Success",
@@ -272,7 +272,7 @@ export function Profile() {
 
   const addAchievement = async (newAchievement: Omit<Achievement, 'id'>) => {
     try {
-      await adminApi.insert('achievements', newAchievement);
+      await adminApi.insert('aneesh_achievements', newAchievement);
 
       toast({
         title: "Success",
@@ -292,7 +292,7 @@ export function Profile() {
 
   const addCourse = async (newCourse: Omit<Course, 'id'>) => {
     try {
-      await adminApi.insert('courses', newCourse);
+      await adminApi.insert('aneesh_courses', newCourse);
 
       toast({
         title: "Success",
@@ -313,7 +313,7 @@ export function Profile() {
   // Delete functions
   const deleteExperience = async (id: string) => {
     try {
-      await adminApi.remove('experience', id);
+      await adminApi.remove('aneesh_experience', id);
 
       toast({
         title: "Success",
@@ -332,7 +332,7 @@ export function Profile() {
 
   const deleteSkill = async (id: string) => {
     try {
-      await adminApi.remove('skills', id);
+      await adminApi.remove('aneesh_skills', id);
 
       toast({
         title: "Success",
@@ -351,7 +351,7 @@ export function Profile() {
 
   const deleteEducation = async (id: string) => {
     try {
-      await adminApi.remove('education', id);
+      await adminApi.remove('aneesh_education', id);
 
       toast({
         title: "Success",
@@ -370,7 +370,7 @@ export function Profile() {
 
   const deleteAchievement = async (id: string) => {
     try {
-      await adminApi.remove('achievements', id);
+      await adminApi.remove('aneesh_achievements', id);
 
       toast({
         title: "Success",
@@ -389,7 +389,7 @@ export function Profile() {
 
   const deleteCourse = async (id: string) => {
     try {
-      await adminApi.remove('courses', id);
+      await adminApi.remove('aneesh_courses', id);
 
       toast({
         title: "Success",
@@ -587,7 +587,7 @@ export function Profile() {
                     className="w-max bg-primary text-primary-foreground hover:bg-primary/90 text-xs sm:text-sm md:text-base h-8 sm:h-10 md:h-11 px-3 sm:px-4 md:px-6"
                     asChild
                   >
-                    <a href={portfolio} target="_blank" rel="noopener noreferrer" className="flex items-center">
+                    <a href={resumePdf} target="_blank" rel="noopener noreferrer" className="flex items-center">
                       <Download className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2" />
                       <span className="hidden xs:inline sm:hidden md:inline">Download Resume</span>
                       <span className="sm:inline md:hidden">Resume</span>

@@ -159,7 +159,7 @@ export function usePersonalInfo() {
     try {
       setLoading(true);
       const { data: result, error } = await supabase
-        .from('personal_info')
+        .from('aneesh_personal_info')
         .select('*')
         .maybeSingle();
 
@@ -188,7 +188,7 @@ export function useEducation() {
     try {
       setLoading(true);
       const { data: result, error } = await supabase
-        .from('education')
+        .from('aneesh_education')
         .select('*')
         .order('order_index');
 
@@ -217,7 +217,7 @@ export function useExperience() {
     try {
       setLoading(true);
       const { data: result, error } = await supabase
-        .from('experience')
+        .from('aneesh_experience')
         .select('*')
         .order('order_index');
 
@@ -246,7 +246,7 @@ export function useProjects() {
     try {
       setLoading(true);
       const { data: result, error } = await supabase
-        .from('projects')
+        .from('aneesh_projects')
         .select('*')
         .order('order_index');
 
@@ -275,7 +275,7 @@ export function useSkills() {
     try {
       setLoading(true);
       const { data: result, error } = await supabase
-        .from('skills')
+        .from('aneesh_skills')
         .select('*')
         .order('order_index');
 
@@ -304,7 +304,7 @@ export function useAchievements() {
     try {
       setLoading(true);
       const { data: result, error } = await supabase
-        .from('achievements')
+        .from('aneesh_achievements')
         .select('*')
         .order('order_index');
 
@@ -370,7 +370,7 @@ function useAdminCrud<T extends { id: string }>(table: string, orderBy: string) 
 }
 
 export function useLanguages() {
-  return useAdminCrud<Language>('languages', 'order_index');
+  return useAdminCrud<Language>('aneesh_languages', 'order_index');
 }
 
 export function useBlogPosts() {
@@ -386,10 +386,10 @@ export function useBlogPosts() {
       // blog_posts). Admins need drafts too, so they go through the
       // authenticated admin gateway instead, which bypasses RLS.
       if (isAdmin) {
-        setData(await adminApi.select<BlogPost>('blog_posts'));
+        setData(await adminApi.select<BlogPost>('aneesh_blog_posts'));
       } else {
         const { data: result, error } = await supabase
-          .from('blog_posts')
+          .from('aneesh_blog_posts')
           .select('*')
           .order('created_at', { ascending: false });
         if (error) throw error;
@@ -411,15 +411,15 @@ export function useBlogPosts() {
 
 // Blog CRUD operations (admin-only, routed through the admin Edge Function)
 export async function addBlogPost(blogPost: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) {
-  return adminApi.insert<BlogPost>('blog_posts', blogPost);
+  return adminApi.insert<BlogPost>('aneesh_blog_posts', blogPost);
 }
 
 export async function updateBlogPost(id: string, updates: Partial<Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>>) {
-  return adminApi.update<BlogPost>('blog_posts', id, updates);
+  return adminApi.update<BlogPost>('aneesh_blog_posts', id, updates);
 }
 
 export async function deleteBlogPost(id: string) {
-  await adminApi.remove('blog_posts', id);
+  await adminApi.remove('aneesh_blog_posts', id);
 }
 
 export function useCourses() {
@@ -431,7 +431,7 @@ export function useCourses() {
     try {
       setLoading(true);
       const { data: result, error } = await supabase
-        .from('courses')
+        .from('aneesh_courses')
         .select('*')
         .order('order_index', { ascending: true });
 
@@ -461,7 +461,7 @@ export function useBlogComments(blogPostId: string) {
     try {
       setLoading(true);
       const { data: result, error } = await supabase
-        .from('blog_comments')
+        .from('aneesh_blog_comments')
         .select('*')
         .eq('blog_post_id', blogPostId)
         .eq('is_approved', true)
@@ -507,7 +507,7 @@ export function useBlogLike(blogPostId: string) {
   const checkLikeStatus = useCallback(async () => {
     try {
       const { data: likes } = await supabase
-        .from('blog_likes')
+        .from('aneesh_blog_likes')
         .select('visitor_id')
         .eq('blog_post_id', blogPostId);
 
@@ -524,7 +524,7 @@ export function useBlogLike(blogPostId: string) {
 
       if (isLiked) {
         const { error } = await supabase
-          .from('blog_likes')
+          .from('aneesh_blog_likes')
           .delete()
           .eq('blog_post_id', blogPostId)
           .eq('visitor_id', visitorId);
@@ -535,7 +535,7 @@ export function useBlogLike(blogPostId: string) {
         }
       } else {
         const { error } = await supabase
-          .from('blog_likes')
+          .from('aneesh_blog_likes')
           .insert({
             blog_post_id: blogPostId,
             visitor_id: visitorId,
@@ -578,8 +578,8 @@ export function useBlogEngagement(blogPostId: string) {
       
       // Fetch counts in parallel
       const [likesResult, commentsResult] = await Promise.all([
-        supabase.from('blog_likes').select('id', { count: 'exact' }).eq('blog_post_id', blogPostId),
-        supabase.from('blog_comments').select('id', { count: 'exact' }).eq('blog_post_id', blogPostId).eq('is_approved', true)
+        supabase.from('aneesh_blog_likes').select('id', { count: 'exact' }).eq('blog_post_id', blogPostId),
+        supabase.from('aneesh_blog_comments').select('id', { count: 'exact' }).eq('blog_post_id', blogPostId).eq('is_approved', true)
       ]);
 
       setCounts({
@@ -603,7 +603,7 @@ export function useBlogEngagement(blogPostId: string) {
 // CRUD operations for engagement
 export const addBlogComment = async (commentData: Omit<BlogComment, 'id' | 'created_at' | 'updated_at'>) => {
   const { data, error } = await supabase
-    .from('blog_comments')
+    .from('aneesh_blog_comments')
     .insert(commentData)
     .select()
     .single();
@@ -617,7 +617,7 @@ export const addBlogComment = async (commentData: Omit<BlogComment, 'id' | 'crea
  *  someone else. */
 export const deleteBlogComment = async (commentId: string) => {
   const { error } = await supabase
-    .from('blog_comments')
+    .from('aneesh_blog_comments')
     .delete()
     .eq('id', commentId);
 
@@ -627,7 +627,7 @@ export const deleteBlogComment = async (commentId: string) => {
 /** Admin moderation: deletes any comment regardless of ownership, via the
  *  service-role admin gateway (bypasses RLS). */
 export const adminDeleteBlogComment = async (commentId: string) => {
-  await adminApi.remove('blog_comments', commentId);
+  await adminApi.remove('aneesh_blog_comments', commentId);
 };
 
 // Site-wide settings (footer text, auth page copy, admin quick links) - a
@@ -647,10 +647,10 @@ export interface SiteSettings {
 }
 
 const SITE_SETTINGS_DEFAULTS: SiteSettings = {
-  footer_text: 'Dileepadari',
-  footer_github_url: 'https://github.com/dileepadari/portfolio',
+  footer_text: 'Aneesh Sambu',
+  footer_github_url: 'https://github.com/sambuaneesh/portfolio',
   auth_title: 'Admin Sign In',
-  auth_description: "This is Dileep Adari's portfolio. Only authorized users can access admin features.",
+  auth_description: "This is Aneesh Sambu's portfolio. Only authorized users can access admin features.",
   admin_quick_links: [],
 };
 
@@ -661,7 +661,7 @@ export function useSiteSettings() {
   const fetchSettings = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.from('site_settings').select('key, value');
+      const { data, error } = await supabase.from('aneesh_site_settings').select('key, value');
       if (error) throw error;
       const merged = { ...SITE_SETTINGS_DEFAULTS };
       for (const row of data || []) {
@@ -678,7 +678,7 @@ export function useSiteSettings() {
   }, [fetchSettings]);
 
   const updateSetting = async <K extends keyof SiteSettings>(key: K, value: SiteSettings[K]) => {
-    await adminApi.upsert('site_settings', { key, value }, 'key');
+    await adminApi.upsert('aneesh_site_settings', { key, value }, 'key');
     await fetchSettings();
   };
 
