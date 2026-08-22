@@ -478,8 +478,7 @@ export default function Contact() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-4">Let's Discuss Ideas</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Have a project in mind? Want to collaborate? Or just want to say hello? 
-            I'd love to hear from you!
+            Questions, feedback, or just want to say hi? Feel free to reach out.
           </p>
         </div>
 
@@ -844,43 +843,6 @@ export default function Contact() {
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Project Ideas */}
-            <Card>
-              <CardHeader>
-                <CardTitle>What can we build together?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="p-4 bg-muted rounded-lg">
-                    <h4 className="font-semibold mb-2">Web Applications</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Full-stack web apps with frameworks like Next.js, and Node.js
-                    </p>
-                  </div>
-                  
-                  <div className="p-4 bg-muted rounded-lg">
-                    <h4 className="font-semibold mb-2">API Development</h4>
-                    <p className="text-sm text-muted-foreground">
-                      RESTful APIs endpoints for mobile and web applications
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Response Time */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <h4 className="font-semibold mb-2">Quick Response</h4>
-                  <p className="text-sm text-muted-foreground">
-                    I typically respond within 24 hours. For urgent matters, 
-                    please mention it in your message.
-                  </p>
-                </div>
               </CardContent>
             </Card>
           </div>

@@ -14,7 +14,6 @@ import { useState } from "react";
 import {
   MapPin,
   Mail,
-  Globe,
   Linkedin,
   Github,
   Download,
@@ -52,7 +51,7 @@ import resumePdf from "@/assets/resume.pdf";
 // (stored as a string key in personal_info.highlights) rather than a full
 // icon-picker, kept small and already-imported to avoid extra bundle weight.
 const HIGHLIGHT_ICON_MAP: Record<string, typeof Layers> = {
-  Layers, Palette, Monitor, GitBranch, Code, Award, Star, Briefcase, Globe, Trophy,
+  Layers, Palette, Monitor, GitBranch, Code, Award, Star, Briefcase, Trophy,
 };
 const HIGHLIGHT_ICON_OPTIONS = Object.keys(HIGHLIGHT_ICON_MAP);
 
@@ -504,15 +503,6 @@ export function Profile() {
                     <span className="truncate">{personalInfo?.email}</span>
                   </a>
                   <a
-                    href={`${personalInfo?.website}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center lg:justify-start text-sm md:text-base text-muted-foreground hover:text-primary transition-colors cursor-pointer w-max"
-                  >
-                    <Globe className="w-4 h-4 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-2 shrink-0" />
-                    <span className="truncate">{personalInfo?.website}</span>
-                  </a>
-                  <a
                     href={`https://maps.google.com/?q=${encodeURIComponent(personalInfo?.location || '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -560,14 +550,6 @@ export function Profile() {
                       </a>
                     </Button>
                   )}
-
-                  <Button variant="outline" size="sm" className="w-max text-xs sm:text-sm md:text-base h-8 sm:h-9 md:h-10 px-2 sm:px-3 md:px-4" asChild>
-                    <a href={personalInfo?.website} target="_blank" rel="noopener noreferrer">
-                      <Globe className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2" />
-                      <span className="hidden xs:inline sm:hidden md:inline">Portfolio</span>
-                      <span className="hidden sm:inline md:hidden">Web</span>
-                    </a>
-                  </Button>
                 </div>
 
                 <div className="flex flex-row xs:flex-row justify-center lg:justify-start gap-2 sm:gap-3 w-max mx-auto lg:mx-0">
@@ -617,7 +599,7 @@ export function Profile() {
             ) : (
               <div className="space-y-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
                 <p>
-                  {personalInfo?.bio || "Hello! I'm a passionate developer with a keen interest in building innovative solutions that make a difference."}
+                  {personalInfo?.bio || "B.Tech + MS by Research student in Computer Science at IIIT Hyderabad."}
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
@@ -634,10 +616,6 @@ export function Profile() {
                     );
                   })}
                 </div>
-
-                <p className="text-center pt-4 border-t border-border">
-                  <span className="text-foreground font-medium">Ready to collaborate</span> on impactful projects and contribute to forward-thinking teams.
-                </p>
 
                 <div className="flex justify-center pt-1">
                   <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 hover:scale-105 hover:shadow-lg">
@@ -1237,7 +1215,7 @@ export function Profile() {
                             )}
                             {achievement?.certificate_url && (
                               <a href={achievement.certificate_url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground mt-2">
-                                View Certificate
+                                View Details
                               </a>
                             )}
                             </div>

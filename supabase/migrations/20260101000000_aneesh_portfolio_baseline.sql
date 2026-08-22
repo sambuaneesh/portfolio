@@ -56,7 +56,7 @@ insert into public.aneesh_personal_info (
 ) values (
   'Aneesh Sambu',
   'Software Developer & Undergraduate Researcher',
-  'I''m a B.Tech + MS by Research student in Computer Science at IIIT Hyderabad and an undergraduate researcher at SERC (Software Engineering Research Center). I love understanding how things work under the hood — I''ve built my own programming language, a Unix shell in C, a network file system, and a Google File System clone. Currently interning at Wells Fargo and publishing research on software architecture and LLMs.',
+  'B.Tech + MS by Research student in Computer Science at IIIT Hyderabad. I work as an undergraduate researcher at SERC, and in my free time I build small systems projects to understand how things like shells, file systems, and interpreters actually work.',
   'Hyderabad, India',
   'sambu.aneesh@research.iiit.ac.in',
   '+91 9030304583',
@@ -65,10 +65,10 @@ insert into public.aneesh_personal_info (
   'https://github.com/sambuaneesh',
   'https://avatars.githubusercontent.com/u/75294086?v=4',
   '[
-    {"icon": "Cpu", "title": "Systems Programming", "description": "Built interpreters, shells, network file systems and a Google File System clone from scratch to understand what happens under the hood."},
-    {"icon": "GitBranch", "title": "SE Research", "description": "Undergraduate researcher at SERC, IIITH — presenting at IEEE ICSA 2026 (A-tier) on software architecture and LLMs."},
-    {"icon": "Code2", "title": "Full-Stack Development", "description": "Building web applications with React, Node.js, Svelte, FastAPI and friends — from frontend polish to backend plumbing."},
-    {"icon": "Network", "title": "Distributed Systems", "description": "Exploring distributed file systems, gRPC-based collaboration tools, and fault-tolerant architectures."}
+    {"icon": "Cpu", "title": "Systems Programming", "description": "Built small projects like a shell and a network file system in C to learn how they work."},
+    {"icon": "GitBranch", "title": "SE Research", "description": "Undergraduate researcher at SERC, IIITH. Presenting at IEEE ICSA 2026 on software architecture and LLMs."},
+    {"icon": "Code2", "title": "Web Development", "description": "Comfortable across the stack with React, Node.js, Svelte, and FastAPI."},
+    {"icon": "Network", "title": "Distributed Systems", "description": "Coursework and projects covering distributed file systems and gRPC-based tools."}
   ]'::jsonb
 );
 
@@ -101,10 +101,10 @@ create trigger aneesh_education_updated_at
 insert into public.aneesh_education (institution, degree, duration, gpa, location, order_index) values
   ('International Institute of Information Technology, Hyderabad',
    'B.Tech + MS by Research in Computer Science and Engineering',
-   '2023 — Expected May 2027', 'CGPA: 8.05', 'Hyderabad, India', 1),
+   '2023 - Expected May 2027', 'CGPA: 8.05', 'Hyderabad, India', 1),
   ('Neil Gogte Institute of Technology',
    'Bachelor of Engineering in Computer Science (transferred)',
-   '2022 — May 2023', 'CGPA: 8.65 (3 semesters)', 'Hyderabad, India', 2);
+   '2022 - May 2023', 'CGPA: 8.65 (3 semesters)', 'Hyderabad, India', 2);
 
 -- ----------------------------------------------------------------------------
 -- experience
@@ -132,17 +132,17 @@ create trigger aneesh_experience_updated_at
   for each row execute function public.aneesh_update_updated_at_column();
 
 insert into public.aneesh_experience (title, company, duration, location, description, technologies, order_index) values
-  ('Technology Program Intern', 'Wells Fargo', 'May 2026 — July 2026', 'Hyderabad, India',
+  ('Technology Program Intern', 'Wells Fargo', 'May 2026 - July 2026', 'Hyderabad, India',
    array['Working as a Technology Program Intern contributing to enterprise software development initiatives.'],
    array['Enterprise Software'], 1),
-  ('Undergraduate Researcher', 'SERC, Software Engineering Research Center — IIITH', 'March 2024 — Present', 'IIITH, Hyderabad',
+  ('Undergraduate Researcher', 'SERC, IIIT Hyderabad', 'March 2024 - Present', 'IIITH, Hyderabad',
    array['Accepted to present a main track research paper at the 23rd IEEE ICSA 2026 (A-tier conference).',
          'Published a research paper at the SAGAI workshop co-located with the ICSA conference as one of the main authors.'],
    array['Software Engineering', 'LLMs', 'Research'], 2),
-  ('Summer Intern', 'Smart City Living Lab — IIITH', 'May 2024 — July 2024', 'IIITH, Hyderabad',
+  ('Summer Intern', 'Smart City Living Lab, IIIT Hyderabad', 'May 2024 - July 2024', 'IIITH, Hyderabad',
    array['Worked on maintaining and developing features for the City IoT Operating Platform (ctOP).'],
    array['IoT', 'Full-Stack'], 3),
-  ('Intern', 'VILS AI — IIITH', 'January 2024 — April 2024', 'IIITH, Hyderabad',
+  ('Intern', 'VILS AI, IIIT Hyderabad', 'January 2024 - April 2024', 'IIITH, Hyderabad',
    array['Created a frontend interface for "HR-Buddy", an AI-powered talent management platform.'],
    array['React', 'Frontend'], 4);
 
@@ -181,28 +181,28 @@ create trigger aneesh_projects_updated_at
 
 insert into public.aneesh_projects (title, description, github_url, live_url, language, language_color, stars, featured, order_index) values
   ('WhyPY',
-   'A custom programming language built to understand the world of interpreters — implemented lexical analysis, parsing, and evaluation components from scratch to support the language''s functionality.',
+   'A custom programming language built to understand how interpreters work. Implements lexical analysis, parsing, and evaluation from scratch.',
    'https://github.com/sambuaneesh/why-py', 'https://why-py.vercel.app/', 'Python', '#3572A5', null, true, 1),
   ('Network File System',
-   'A socket programming project that emulates a client-server relationship to enable operations on files — creating, editing, deleting, and transferring files, with automatic backups in case of server failure.',
+   'A socket programming project that emulates a client-server relationship for file operations: creating, editing, deleting, and transferring files, with backups in case of server failure.',
    'https://github.com/sambuaneesh/Network-File-System', null, 'C', '#555555', null, true, 2),
   ('Custom GFS Implementation',
    'A custom implementation of the Google File System (GFS) built to understand distributed file system architectures, focusing on scalability, fault tolerance, and high aggregate performance across multiple storage servers.',
    'https://github.com/sambuaneesh/custom-gfs-implementation', null, 'Python', '#3572A5', null, true, 3),
   ('goLLab Editor',
-   'A collaborative document editor utilizing a client-server architecture with gRPC for communication — multiple users can edit documents simultaneously with real-time synchronization.',
+   'A collaborative document editor built on a gRPC client-server architecture, where multiple users can edit documents with real-time synchronization.',
    'https://github.com/sambuaneesh/goLLab-editor', null, 'Go', '#00ADD8', null, true, 4),
-  ('wyShell — Custom Shell',
+  ('wyShell',
    'A Unix-style shell implemented entirely from scratch in C, supporting standard shell functionality.',
    'https://github.com/sambuaneesh/wyShell', null, 'C', '#555555', null, false, 5),
   ('leetpremium',
-   'Ok, let me be honest — I seriously opened LeetCode to practice DSA, but ended up building this instead.',
+   'I seriously opened LeetCode to practice DSA, but ended up building this instead.',
    'https://github.com/sambuaneesh/leetpremium', null, 'JavaScript', '#f1e05a', 21, false, 6),
   ('multi-audio-sink',
    'Human-friendly TUI for combining, routing, and managing PipeWire audio outputs on Linux.',
    'https://github.com/sambuaneesh/multi-audio-sink', null, 'Rust', '#dea584', 1, false, 7),
   ('agentic_decomposer',
-   'Experiments in agentic decomposition — breaking down complex tasks for LLM-driven agents.',
+   'Experiments in agentic decomposition: breaking down complex tasks for LLM-driven agents.',
    'https://github.com/sambuaneesh/agentic_decomposer', null, 'Python', '#3572A5', null, false, 8);
 
 -- ----------------------------------------------------------------------------
@@ -276,19 +276,19 @@ create trigger aneesh_achievements_updated_at
   for each row execute function public.aneesh_update_updated_at_column();
 
 insert into public.aneesh_achievements (title, description, certificate_url, order_index) values
-  ('ICSA 2026 — Main Track Research Paper',
+  ('ICSA 2026 Main Track Research Paper',
    'Accepted to present a main track research paper at the 23rd IEEE International Conference on Software Architecture (ICSA 2026), an A-tier venue.',
    'https://arxiv.org/pdf/2502.00689', 1),
   ('SAGAI Workshop Publication',
    'Published a research paper at the SAGAI workshop co-located with the ICSA conference as one of the main authors.',
    'https://arxiv.org/pdf/2502.00689', 2),
-  ('2nd Place — HackIIIT',
+  ('2nd Place at HackIIIT',
    'Secured 2nd position in the annually held HackIIIT hackathon (regular track) at IIIT Hyderabad.',
    'https://blog.montycloud.com/blogs/montycloud-empowering-innovation-at-the-moya-hackathon', 3),
   ('Web-Admin, Clubs Council IIITH',
    'Worked as Web-Admin for the Clubs Council at IIIT Hyderabad.',
    'https://clubs.iiit.ac.in/profile/sambu.aneesh', 4),
-  ('Author — The Boring Blog',
+  ('Author of The Boring Blog',
    'Author of "The Boring Blog," a personal blog.',
    'https://theboringblog.netlify.app/', 5);
 
@@ -393,7 +393,7 @@ insert into public.aneesh_site_settings (key, value) values
   ('admin_quick_links', '[]');
 
 -- ----------------------------------------------------------------------------
--- admin_users (no RLS policies — service role only, via the Edge Function)
+-- admin_users (no RLS policies: service role only, via the Edge Function)
 -- ----------------------------------------------------------------------------
 create table if not exists public.aneesh_admin_users (
   id uuid primary key default gen_random_uuid(),
