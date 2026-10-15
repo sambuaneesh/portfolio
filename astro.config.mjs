@@ -17,10 +17,11 @@ export default defineConfig({
   image: {
     // Content images are admin-uploaded and can live anywhere (Supabase
     // storage, GitHub, Vercel). They're fetched once at build and re-encoded.
-    remotePatterns: ['com', 'co', 'app', 'io', 'dev', 'net', 'org', 'in', 'me'].map((tld) => ({
-      protocol: 'https',
-      hostname: `**.${tld}`,
-    })),
+    // '**.com' only matches subdomains, so bare hosts are listed too.
+    remotePatterns: ['com', 'co', 'app', 'io', 'dev', 'net', 'org', 'in', 'me'].flatMap((tld) => [
+      { protocol: 'https', hostname: `**.${tld}` },
+      { protocol: 'https', hostname: `*.${tld}` },
+    ]),
   },
   devToolbar: { enabled: false },
 });

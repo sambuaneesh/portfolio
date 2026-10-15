@@ -12,6 +12,11 @@ export interface Field {
   required?: boolean;
   options?: string[];
   help?: string;
+  /** Stored in this site_settings key as { [row id]: { [field]: value } }
+   *  instead of a table column (per-row extras that need no migration). */
+  extra?: string;
+  /** Value to show when nothing is stored yet. */
+  def?: unknown;
   min?: number;
   max?: number;
 }
@@ -76,7 +81,9 @@ export const TABLES: TableCfg[] = [
       { k: 'category', type: 'text' },
       { k: 'tags', type: 'list' },
       { k: 'featured', type: 'bool', help: 'shown on the home page (first 4)' },
-      { k: 'is_contributed', label: 'team / contribution', type: 'bool' },
+      { k: 'is_contributed', label: 'team project', type: 'bool' },
+      { k: 'show_readme', label: 'show github readme on the project page', type: 'bool', extra: 'project_extras', def: true },
+      { k: 'readme_override', label: 'write-up (replaces the readme)', type: 'markdown', extra: 'project_extras', help: 'Markdown. If filled, shown instead of the GitHub README.' },
       { k: 'stars', type: 'number', help: 'fallback if GitHub is unreachable' },
       { k: 'forks', type: 'number' },
       { ...order },

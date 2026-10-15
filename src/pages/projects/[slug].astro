@@ -2,9 +2,11 @@
 import Base from '../../layouts/Base.astro';
 import Win from '../../components/Win.astro';
 import Cart from '../../components/Cart.astro';
-import { getModules, type Module } from '../../lib/db';
+import { getModules, getSiteSettings, type Module } from '../../lib/db';
 import { u, fmtDate } from '../../lib/site';
 import { optimize } from '../../lib/images';
+import { getReadme } from '../../lib/readme';
+import { renderMarkdown } from '../../lib/markdown';
 
 export async function getStaticPaths() {
   const modules = await getModules();
@@ -19,6 +21,17 @@ const { m, prev, next } = Astro.props;
 
 const shots = [...new Set([m.image_url, ...(m.images ?? [])].filter(Boolean) as string[])];
 const screens = await Promise.all(shots.map(async (src) => ({ ...(await optimize(src, 1280)), orig: src })));
+// Project write-up: a manual override from /admin wins; otherwise the repo's
+// README, unless it's been switched off for this project.
+let readme: { html: string; file: string; href: string | null } | null = null;
+const opts = (await getSiteSettings()).project_extras?.[m.id] ?? {};
+if (opts.readme_override?.trim()) {
+  readme = { html: await renderMarkdown(opts.readme_override, { demote: 1 }), file: 'notes', href: null };
+} else if (opts.show_readme !== false && m.repo) {
+  const r = await getReadme(m.repo.owner, m.repo.name);
+  if (r) readme = { html: await renderMarkdown(r.markdown, { baseHref: r.baseHref, baseSrc: r.baseSrc, demote: 1 }), file: r.file, href: `${r.baseHref}${r.file}` };
+}
+
 const ogImage = screens[0] ? new URL(screens[0].src, Astro.site).href : undefined;
 
 const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
@@ -51,7 +64,7 @@ const spec: [string, string | null][] = [
       <Cart part={m.part} kicker={m.language ?? 'module'} title={m.title} color={m.language_color} foot={m.pushedAt ? fmtDate(m.pushedAt, { year: 'numeric' }) : ''} tilt />
     </Win>
 
-    <Win title="details" class="boot boot-3" id="specs">
+    <Win title="spec sheet" class="boot boot-3" id="specs">
       <dl class="spec">
         {spec.filter(([, v]) => v).map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
         {m.live_url && <div><dt>live</dt><dd><a href={m.live_url} rel="noopener">{host(m.live_url)}</a></dd></div>}
@@ -64,6 +77,13 @@ const spec: [string, string | null][] = [
         <a href={s.orig} class="screen__img"><img src={s.src} alt={`${m.title} screenshot ${i + 1}`} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" width={s.width} height={s.height} /></a>
       </Win>
     ))}
+
+    {readme && (
+      <Win title="readme" meta={readme.file} class="wfull reveal" id="readme" as="article">
+        <div class="prose readme" set:html={readme.html} />
+        {readme.href && <p class="label"><a href={readme.href} rel="noopener">view on github</a></p>}
+      </Win>
+    )}
 
     <Win title="prev" meta={prev.part} href={u(`/projects/${prev.slug}/`)} class="reveal" id="prev">
       <p class="h-tile">← {prev.title}</p>
@@ -79,5 +99,10 @@ const spec: [string, string | null][] = [
   :global(.cart-tile .win__body) { justify-content: center; padding: 0; }
   :global(.screen .win__body) { padding: 0; }
   .screen__img { display: block; background: var(--tile-2); }
+  .readme { max-width: 78ch; }
+  .readme :global(img) { display: inline-block; max-width: 100%; height: auto; border: 0; vertical-align: middle; }
+  .readme :global(p > img:only-child), .readme :global(p > a:only-child > img) { display: block; border: var(--bw) solid var(--rule); }
+  .readme :global(h2:first-child) { margin-top: 0; }
+  .readme :global(pre) { max-width: 100%; }
   .screen__img img { width: auto; max-width: 100%; height: auto; max-height: 72vh; margin: 0 auto; object-fit: contain; }
 </style>

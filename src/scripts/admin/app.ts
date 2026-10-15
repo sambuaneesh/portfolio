@@ -140,6 +140,12 @@ export function mountAdmin(root: HTMLElement) {
     return api.publicSelect<Row>(cfg.table, cfg.order);
   }
 
+  type Extras = Record<string, Record<string, unknown>>;
+  async function loadExtras(key: string): Promise<Extras> {
+    const rows = await api.publicSelect<Row>('aneesh_site_settings', 'key.asc');
+    return ((rows.find((r) => r.key === key)?.value as Extras | undefined) ?? {});
+  }
+
   async function renderTable(cfg: TableCfg, main: HTMLElement) {
     const body = h('div', { class: 'win__body' }, h('p', { class: 'muted' }, 'loading…'));
     const newBtn = cfg.single || cfg.noCreate ? null : h('button', { class: 'btn', type: 'button', onclick: () => renderForm(cfg, main, null) }, '+ new');
@@ -180,15 +186,22 @@ export function mountAdmin(root: HTMLElement) {
 
   // --- form -----------------------------------------------------------------
 
-  function renderForm(cfg: TableCfg, main: HTMLElement, row: Row | null) {
+  async function renderForm(cfg: TableCfg, main: HTMLElement, row: Row | null) {
     const idCol = cfg.idColumn ?? 'id';
     const isNew = !row;
     const status = h('p', { class: 'notice', hidden: true, role: 'status' });
     const getters: Record<string, () => unknown> = {};
 
     const form = h('form', { class: 'edit', novalidate: true });
-    for (const f of cfg.fields) {
-      const { node, get } = fieldInput(f, row?.[f.k], api, cfg, isNew);
+    const fields = cfg.fields;
+    const extraKeys = [...new Set(fields.map((f) => f.extra).filter(Boolean) as string[])];
+    const extras: Record<string, Extras> = {};
+    try {
+      for (const k of extraKeys) extras[k] = await loadExtras(k);
+    } catch { /* fields fall back to defaults */ }
+    for (const f of fields) {
+      const stored = f.extra ? extras[f.extra]?.[String(row?.[idCol] ?? '')]?.[f.k] : row?.[f.k];
+      const { node, get } = fieldInput(f, stored ?? f.def, api, cfg, isNew);
       getters[f.k] = get;
       form.append(node);
     }
@@ -217,20 +230,30 @@ export function mountAdmin(root: HTMLElement) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const payload: Row = {};
+      const extraVals: Record<string, Row> = {};
       try {
-        for (const f of cfg.fields) {
+        for (const f of fields) {
           const v = getters[f.k]();
           if (f.required && (v == null || v === '')) throw new Error(`"${f.label ?? f.k}" is required`);
-          payload[f.k] = v;
+          if (f.extra) (extraVals[f.extra] ??= {})[f.k] = v;
+          else payload[f.k] = v;
         }
       } catch (err) {
         return fail(err);
       }
       save.disabled = true;
       try {
-        if (cfg.idColumn && cfg.idColumn !== 'id') await api.upsert(cfg.table, payload, idCol);
-        else if (isNew) await api.insert(cfg.table, payload);
-        else await api.update(cfg.table, String(row![idCol]), payload, idCol);
+        let saved: Row | undefined;
+        if (cfg.idColumn && cfg.idColumn !== 'id') saved = await api.upsert(cfg.table, payload, idCol);
+        else if (isNew) saved = await api.insert(cfg.table, payload);
+        else saved = await api.update(cfg.table, String(row![idCol]), payload, idCol);
+        const id = String(saved?.[idCol] ?? row?.[idCol] ?? '');
+        for (const [key, vals] of Object.entries(extraVals)) {
+          if (!id) break;
+          const map = await loadExtras(key); // re-read: never clobber other rows' extras
+          map[id] = vals;
+          await api.upsert('aneesh_site_settings', { key, value: map }, 'key');
+        }
         markDirty(cfg);
         status.hidden = false;
         status.dataset.kind = 'ok';

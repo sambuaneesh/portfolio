@@ -72,6 +72,8 @@ Migrations live in `supabase/migrations/`. The Supabase instance is shared, so n
 - `20260101000000_aneesh_portfolio_baseline.sql`: every table, RLS, storage bucket, seed content.
 - `20261016000000_blog_likes_public_count.sql` (**not yet applied**): makes like counts readable so posts can show them.
 
+Project pages render the repo's GitHub README (fetched at build from raw.githubusercontent.com). Per-project "show readme" / "write-up" options are edited on the project form in `/admin/` and stored in the `project_extras` site setting, so they need no migration.
+
 Apply pending migrations with `npx supabase db push`.
 
 ### Admin users
@@ -91,3 +93,4 @@ Edited under **Site settings** in `/admin/` (JSON values):
 | `auth_title`, `auth_description` | admin sign-in screen |
 | `badge_lab` | `{ "label", "url" }` on the home ID badge |
 | `extra_links` | `[{ "label", "url" }]` added to links and the command line; a Steam profile link also drives the games tile |
+| `project_extras` | `{ "<project id>": { "show_readme": bool, "readme_override": "markdown" } }`; edited from the project form |

@@ -78,6 +78,8 @@ export interface SiteSettings {
   badge_lab: { label: string; url: string | null } | null;
   /** Links with no column of their own (Steam, etc.): [{ label, url }]. */
   extra_links: { label: string; url: string }[];
+  /** Per-project page options, keyed by project id (edited in /admin). */
+  project_extras: Record<string, { show_readme?: boolean; readme_override?: string | null }>;
 }
 
 const cache = new Map<string, Promise<unknown>>();
@@ -126,6 +128,7 @@ const SETTINGS_DEFAULTS: SiteSettings = {
   admin_quick_links: [],
   badge_lab: { label: 'SA4S@SERC', url: 'https://sa4s-serc.github.io/' },
   extra_links: [{ label: 'steam', url: 'https://steamcommunity.com/id/phant0mble3d/' }],
+  project_extras: {},
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {

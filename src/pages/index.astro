@@ -32,12 +32,12 @@ const avatar = me.avatar_url ? await optimize(me.avatar_url, 192, 192) : null;
 
 const words = me.name.toUpperCase().split(' ');
 const ports = [
-  me.github && { k: 'github', v: me.github.replace(/^https?:\/\/(www\.)?/, ''), href: me.github },
-  me.linkedin && { k: 'linkedin', v: 'linkedin/aneesh-sambu', href: me.linkedin },
-  me.email && { k: 'email', v: me.email, href: `mailto:${me.email}` },
-  me.website && { k: 'blog', v: me.website.replace(/^https?:\/\//, ''), href: me.website },
-  ...(settings.extra_links ?? []).map((l) => ({ k: l.label, v: l.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''), href: l.url })),
-  { k: 'resume', v: 'resume.pdf', href: u('/resume.pdf') },
+  me.github && { k: 'GIT', v: me.github.replace(/^https?:\/\/(www\.)?/, ''), href: me.github },
+  me.linkedin && { k: 'LNK', v: 'linkedin/aneesh-sambu', href: me.linkedin },
+  me.email && { k: 'MAIL', v: me.email, href: `mailto:${me.email}` },
+  me.website && { k: 'BLOG', v: me.website.replace(/^https?:\/\//, ''), href: me.website },
+  ...(settings.extra_links ?? []).map((l) => ({ k: l.label.slice(0, 5).toUpperCase(), v: l.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''), href: l.url })),
+  { k: 'PDF', v: 'resume.pdf', href: u('/resume.pdf') },
 ].filter(Boolean) as { k: string; v: string; href: string }[];
 ---
 <Base ws="home" path="~">
@@ -76,20 +76,20 @@ const ports = [
       </div>
     </Win>
 
-    <Win title="now" class="boot boot-3" id="now" href={u('/cv/#experience')}>
+    <Win title="now" meta="ps aux" class="boot boot-3" id="now" href={u('/cv/#experience')}>
       <ul class="ps">
         {now.map((e) => (
-          <li><div><strong>{e.title}</strong><span class="muted">{e.company}</span><span class="label">{e.duration}</span></div></li>
+          <li><span class="ps__pid mono">RUN</span><div><strong>{e.title}</strong><span class="muted">{e.company}</span><span class="label">{e.duration}</span></div></li>
         ))}
         {last.map((e) => (
-          <li class="ps__prev"><div><strong>{e.title}</strong><span class="muted">{e.company}</span><span class="label">{e.duration}</span></div></li>
+          <li class="ps__prev"><span class="ps__pid mono">EXIT 0</span><div><strong>{e.title}</strong><span class="muted">{e.company}</span><span class="label">{e.duration}</span></div></li>
         ))}
       </ul>
     </Win>
 
     {featured.map((m) => <ModuleTile m={m} />)}
 
-    <Win title="focus" class="w2 reveal" id="subsystems">
+    <Win title="subsystems" meta={`${me.highlights.length} units`} class="w2 reveal" id="subsystems">
       <ul class="subs">
         {me.highlights.map((h, i) => (
           <li>
@@ -112,7 +112,7 @@ const ports = [
       </ol>
     </Win>
 
-    <Win title="languages" class="reveal" id="toolchain" href={u('/cv/#skills')}>
+    <Win title="toolchain" class="reveal" id="toolchain" href={u('/cv/#skills')}>
       <ul class="chain">
         {chain.proven.map(({ skill, mods }) => (
           <li>
@@ -129,7 +129,7 @@ const ports = [
       )}
     </Win>
 
-    <Win title="links" class="reveal" id="ports">
+    <Win title="i/o" meta="ports" class="reveal" id="ports">
       <ul class="ports">
         {ports.map((p) => (
           <li><span class="tape">{p.k}</span><a href={p.href} rel={p.href.startsWith('http') ? 'me noopener' : undefined}>{p.v}</a></li>
@@ -137,7 +137,7 @@ const ports = [
       </ul>
     </Win>
 
-    <Win title="writing" class="reveal" id="writing" href={u('/writing/')}>
+    <Win title="writing" meta={posts.length ? `${posts.length} posts` : 'tape empty'} class="reveal" id="writing" href={u('/writing/')}>
       {posts.length ? (
         <ul class="log">
           {posts.slice(0, 3).map((p) => (
@@ -165,7 +165,7 @@ const ports = [
       </Win>
     )}
 
-    <Win title="keyboard" class="reveal keys-tile" id="keys">
+    <Win title="keys" class="reveal keys-tile" id="keys">
       <p class="mono keyline">
         <kbd class="k">1</kbd>–<kbd class="k">5</kbd> workspaces &nbsp;·&nbsp;
         <kbd class="k">h</kbd><kbd class="k">j</kbd><kbd class="k">k</kbd><kbd class="k">l</kbd> move &nbsp;·&nbsp;
@@ -198,9 +198,10 @@ const ports = [
   @container (max-width: 17rem) { .badge { grid-template-columns: 1fr; } }
 
   .ps { list-style: none; display: grid; gap: 0.8rem; }
-  .ps li { padding-left: 0.9rem; border-left: 4px solid var(--accent); }
+  .ps li { display: grid; grid-template-columns: 3.6rem 1fr; gap: 0.75rem; align-items: start; }
   .ps li div { display: grid; gap: 0.1rem; }
-  .ps .ps__prev { border-left-color: var(--rule); opacity: 0.8; }
+  .ps__pid { font-size: 0.68rem; padding: 0.1rem 0.3rem; text-align: center; border: 1.5px solid var(--rule); background: var(--accent); color: var(--on-accent); font-weight: 700; }
+  .ps__prev .ps__pid { background: transparent; color: var(--ink); }
 
   .subs { list-style: none; display: grid; gap: 0; }
   .subs li { display: grid; grid-template-columns: 2.6rem 1fr auto; gap: 0.9rem; padding: 0.75rem 0; border-bottom: 1px dashed var(--rule); align-items: start; }
@@ -229,7 +230,7 @@ const ports = [
   .chain__rest { font-size: 0.78rem; padding-top: 0.6rem; border-top: 1px dashed var(--rule); }
 
   .ports { list-style: none; display: grid; gap: 0.55rem; }
-  .ports li { display: grid; grid-template-columns: 4.6rem 1fr; gap: 0.6rem; align-items: center; min-width: 0; min-height: 24px; }
+  .ports li { display: grid; grid-template-columns: 3.6rem 1fr; gap: 0.6rem; align-items: center; min-width: 0; min-height: 24px; }
   .ports .tape { text-align: center; }
   .ports a { font-family: var(--font-mono); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 

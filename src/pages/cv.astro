@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Win from '../components/Win.astro';
 import { getPersonalInfo, getExperience, getEducation, getAchievements, getSkills, getCourses, getLanguages } from '../lib/db';
 import { u } from '../lib/site';
+import { localeOf } from '../lib/toolchain';
 
 const [me, experience, education, achievements, skills, courses, languages] = await Promise.all([
   getPersonalInfo(), getExperience(), getEducation(), getAchievements(), getSkills(), getCourses(), getLanguages(),
@@ -77,9 +78,14 @@ const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').split('/')
     </Win>
 
     <Win title="languages" class="reveal" id="languages">
-      <dl class="spec">
-        {languages.map((l) => <div><dt>{l.name}</dt><dd>{l.level.toLowerCase()}</dd></div>)}
-      </dl>
+      <div class="term mono">
+        <p class="term__cmd"><span aria-hidden="true">$ </span>locale -a</p>
+        <ul class="locales">
+          {languages.map((l) => (
+            <li><span>{localeOf(l.name)}</span><span><b>{l.name}</b> <span class="muted"># {l.level.toLowerCase()}</span></span></li>
+          ))}
+        </ul>
+      </div>
     </Win>
 
     <Win title="research & awards" class="w2 reveal" id="record">
@@ -155,6 +161,10 @@ const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').split('/')
   .stack > li { display: grid; gap: 0.5rem; }
   .stack > li + li { padding-top: 1.2rem; border-top: 1px dashed var(--rule); }
 
+  .term { font-size: 0.85rem; display: grid; gap: 0.6rem; }
+  .term__cmd { color: var(--muted); }
+  .locales { list-style: none; display: grid; gap: 0.35rem; }
+  .locales li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.2rem 1rem; }
   .keycaps { list-style: none; display: flex; flex-wrap: wrap; gap: 0.55rem; }
   .keycaps .k { font-size: 0.85rem; padding: 0.25rem 0.6rem; border-bottom-width: 4px; }
 
