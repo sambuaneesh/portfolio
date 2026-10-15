@@ -1,0 +1,36 @@
+{
+  "name": "sambuaneesh-portfolio",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "budget": "node scripts/check-budget.mjs",
+    "create-admin": "node scripts/create-admin.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@shikijs/rehype": "^4.5.0",
+    "astro": "^7.4.0",
+    "rehype-raw": "^7.0.0",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "shiki": "^4.5.0",
+    "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "bcryptjs": "^3.0.3",
+    "typescript": "^6.0.3"
+  }
+}

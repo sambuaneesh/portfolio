@@ -1,0 +1,75 @@
+---
+import Base from '../layouts/Base.astro';
+import { getSiteSettings } from '../lib/db';
+
+const settings = await getSiteSettings();
+const supabase = { url: import.meta.env.PUBLIC_SUPABASE_URL, key: import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY };
+const repo = settings.footer_github_url.replace(/\/$/, '');
+---
+<Base title="Admin" ws={null} path="/root" noindex>
+  <div
+    class="admin"
+    data-admin
+    data-url={supabase.url}
+    data-key={supabase.key}
+    data-title={settings.auth_title}
+    data-desc={settings.auth_description}
+    data-actions={`${repo}/actions/workflows/deploy.yml`}
+  >
+    <div data-view><p class="muted mono">loading…</p></div>
+    <noscript><p class="notice">The admin console needs JavaScript.</p></noscript>
+  </div>
+</Base>
+
+<script>
+  import { mountAdmin } from '../scripts/admin/app';
+  const root = document.querySelector<HTMLElement>('[data-admin]');
+  if (root) mountAdmin(root);
+</script>
+
+<style>
+  .admin :global([data-view]) { display: grid; gap: var(--gap); }
+  .admin :global(.login-win) { max-width: 28rem; margin: 6vh auto 0; width: 100%; }
+  .admin :global(.login) { display: grid; gap: 0.9rem; }
+  .admin :global(.login .h-page) { font-size: 2rem; }
+  .admin :global(.topbar__body) { flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; padding-block: 0.75rem; }
+  .admin :global(.pub) { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem; }
+  .admin :global(.console) { display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 56rem) {
+    .admin :global(.console) { grid-template-columns: 14rem minmax(0, 1fr); }
+    .admin :global(.console > .win:first-child) { position: sticky; top: calc(var(--bar-h) + var(--gap)); }
+  }
+  .admin :global(.side) { display: grid; gap: 0.15rem; }
+  .admin :global(.side__g) { margin-top: 0.7rem; }
+  .admin :global(.side__g:first-child) { margin-top: 0; }
+  .admin :global(.side__link) { font-family: var(--font-mono); font-size: 0.85rem; text-decoration: none; padding: 0.3rem 0.5rem; border: 1px solid transparent; }
+  .admin :global(.side__link:hover) { border-color: var(--rule); }
+  .admin :global(.side__link[aria-current='true']) { background: var(--accent); color: var(--on-accent); }
+  @media (max-width: 55.99rem) {
+    .admin :global(.side) { grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); }
+    .admin :global(.side__g) { grid-column: 1 / -1; }
+  }
+  .admin :global(.toolbar) { display: flex; gap: 0.6rem; }
+  .admin :global(.toolbar .input) { flex: 1; }
+  .admin :global(.rows) { list-style: none; display: grid; gap: 0.35rem; }
+  .admin :global(.row) {
+    width: 100%; text-align: left; display: grid; gap: 0.1rem; padding: 0.6rem 0.75rem;
+    background: var(--tile-2); color: var(--ink); border: 1px solid var(--rule); border-radius: var(--radius);
+    font: inherit; cursor: pointer;
+  }
+  .admin :global(.row:hover) { border-color: var(--active); box-shadow: 3px 3px 0 var(--edge); }
+  .admin :global(.row .mono) { font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .admin :global(.edit) { display: grid; gap: 1rem; max-width: 52rem; }
+  .admin :global(.field--bool) { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; font-family: var(--font-mono); font-size: 0.85rem; }
+  .admin :global(.field--bool input) { width: 1.2rem; height: 1.2rem; accent-color: var(--accent); }
+  .admin :global(.field--bool .help) { flex-basis: 100%; }
+  .admin :global(.help) { font-size: 0.78rem; }
+  .admin :global(.md) { font-size: 0.88rem; line-height: 1.55; }
+  .admin :global(.pair) { display: flex; gap: 0.5rem; }
+  .admin :global(.pair input[type='color']) { width: 3rem; height: 2.6rem; border: var(--bw) solid var(--rule); padding: 0; background: none; }
+  .admin :global(.imgfield) { display: grid; gap: 0.5rem; }
+  .admin :global(.thumbs) { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .admin :global(.thumbs img) { height: 72px; width: auto; border: 1px solid var(--rule); }
+  .admin :global(.danger) { --face: #d7263d; --fg: #fff; margin-left: auto; }
+  .admin :global([data-dirty]) { outline: 3px dashed var(--accent); outline-offset: 4px; }
+</style>

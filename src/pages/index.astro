@@ -1,0 +1,242 @@
+---
+import Base from '../layouts/Base.astro';
+import Win from '../components/Win.astro';
+import Cart from '../components/Cart.astro';
+import ModuleTile from '../components/ModuleTile.astro';
+import { getPersonalInfo, getModules, getExperience, getEducation, getAchievements, getSkills, getBlogPosts, getSiteSettings } from '../lib/db';
+import { u, fmtDate } from '../lib/site';
+import { glyph } from '../lib/glyphs';
+import { optimize } from '../lib/images';
+import { toolchain } from '../lib/toolchain';
+import { getSteam } from '../lib/steam';
+
+const [me, modules, experience, education, achievements, skills, posts, settings] = await Promise.all([
+  getPersonalInfo(), getModules(), getExperience(), getEducation(), getAchievements(), getSkills(), getBlogPosts(), getSiteSettings(),
+]);
+const lab = settings.badge_lab;
+const extra = settings.extra_links ?? [];
+const steamUrl = extra.find((l) => /steamcommunity\.com/.test(l.url))?.url;
+const steam = steamUrl ? await getSteam(steamUrl) : null;
+const games = steam
+  ? await Promise.all(steam.games.slice(0, 3).map(async (g) => ({ ...g, img: g.capsule ? await optimize(g.capsule, 184, 69) : null })))
+  : [];
+
+const featured = modules.filter((m) => m.featured).slice(0, 4);
+const current = experience.filter((e) => /present/i.test(e.duration));
+const now = current.length ? current : experience.slice(0, 1);
+const last = experience.filter((e) => !/present/i.test(e.duration)).slice(0, 1);
+const chain = toolchain(skills.filter((s) => s.category === 'Languages'), modules);
+const school = education[0];
+
+const avatar = me.avatar_url ? await optimize(me.avatar_url, 192, 192) : null;
+
+const words = me.name.toUpperCase().split(' ');
+const ports = [
+  me.github && { k: 'github', v: me.github.replace(/^https?:\/\/(www\.)?/, ''), href: me.github },
+  me.linkedin && { k: 'linkedin', v: 'linkedin/aneesh-sambu', href: me.linkedin },
+  me.email && { k: 'email', v: me.email, href: `mailto:${me.email}` },
+  me.website && { k: 'blog', v: me.website.replace(/^https?:\/\//, ''), href: me.website },
+  ...(settings.extra_links ?? []).map((l) => ({ k: l.label, v: l.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''), href: l.url })),
+  { k: 'resume', v: 'resume.pdf', href: u('/resume.pdf') },
+].filter(Boolean) as { k: string; v: string; href: string }[];
+---
+<Base ws="home" path="~">
+  <h1 class="sr-only">{me.name}: {me.title}</h1>
+  <div class="tiles">
+
+    <Win title="about" meta={me.location ?? ''} class="w3 h2 hero scan boot" id="hero">
+      <div class="hero__grid">
+        <div class="hero__text">
+          <p class="display kinetic" aria-hidden="true">
+            {words.map((w, i) => (
+              <><span class="hero__word" aria-hidden="true">{[...w].map((c) => <span class="ch">{c}</span>)}</span>{i < words.length - 1 && ' '}</>
+            ))}
+          </p>
+          <p class="hero__title mono">{me.title}</p>
+          <p class="lede">{me.bio}</p>
+          <div class="btns lift">
+            <a class="btn btn--hot" href={u('/projects/')}>Projects</a>
+            <a class="btn" href={u('/cv/')}>CV</a>
+            <a class="btn" href={u('/contact/')}>Contact</a>
+          </div>
+        </div>
+        <Cart part="AS-00" kicker={me.title.split(' & ')[0]} title={me.name} foot={me.location?.split(',')[0] ?? ''} tilt />
+      </div>
+    </Win>
+
+    <Win title="id" class="boot boot-2" id="id">
+      <div class="badge">
+        {avatar && <img src={avatar.src} alt={`Portrait of ${me.name}`} width="96" height="96" decoding="async" fetchpriority="low" />}
+        <dl class="spec">
+          <div><dt>name</dt><dd>{me.name}</dd></div>
+          {lab && <div><dt>lab</dt><dd>{lab.url ? <a class="lift" href={lab.url} rel="noopener">{lab.label}</a> : lab.label}</dd></div>}
+          {school && <div><dt>unit</dt><dd>IIIT Hyderabad</dd></div>}
+          {me.location && <div><dt>loc</dt><dd>{me.location}</dd></div>}
+        </dl>
+      </div>
+    </Win>
+
+    <Win title="now" class="boot boot-3" id="now" href={u('/cv/#experience')}>
+      <ul class="ps">
+        {now.map((e) => (
+          <li><div><strong>{e.title}</strong><span class="muted">{e.company}</span><span class="label">{e.duration}</span></div></li>
+        ))}
+        {last.map((e) => (
+          <li class="ps__prev"><div><strong>{e.title}</strong><span class="muted">{e.company}</span><span class="label">{e.duration}</span></div></li>
+        ))}
+      </ul>
+    </Win>
+
+    {featured.map((m) => <ModuleTile m={m} />)}
+
+    <Win title="focus" class="w2 reveal" id="subsystems">
+      <ul class="subs">
+        {me.highlights.map((h, i) => (
+          <li>
+            <span class="subs__glyph mono" aria-hidden="true">{glyph(h.icon)}</span>
+            <div>
+              <h2 class="h-tile">{h.title}</h2>
+              <p class="muted">{h.description}</p>
+            </div>
+            <span class="label subs__n">0{i + 1}</span>
+          </li>
+        ))}
+      </ul>
+    </Win>
+
+    <Win title="research & awards" class="reveal" id="research" href={u('/cv/#record')}>
+      <ol class="log">
+        {achievements.slice(0, 3).map((a) => (
+          <li><strong>{a.title}</strong><span class="muted">{a.description}</span></li>
+        ))}
+      </ol>
+    </Win>
+
+    <Win title="languages" class="reveal" id="toolchain" href={u('/cv/#skills')}>
+      <ul class="chain">
+        {chain.proven.map(({ skill, mods }) => (
+          <li>
+            <kbd class="k">{skill.skill_name}</kbd>
+            <span class="chain__arrow" aria-hidden="true">→</span>
+            <span class="chain__mods lift">
+              {mods.map((m) => <a href={u(`/projects/${m.slug}/`)}><span class="muted">{m.part}</span> {m.title}</a>)}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {chain.rest.length > 0 && (
+        <p class="chain__rest mono"><span class="label">also</span> {chain.rest.map((r) => r.skill.skill_name).join(' · ')}</p>
+      )}
+    </Win>
+
+    <Win title="links" class="reveal" id="ports">
+      <ul class="ports">
+        {ports.map((p) => (
+          <li><span class="tape">{p.k}</span><a href={p.href} rel={p.href.startsWith('http') ? 'me noopener' : undefined}>{p.v}</a></li>
+        ))}
+      </ul>
+    </Win>
+
+    <Win title="writing" class="reveal" id="writing" href={u('/writing/')}>
+      {posts.length ? (
+        <ul class="log">
+          {posts.slice(0, 3).map((p) => (
+            <li><strong>{p.title}</strong><span class="label">{fmtDate(p.created_at)}</span></li>
+          ))}
+        </ul>
+      ) : (
+        <>
+          <p class="muted">No posts here yet. Older writing is on <a class="lift" href={me.website ?? '#'}>The Boring Blog</a>.</p>
+        </>
+      )}
+    </Win>
+
+    {steam && games.length > 0 && (
+      <Win title="games" meta={steam.handle} class="reveal" id="games" href={steam.url}>
+        <ul class="games">
+          {games.map((g) => (
+            <li>
+              {g.img && <img src={g.img.src} width="92" height="35" alt="" loading="lazy" decoding="async" />}
+              <span class="games__name">{g.name}</span>
+              <span class="label">{g.hoursTotal} h</span>
+            </li>
+          ))}
+        </ul>
+      </Win>
+    )}
+
+    <Win title="keyboard" class="reveal keys-tile" id="keys">
+      <p class="mono keyline">
+        <kbd class="k">1</kbd>–<kbd class="k">5</kbd> workspaces &nbsp;·&nbsp;
+        <kbd class="k">h</kbd><kbd class="k">j</kbd><kbd class="k">k</kbd><kbd class="k">l</kbd> move &nbsp;·&nbsp;
+        <kbd class="k">↵</kbd> open &nbsp;·&nbsp;
+        <kbd class="k">:</kbd> command &nbsp;·&nbsp;
+        <kbd class="k">t</kbd> theme &nbsp;·&nbsp;
+        <kbd class="k">?</kbd> help
+      </p>
+    </Win>
+  </div>
+</Base>
+
+<style>
+  .hero__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; align-items: center; height: 100%; }
+  .hero__text { display: grid; gap: 1rem; align-content: start; }
+  .hero__word { white-space: nowrap; }
+  .hero__title { font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .hero__grid :global(.cart-stage) { display: none; }
+  @container (min-width: 46rem) {
+    .hero__grid { grid-template-columns: minmax(0, 1fr) 17rem; }
+    .hero__grid :global(.cart-stage) { display: grid; }
+    .hero__text .display { font-size: clamp(2.6rem, 7cqi, 5.6rem); }
+  }
+
+  .badge { display: grid; gap: 0.9rem; grid-template-columns: auto 1fr; align-items: start; }
+  .badge img { width: 96px; height: 96px; border: var(--bw) solid var(--rule); filter: grayscale(1) contrast(1.1); object-fit: cover; }
+  :global([data-theme='nostromo']) .badge img { filter: grayscale(1) sepia(1) saturate(2.4) hue-rotate(-12deg) brightness(.9); }
+  :global([data-theme='phosphor']) .badge img { filter: grayscale(1) sepia(1) saturate(4) hue-rotate(70deg) brightness(.85); }
+  :global([data-theme='aero']) .badge img { filter: none; border-radius: 12px; }
+  @container (max-width: 17rem) { .badge { grid-template-columns: 1fr; } }
+
+  .ps { list-style: none; display: grid; gap: 0.8rem; }
+  .ps li { padding-left: 0.9rem; border-left: 4px solid var(--accent); }
+  .ps li div { display: grid; gap: 0.1rem; }
+  .ps .ps__prev { border-left-color: var(--rule); opacity: 0.8; }
+
+  .subs { list-style: none; display: grid; gap: 0; }
+  .subs li { display: grid; grid-template-columns: 2.6rem 1fr auto; gap: 0.9rem; padding: 0.75rem 0; border-bottom: 1px dashed var(--rule); align-items: start; }
+  .subs li:first-child { padding-top: 0; }
+  .subs li:last-child { border-bottom: 0; padding-bottom: 0; }
+  .subs__glyph { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border: var(--bw) solid var(--rule); background: var(--tile-2); font-weight: 700; font-size: 1rem; }
+  .subs .h-tile { font-size: 1.05rem; margin-bottom: 0.15rem; }
+  .subs p { font-size: 0.92rem; }
+  @container (min-width: 40rem) {
+    .subs { grid-template-columns: 1fr 1fr; column-gap: 1.5rem; }
+    .subs li:nth-last-child(2) { border-bottom: 0; padding-bottom: 0; }
+    .subs li:nth-child(2) { padding-top: 0; }
+  }
+
+  .log { list-style: none; display: grid; gap: 0.7rem; counter-reset: log; }
+  .log li { display: grid; gap: 0.1rem; padding-left: 2.2rem; position: relative; counter-increment: log; font-size: 0.92rem; }
+  .log li::before { content: '[' counter(log, decimal-leading-zero) ']'; position: absolute; left: 0; font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); top: 0.15rem; }
+  .log .muted { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .chain { list-style: none; display: grid; gap: 0.7rem; }
+  .chain li { display: grid; grid-template-columns: auto auto 1fr; gap: 0.5rem; align-items: baseline; font-size: 0.85rem; }
+  .chain .k { font-size: 0.8rem; }
+  .chain__arrow { color: var(--muted); }
+  .chain__mods { display: grid; gap: 0.15rem; font-family: var(--font-mono); font-size: 0.78rem; min-width: 0; }
+  .chain__mods a { display: block; min-height: 24px; line-height: 24px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chain__rest { font-size: 0.78rem; padding-top: 0.6rem; border-top: 1px dashed var(--rule); }
+
+  .ports { list-style: none; display: grid; gap: 0.55rem; }
+  .ports li { display: grid; grid-template-columns: 4.6rem 1fr; gap: 0.6rem; align-items: center; min-width: 0; min-height: 24px; }
+  .ports .tape { text-align: center; }
+  .ports a { font-family: var(--font-mono); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .keyline { font-size: 0.85rem; line-height: 2.1; }
+  .games { list-style: none; display: grid; gap: 0.7rem; }
+  .games li { display: grid; grid-template-columns: 92px 1fr auto; gap: 0.75rem; align-items: center; font-size: 0.9rem; }
+  .games img { width: 92px; height: 35px; object-fit: cover; border: 1.5px solid var(--rule); }
+  .games__name { font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  @media (pointer: coarse) { :global(.keys-tile) { display: none; } }
+</style>

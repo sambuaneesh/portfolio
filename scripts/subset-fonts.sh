@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Regenerates the self-hosted font subsets in src/assets/fonts from the
+# @fontsource-variable packages. Only Basic Latin + Latin-1 + common
+# punctuation/arrows/box-drawing are kept - everything this site renders -
+# which roughly halves the bytes a visitor downloads. Needs `uv` (uses uvx).
+set -euo pipefail
+cd "$(dirname "$0")/.."
+UNICODES="U+0020-007E,U+00A0-00FF,U+0131,U+0152-0153,U+02C6,U+02DA,U+02DC,U+2010-2027,U+2030-203A,U+2044,U+20AC,U+20B9,U+2122,U+2190-2195,U+21B5,U+2212,U+2500-257F,U+25A0-25CF,U+2713"
+sub() {
+  uvx --from 'fonttools[woff]' --with brotli pyftsubset "$1" \
+    --unicodes="$UNICODES" --layout-features='kern,liga,calt,tnum,zero,ss01' \
+    --flavor=woff2 --output-file="$2" --no-hinting --desubroutinize
+}
+# Trim the weight axes to the range the CSS actually uses (drops unused masters).
+pin() {
+  uvx --from 'fonttools[woff]' --with brotli fonttools varLib.instancer "$1" "${@:3}" -o "$2"
+}
+TMP=$(mktemp -d)
+sub node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2 "$TMP/a.woff2"
+pin "$TMP/a.woff2" src/assets/fonts/archivo-subset.woff2 wght=400:900 wdth=62:125
+sub node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2 "$TMP/j.woff2"
+pin "$TMP/j.woff2" src/assets/fonts/jetbrains-mono-subset.woff2 wght=400:700
+rm -rf "$TMP"
+ls -l src/assets/fonts

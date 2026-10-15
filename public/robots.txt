@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /portfolio/admin/
+
+Sitemap: https://sambuaneesh.github.io/portfolio/sitemap-index.xml

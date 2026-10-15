@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import Win from '../../components/Win.astro';
+import { getBlogPosts, getPersonalInfo } from '../../lib/db';
+import { u, fmtDate, readingTime } from '../../lib/site';
+
+const [posts, me] = await Promise.all([getBlogPosts(), getPersonalInfo()]);
+---
+<Base title="Writing" ws="writing" path="~/writing" description={`Notes and essays by ${me.name}.`}>
+  <div class="tiles">
+    <Win title="writing" class="wfull boot" id="writing-head">
+      <h1 class="h-page">Writing</h1>
+    </Win>
+
+    {posts.length === 0 && (
+      <Win title="posts" class="w2 reveal" id="empty">
+        <p class="muted">No posts here yet. Older writing is on {me.website ? <a href={me.website}>The Boring Blog</a> : 'my blog'}.</p>
+      </Win>
+    )}
+
+    {posts.map((p, i) => (
+      <Win title={fmtDate(p.created_at)} href={p.external_link && !p.content ? p.external_link : u(`/writing/${p.slug}/`)} class:list={['reveal', i === 0 && 'w2']} id={`post-${p.slug}`}>
+        <h2 class="h-tile" style={`view-transition-name:p-${p.slug}`}>{p.title}</h2>
+        {p.excerpt && <p class="muted">{p.excerpt}</p>}
+        <Fragment slot="foot">
+          <span>{readingTime(p.content)} min</span>
+          {p.tags?.map((t) => <span>#{t}</span>)}
+        </Fragment>
+      </Win>
+    ))}
+  </div>
+</Base>

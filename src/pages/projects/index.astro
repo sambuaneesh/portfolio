@@ -1,0 +1,57 @@
+---
+import Base from '../../layouts/Base.astro';
+import Win from '../../components/Win.astro';
+import ModuleTile from '../../components/ModuleTile.astro';
+import { getModules } from '../../lib/db';
+import { slugify } from '../../lib/db';
+
+const modules = await getModules();
+const langs = [...new Map(modules.filter((m) => m.language).map((m) => [m.language!, m.language_color])).entries()];
+
+// Filtering is pure CSS: a radio per language + :has(). Zero JS.
+const filterCss = langs
+  .map(([l]) => `.catalog:has(#f-${slugify(l)}:checked) .module:not([data-lang="${slugify(l)}"]){display:none}`)
+  .join('\n');
+---
+<Base title="Projects" ws="projects" path="~/projects" description={`${modules.length} projects by Aneesh Sambu: shells, file systems, interpreters, distributed systems and tools.`}>
+  <div class="catalog">
+    <div class="tiles">
+      <Win title="projects" meta={`${modules.length}`} class="wfull boot" id="catalog-head">
+        <div class="head">
+          <h1 class="h-page">Projects</h1>
+        </div>
+        <fieldset class="filters lift">
+          <legend class="label">language</legend>
+          <label><input type="radio" name="lang" id="f-all" checked /><span>all</span></label>
+          {langs.map(([l, c]) => (
+            <label><input type="radio" name="lang" id={`f-${slugify(l)}`} /><span><span class="dot" style={`--c:${c ?? 'var(--accent)'}`} aria-hidden="true"></span> {l}</span></label>
+          ))}
+        </fieldset>
+      </Win>
+      {modules.map((m) => (
+        <div class="slot" data-lang={m.language ? slugify(m.language) : ''}>
+          <ModuleTile m={m} thumb class={m.featured ? 'module--featured' : ''} />
+        </div>
+      ))}
+    </div>
+  </div>
+  <style set:html={filterCss.replaceAll('.module:not', '.slot:not')}></style>
+</Base>
+
+<style>
+  .head { display: grid; gap: 0.75rem; }
+  .slot { display: grid; }
+  .filters { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .filters legend { margin-bottom: 0.5rem; padding: 0; }
+  .filters label { cursor: pointer; }
+  .filters input { position: absolute; opacity: 0; pointer-events: none; }
+  .filters label > span {
+    display: inline-flex; align-items: center; gap: 0.4em;
+    min-height: 2.2rem; padding: 0.25rem 0.75rem;
+    border: var(--bw) solid var(--rule); border-radius: var(--radius);
+    font-family: var(--font-mono); font-size: 0.8rem;
+    background: var(--tile-2);
+  }
+  .filters input:checked + span { background: var(--accent); color: var(--on-accent); }
+  .filters input:focus-visible + span { outline: 3px solid var(--active); outline-offset: 2px; }
+</style>

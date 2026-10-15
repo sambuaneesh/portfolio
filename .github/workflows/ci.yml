@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check
+        run: npm run check
+
+      - name: Build
+        env:
+          PUBLIC_SUPABASE_URL: https://egqcfennzkzywarpxmwi.supabase.co
+          PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_z2rNXUryA3THtizNMA2p6w_H18Sgo9O
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build
+
+      - name: Performance budget
+        run: npm run budget

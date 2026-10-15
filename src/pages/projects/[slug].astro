@@ -1,0 +1,83 @@
+---
+import Base from '../../layouts/Base.astro';
+import Win from '../../components/Win.astro';
+import Cart from '../../components/Cart.astro';
+import { getModules, type Module } from '../../lib/db';
+import { u, fmtDate } from '../../lib/site';
+import { optimize } from '../../lib/images';
+
+export async function getStaticPaths() {
+  const modules = await getModules();
+  return modules.map((m, i) => ({
+    params: { slug: m.slug },
+    props: { m, prev: modules[i - 1] ?? modules[modules.length - 1], next: modules[i + 1] ?? modules[0] },
+  }));
+}
+
+interface Props { m: Module; prev: Module; next: Module }
+const { m, prev, next } = Astro.props;
+
+const shots = [...new Set([m.image_url, ...(m.images ?? [])].filter(Boolean) as string[])];
+const screens = await Promise.all(shots.map(async (src) => ({ ...(await optimize(src, 1280)), orig: src })));
+const ogImage = screens[0] ? new URL(screens[0].src, Astro.site).href : undefined;
+
+const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+const spec: [string, string | null][] = [
+  ['part', m.part],
+  ['language', m.language],
+  ['type', m.is_contributed ? 'team project' : 'solo'],
+  ['category', m.category],
+  ['stars', m.stars != null ? `★ ${m.stars}` : null],
+  ['forks', m.forks != null ? String(m.forks) : null],
+  ['license', m.license],
+  ['last push', m.pushedAt ? fmtDate(m.pushedAt) : null],
+  ['repo', m.repo ? `${m.repo.owner}/${m.repo.name}` : null],
+];
+---
+<Base title={m.title} ws="projects" path={`~/projects/${m.slug}`} description={m.description} image={ogImage}>
+  <div class="tiles">
+    <Win title={m.part} class="w2 boot" id="sheet">
+      <p class="label"><a href={u('/projects/')}>← projects</a></p>
+      <h1 class="h-page" style={`view-transition-name:t-${m.slug}`}>{m.title}</h1>
+      <p class="lede">{m.description}</p>
+      {m.tags?.length ? <ul class="tags" aria-label="Tags">{m.tags.map((t) => <li>{t}</li>)}</ul> : null}
+      <div class="btns">
+        {m.github_url && <a class="btn btn--hot" href={m.github_url} rel="noopener">Source</a>}
+        {m.live_url && <a class="btn" href={m.live_url} rel="noopener">Live</a>}
+      </div>
+    </Win>
+
+    <Win title={m.language ?? 'project'} class="boot boot-2 cart-tile" id="unit" ctl={false}>
+      <Cart part={m.part} kicker={m.language ?? 'module'} title={m.title} color={m.language_color} foot={m.pushedAt ? fmtDate(m.pushedAt, { year: 'numeric' }) : ''} tilt />
+    </Win>
+
+    <Win title="details" class="boot boot-3" id="specs">
+      <dl class="spec">
+        {spec.filter(([, v]) => v).map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+        {m.live_url && <div><dt>live</dt><dd><a href={m.live_url} rel="noopener">{host(m.live_url)}</a></dd></div>}
+      </dl>
+      <div class="hazard" aria-hidden="true"></div>
+    </Win>
+
+    {screens.map((s, i) => (
+      <Win title={screens.length > 1 ? `screenshot ${i + 1}` : 'screenshot'} class="wfull reveal screen" id={`screen-${i}`}>
+        <a href={s.orig} class="screen__img"><img src={s.src} alt={`${m.title} screenshot ${i + 1}`} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" width={s.width} height={s.height} /></a>
+      </Win>
+    ))}
+
+    <Win title="prev" meta={prev.part} href={u(`/projects/${prev.slug}/`)} class="reveal" id="prev">
+      <p class="h-tile">← {prev.title}</p>
+    </Win>
+    <Win title="next" meta={next.part} href={u(`/projects/${next.slug}/`)} class="reveal" id="next">
+      <p class="h-tile">{next.title} →</p>
+    </Win>
+  </div>
+</Base>
+
+<style>
+  :global(#sheet .win__body) { gap: 1.1rem; }
+  :global(.cart-tile .win__body) { justify-content: center; padding: 0; }
+  :global(.screen .win__body) { padding: 0; }
+  .screen__img { display: block; background: var(--tile-2); }
+  .screen__img img { width: auto; max-width: 100%; height: auto; max-height: 72vh; margin: 0 auto; object-fit: contain; }
+</style>

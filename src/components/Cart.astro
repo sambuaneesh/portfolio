@@ -1,0 +1,32 @@
+---
+// The lite-3D cartridge: pure CSS 3D, three faces. `tilt` lets the global
+// script lean it toward the pointer (fine pointers, motion allowed only).
+interface Props {
+  part: string;
+  title: string;
+  kicker?: string;
+  color?: string | null;
+  foot?: string;
+  tilt?: boolean;
+  vt?: string;
+  size?: 'md' | 'lg';
+}
+const { part, title, kicker = '', color, foot = '', tilt = false, vt, size = 'md' } = Astro.props;
+const dims = size === 'lg' ? '--w:17rem;--h:11rem;--d:2.6rem;' : '';
+---
+<div class="cart-stage" aria-hidden="true" data-tilt={tilt ? '' : undefined}>
+  <div class="cart-idle">
+    <div class="cart" style={`${dims}${color ? `--c:${color};` : ''}${vt ? `view-transition-name:${vt};` : ''}`}>
+      <div class="cart__face cart__front">
+        <div class="cart__row"><span>{part}</span><span>AS</span></div>
+        <div class="cart__label">
+          <span>{kicker}</span>
+          <b>{title}</b>
+        </div>
+        <div class="cart__row"><span>{foot}</span><span class="cart__stripe" style="width:40%"></span></div>
+      </div>
+      <div class="cart__face cart__top"></div>
+      <div class="cart__face cart__side"></div>
+    </div>
+  </div>
+</div>

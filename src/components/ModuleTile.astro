@@ -1,0 +1,44 @@
+---
+import Win from './Win.astro';
+import type { Module } from '../lib/db';
+import { u, fmtDate } from '../lib/site';
+import { optimize } from '../lib/images';
+
+interface Props { m: Module; class?: string; thumb?: boolean }
+const { m, class: cls = '', thumb = false } = Astro.props;
+const shot = m.image_url ?? m.images?.[0] ?? null;
+const thumbImg = thumb && shot ? await optimize(shot, 640, 360) : null;
+---
+<Win title={m.part} meta={m.is_contributed ? 'team project' : undefined} href={u(`/projects/${m.slug}/`)} class:list={['module', 'reveal', cls]} id={`m-${m.slug}`}>
+  {thumbImg && (
+    <div class="module__screen">
+      <img src={thumbImg.src} alt="" loading="lazy" decoding="async" width="640" height="360" />
+    </div>
+  )}
+  <h2 class="h-tile module__name" style={`view-transition-name:t-${m.slug}`}>{m.title}</h2>
+  <p class="module__desc muted">{m.description}</p>
+  <Fragment slot="foot">
+    {m.language && <span><span class="dot" style={`--c:${m.language_color ?? 'var(--accent)'}`} aria-hidden="true"></span> {m.language}</span>}
+    {m.stars != null && m.stars > 0 && <span>★ {m.stars}</span>}
+    {m.pushedAt && <span>last push {fmtDate(m.pushedAt, { month: 'short', year: 'numeric' })}</span>}
+  </Fragment>
+</Win>
+
+<style>
+  .module__name { font-size: 1.35rem; font-stretch: 92%; text-transform: uppercase; }
+  .module__desc {
+    font-size: 0.92rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .module__screen {
+    margin: calc(var(--pad) * -1) calc(var(--pad) * -1) 0;
+    border-bottom: var(--bw) solid var(--rule);
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--tile-2);
+  }
+  .module__screen img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+</style>

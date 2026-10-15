@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+import { u, BUILD } from '../lib/site';
+import { getModules } from '../lib/db';
+
+// The one place the site is allowed to break its own rules (anti-design zone).
+const modules = await getModules();
+const addr = () => `0x${Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, '0')}`;
+const trace = ['route_lookup', 'vfs_open', 'path_walk', 'link_path_walk', 'do_filp_open', 'do_sys_openat2', 'entry_SYSCALL_64'];
+---
+<Base title="404 · kernel panic" ws={null} path="/dev/null" noindex>
+  <section class="panic" aria-labelledby="panic-h">
+    <p class="mono line">[ 0.000404] AS/OS {BUILD.commit} #1 SMP PREEMPT_DYNAMIC</p>
+    <h1 id="panic-h" class="big">Kernel panic: not syncing:<br />VFS: unable to mount route <span data-path>?</span></h1>
+    <pre class="mono trace" aria-hidden="true">{`Call Trace:
+${trace.map((t) => ` <TASK>  ${addr()}  ${t}+0x${Math.floor(Math.random() * 0xff).toString(16)}/0x${(Math.floor(Math.random() * 0xff) + 0x100).toString(16)}`).join('\n')}
+ </TASK>
+---[ end Kernel panic - not syncing: page not found ]---`}</pre>
+    <p class="lede">This page doesn't exist.</p>
+    <div class="btns">
+      <a class="btn btn--hot" href={u('/')}>Home</a>
+      <a class="btn" href={u('/projects/')}>Projects</a>
+      <a class="btn" href={u('/cv/')}>CV</a>
+      <a class="btn" href={u('/contact/')}>Contact</a>
+    </div>
+    <p class="mono line muted">projects: {modules.map((m, i) => <>{i > 0 && ' · '}<a href={u(`/projects/${m.slug}/`)}>{m.slug}</a></>)}</p>
+  </section>
+</Base>
+
+<script>
+  const el = document.querySelector('[data-path]');
+  if (el) el.textContent = location.pathname.replace(/^\/portfolio/, '') || '/';
+</script>
+
+<style>
+  .panic {
+    min-height: 70vh;
+    display: grid;
+    align-content: center;
+    gap: 1.4rem;
+    padding: clamp(1rem, 4vw, 3rem);
+    background: var(--ink);
+    color: var(--tile);
+    border: var(--bw) solid var(--rule);
+    transform: rotate(-0.4deg);
+  }
+  .panic a:not(.btn) { color: inherit; }
+  .panic .muted { color: inherit; opacity: 0.75; }
+  .big {
+    font-size: clamp(2rem, 6.5vw, 5rem);
+    font-weight: 900;
+    font-stretch: 62%;
+    text-transform: uppercase;
+    line-height: 0.9;
+    overflow-wrap: anywhere;
+    mix-blend-mode: difference;
+  }
+  .big span { background: var(--accent); color: var(--on-accent); padding: 0 0.2em; font-stretch: 125%; }
+  .line { font-size: 0.8rem; }
+  .trace { margin: 0; font-size: clamp(0.62rem, 1.6vw, 0.8rem); line-height: 1.5; overflow-x: auto; color: var(--accent); }
+  .panic .btn { --face: var(--tile); --fg: var(--ink); }
+  .panic .btn--hot { --face: var(--accent); --fg: var(--on-accent); }
+</style>

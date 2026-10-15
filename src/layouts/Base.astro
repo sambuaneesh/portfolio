@@ -1,0 +1,159 @@
+---
+import '../styles/global.css';
+import archivo from '../assets/fonts/archivo-subset.woff2?url';
+import { WORKSPACES, BUILD, u, fmtDate, type WorkspaceKey } from '../lib/site';
+import { getPersonalInfo, getModules, getSiteSettings } from '../lib/db';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ws?: WorkspaceKey | null;
+  path?: string;
+  noindex?: boolean;
+  image?: string;
+}
+
+const { title, description, ws = null, path = '~', noindex = false, image } = Astro.props;
+const [me, modules, settings] = await Promise.all([getPersonalInfo(), getModules(), getSiteSettings()]);
+
+const fullTitle = title ? `${title} · ${me.name}` : `${me.name} · ${me.title}`;
+const desc = description ?? me.bio.split('. ').slice(0, 2).join('. ').replace(/\.?$/, '.');
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = image ?? me.avatar_url ?? undefined;
+
+const handle = me.name.split(' ')[0].toLowerCase();
+
+// Everything the `:` command line can do, baked into the page as JSON.
+const commands = [
+  ...WORKSPACES.map((w) => ({ l: `go ${w.label}`, h: `${w.n}`, u: u(w.href) })),
+  ...modules.map((m) => ({ l: `open ${m.title}`, h: m.part, u: u(`/projects/${m.slug}/`) })),
+  ...['auto', 'putty', 'nostromo', 'phosphor', 'paper'].map((t) => ({ l: `theme ${t}`, h: 'rice', a: `theme:${t}` })),
+  { l: 'download resume.pdf', h: 'pdf', u: u('/resume.pdf') },
+  me.github && { l: 'github', h: 'ext', u: me.github },
+  me.linkedin && { l: 'linkedin', h: 'ext', u: me.linkedin },
+  me.email && { l: `mail ${me.email}`, h: 'ext', u: `mailto:${me.email}` },
+  me.website && { l: 'blog (the boring blog)', h: 'ext', u: me.website },
+  ...(settings.extra_links ?? []).map((l) => ({ l: l.label, h: 'ext', u: l.url })),
+  { l: 'print cv', h: 'cv', u: `${u('/cv/')}#print` },
+  { l: 'help', h: '?', a: 'help' },
+].filter(Boolean);
+
+const sameAs = [me.github, me.linkedin, me.website, me.twitter, me.medium, ...(settings.extra_links ?? []).map((l) => l.url)].filter(Boolean);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: me.name,
+  jobTitle: me.title,
+  description: me.bio,
+  url: new URL(u('/'), Astro.site).href,
+  image: me.avatar_url,
+  email: me.email ? `mailto:${me.email}` : undefined,
+  sameAs,
+  affiliation: { '@type': 'CollegeOrUniversity', name: 'International Institute of Information Technology, Hyderabad' },
+};
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={desc} />
+    <meta name="author" content={me.name} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#d9d2bf" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d0c09" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href={u('/favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={u('/sitemap-index.xml')} />
+    <link rel="preload" href={archivo} as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content="summary" />
+
+    <!-- Rice (theme) before first paint: no flash. -->
+    <script is:inline>
+      (function () {
+        var t = 'auto';
+        try { t = localStorage.getItem('as-rice') || 'auto'; } catch (e) {}
+        if (t === 'auto') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'nostromo' : 'putty';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+    <!-- Chromium prerenders same-site links on hover: navigation feels instant. -->
+    <script type="speculationrules" is:inline set:html={JSON.stringify({
+      prerender: [{ where: { and: [{ href_matches: `${u('/')}*` }, { not: { href_matches: `${u('/admin/')}*` } }] }, eagerness: 'moderate' }],
+    })} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="bar">
+      <div class="bar__group">
+        <a class="bar__brand" href={u('/')}>
+          <span class="tape tape--accent">AS</span><span>{handle}</span>
+        </a>
+        <nav class="bar__group bar__ws" aria-label="Workspaces">
+          {WORKSPACES.map((w) => (
+            <a class="ws" href={u(w.href)} aria-current={ws === w.key ? 'page' : undefined} data-ws={w.n}>
+              <span class="ws__n">{w.n}</span><span>{w.label}</span>
+            </a>
+          ))}
+        </nav>
+      </div>
+      <div class="bar__group bar__group--right">
+        <span class="bar__path" title="current path">{handle}@iiith:{path}</span>
+        <span class="clock" data-clock title="Local time in Hyderabad">HYD --:--</span>
+        <button class="chip" type="button" data-rice title="Switch theme"><span class="sr-only">theme </span><span data-rice-name>auto</span></button>
+        <button class="chip" type="button" data-cmd-open title="Command line"><kbd>:</kbd><span>cmd</span></button>
+        <button class="chip chip--help" type="button" data-help-open title="Keyboard shortcuts"><kbd>?</kbd><span class="sr-only"> help</span></button>
+      </div>
+    </header>
+
+    <main id="main" class="desk" tabindex="-1">
+      <slot />
+    </main>
+
+    <footer class="statusline">
+      <span class="mode" data-mode>NORMAL</span>
+      <span class="grow">{settings.footer_text} · built {fmtDate(BUILD.at)} · <a href={settings.footer_github_url}>src@{BUILD.commit}</a></span>
+      <span class="no-print">press <kbd class="k">:</kbd> for commands</span>
+    </footer>
+
+    <nav class="dock" aria-label="Workspaces">
+      {WORKSPACES.map((w) => (
+        <a href={u(w.href)} aria-current={ws === w.key ? 'page' : undefined}><span>{w.n}</span><span>{w.label}</span></a>
+      ))}
+    </nav>
+
+    <dialog id="cmd" aria-label="Command line">
+      <div class="cmd__in"><span aria-hidden="true">:</span><input id="cmd-q" type="text" autocomplete="off" spellcheck="false" placeholder="go to a page, project or theme" aria-controls="cmd-list" role="combobox" aria-expanded="true" /></div>
+      <ul id="cmd-list" class="cmd__list" role="listbox"></ul>
+      <div class="cmd__foot">↑↓ select · ↵ run · esc close</div>
+    </dialog>
+
+    <dialog id="help" aria-label="Keyboard shortcuts">
+      <div class="win__bar"><span class="win__title">keyboard</span></div>
+      <dl class="keys">
+        <dt><kbd class="k">1</kbd>–<kbd class="k">5</kbd></dt><dd>switch workspace</dd>
+        <dt><kbd class="k">h</kbd><kbd class="k">j</kbd><kbd class="k">k</kbd><kbd class="k">l</kbd></dt><dd>move focus between tiles</dd>
+        <dt><kbd class="k">↵</kbd></dt><dd>open the focused tile</dd>
+        <dt><kbd class="k">:</kbd> / <kbd class="k">ctrl</kbd><kbd class="k">k</kbd></dt><dd>command line</dd>
+        <dt><kbd class="k">t</kbd></dt><dd>switch theme</dd>
+        <dt><kbd class="k">?</kbd></dt><dd>this help</dd>
+        <dt><kbd class="k">esc</kbd></dt><dd>close</dd>
+      </dl>
+    </dialog>
+
+    <script type="application/json" id="cmd-data" set:html={JSON.stringify(commands)} />
+    <script>
+      import '../scripts/shell';
+    </script>
+  </body>
+</html>

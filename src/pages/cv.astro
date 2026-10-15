@@ -1,0 +1,181 @@
+---
+import Base from '../layouts/Base.astro';
+import Win from '../components/Win.astro';
+import { getPersonalInfo, getExperience, getEducation, getAchievements, getSkills, getCourses, getLanguages } from '../lib/db';
+import { u } from '../lib/site';
+
+const [me, experience, education, achievements, skills, courses, languages] = await Promise.all([
+  getPersonalInfo(), getExperience(), getEducation(), getAchievements(), getSkills(), getCourses(), getLanguages(),
+]);
+
+const skillGroups = [...skills.reduce((map, s) => {
+  map.set(s.category, [...(map.get(s.category) ?? []), s]);
+  return map;
+}, new Map<string, typeof skills>())];
+
+const sortedCourses = [...courses].sort((a, b) => Number(!!b.is_favorite) - Number(!!a.is_favorite));
+const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
+---
+<Base title="CV" ws="cv" path="~/cv" description={`Experience, education, research, skills and coursework of ${me.name}.`}>
+  <div class="tiles manual">
+    <Win title="cv" class="wfull boot" id="top">
+      <div class="head">
+        <div>
+          <h1 class="h-page">{me.name}</h1>
+          <p class="mono sub">{me.title}</p>
+          <p class="contact mono">
+            {[me.location, me.email, me.phone].filter(Boolean).join('  ·  ')}
+          </p>
+        </div>
+        <div class="btns no-print">
+          <a class="btn btn--hot" href={u('/resume.pdf')} download>Download PDF</a>
+          <button class="btn" type="button" data-print>Print</button>
+        </div>
+      </div>
+      <nav class="toc no-print" aria-label="Sections">
+        <a href="#experience">experience</a>
+        <a href="#education">education</a>
+        <a href="#record">research &amp; awards</a>
+        <a href="#skills">skills</a>
+        <a href="#courses">coursework</a>
+        <a href="#languages">languages</a>
+      </nav>
+    </Win>
+
+    <Win title="experience" class="w2 reveal" id="experience">
+      <ol class="timeline">
+        {experience.map((e) => (
+          <li>
+            <div class="timeline__when label">{e.duration}</div>
+            <div class="timeline__what">
+              <h2 class="h-tile">{e.title}</h2>
+              <p class="muted">{e.company}{e.location ? ` · ${e.location}` : ''}</p>
+              {e.description?.length ? <ul class="bullets">{e.description.map((d) => <li>{d}</li>)}</ul> : null}
+              {e.technologies?.length ? <ul class="tags">{e.technologies.map((t) => <li>{t}</li>)}</ul> : null}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </Win>
+
+    <Win title="education" class="reveal" id="education">
+      <ul class="stack">
+        {education.map((ed) => (
+          <li>
+            <h2 class="h-tile">{ed.institution}</h2>
+            <p>{ed.degree}</p>
+            <dl class="spec">
+              <div><dt>term</dt><dd>{ed.duration}</dd></div>
+              {ed.gpa && <div><dt>score</dt><dd>{ed.gpa.replace(/^CGPA:\s*/i, '')}</dd></div>}
+              {ed.location && <div><dt>loc</dt><dd>{ed.location}</dd></div>}
+            </dl>
+            {ed.description && <p class="muted">{ed.description}</p>}
+            {ed.coursework?.length ? <ul class="tags">{ed.coursework.map((c) => <li>{c}</li>)}</ul> : null}
+          </li>
+        ))}
+      </ul>
+    </Win>
+
+    <Win title="languages" class="reveal" id="languages">
+      <dl class="spec">
+        {languages.map((l) => <div><dt>{l.name}</dt><dd>{l.level.toLowerCase()}</dd></div>)}
+      </dl>
+    </Win>
+
+    <Win title="research & awards" class="w2 reveal" id="record">
+      <ol class="record">
+        {achievements.map((a, i) => (
+          <li>
+            <span class="tape">{String(i + 1).padStart(2, '0')}</span>
+            <div>
+              <h2 class="h-tile">{a.certificate_url ? <a href={a.certificate_url} rel="noopener">{a.title}</a> : a.title}</h2>
+              {a.description && <p class="muted">{a.description}</p>}
+              <p class="label">{[a.date_achieved, a.certificate_url && host(a.certificate_url)].filter(Boolean).join(' · ')}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </Win>
+
+    <Win title="skills" class="wfull reveal" id="skills">
+      <div class="skillgrid">
+        {skillGroups.map(([cat, list]) => (
+          <section>
+            <h2 class="label cat">{cat}</h2>
+            <ul class="keycaps">
+              {list.map((s) => {
+                return (
+                  <li><kbd class="k">{s.skill_name}</kbd></li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </Win>
+
+    <Win title="coursework" class="wfull reveal" id="courses">
+      <div class="table-wrap">
+        <table class="courses">
+          <thead><tr><th scope="col">course</th><th scope="col">term</th></tr></thead>
+          <tbody>
+            {sortedCourses.map((c) => (
+              <tr class:list={{ fav: c.is_favorite }}>
+                <td>{c.certificate_url ? <a href={c.certificate_url}>{c.name}</a> : c.name}</td>
+                <td class="mono">{c.completion_date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Win>
+  </div>
+</Base>
+
+<script>
+  document.querySelectorAll('[data-print]').forEach((b) => b.addEventListener('click', () => print()));
+</script>
+
+<style>
+  .head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1.25rem; }
+  .sub { text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.6rem; }
+  .contact { font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem; }
+  .toc { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; font-family: var(--font-mono); font-size: 0.8rem; padding-top: 0.75rem; border-top: 1px dashed var(--rule); }
+
+  .timeline { list-style: none; display: grid; gap: 1.4rem; }
+  .timeline > li { display: grid; gap: 0.4rem; padding-left: 1.1rem; border-left: 4px solid var(--accent); }
+  .timeline__what { display: grid; gap: 0.45rem; }
+  .bullets { padding-left: 1.1em; display: grid; gap: 0.25rem; font-size: 0.95rem; }
+  @container (min-width: 38rem) {
+    .timeline > li { grid-template-columns: 11rem 1fr; gap: 1.25rem; border-left: 0; padding-left: 0; }
+    .timeline__when { padding-top: 0.3rem; border-top: 4px solid var(--accent); }
+  }
+
+  .stack { list-style: none; display: grid; gap: 1.4rem; }
+  .stack > li { display: grid; gap: 0.5rem; }
+  .stack > li + li { padding-top: 1.2rem; border-top: 1px dashed var(--rule); }
+
+  .keycaps { list-style: none; display: flex; flex-wrap: wrap; gap: 0.55rem; }
+  .keycaps .k { font-size: 0.85rem; padding: 0.25rem 0.6rem; border-bottom-width: 4px; }
+
+  .record { list-style: none; display: grid; gap: 1.1rem; }
+  .record > li { display: grid; grid-template-columns: auto 1fr; gap: 0.9rem; align-items: start; }
+  .record > li > div { display: grid; gap: 0.25rem; }
+  .record .h-tile { font-size: 1.1rem; }
+
+  .skillgrid { display: grid; gap: 1.4rem 2rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); }
+  .cat { margin-bottom: 0.6rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--rule); }
+
+  .table-wrap { overflow-x: auto; }
+  .courses { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+  .courses th { text-align: left; font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); border-bottom: var(--bw) solid var(--rule); padding: 0.4rem 0.6rem; }
+  .courses td { padding: 0.45rem 0.6rem; border-bottom: 1px dotted var(--rule); }
+  .courses td:not(:first-child) { white-space: nowrap; }
+  .courses tr.fav td { font-weight: 700; }
+
+  @media print {
+    .manual { display: block; }
+    .manual :global(.win) { margin-bottom: 10pt; }
+    .manual :global(.win__ctl) { display: none; }
+  }
+</style>

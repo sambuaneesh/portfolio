@@ -1,0 +1,153 @@
+---
+import Base from '../layouts/Base.astro';
+import Win from '../components/Win.astro';
+import { getPersonalInfo } from '../lib/db';
+
+const me = await getPersonalInfo();
+const supabase = { url: import.meta.env.PUBLIC_SUPABASE_URL, key: import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY };
+const channels = [
+  me.email && { k: 'email', v: me.email, href: `mailto:${me.email}` },
+  me.linkedin && { k: 'linkedin', v: 'linkedin.com/in/aneesh-sambu', href: me.linkedin },
+  me.github && { k: 'github', v: me.github.replace(/^https?:\/\//, ''), href: me.github },
+].filter(Boolean) as { k: string; v: string; href: string }[];
+---
+<Base title="Contact" ws="contact" path="~/contact" description={`Send ${me.name} a message or a structured task request.`}>
+  <div class="tiles">
+    <Win title="contact" class="w2 boot" id="comms-head">
+      <h1 class="h-page">Contact</h1>
+      <p class="lede muted">For research, internships, or a project.</p>
+    </Win>
+
+    <Win title="elsewhere" class="boot boot-2" id="lines">
+      <ul class="ports">
+        {channels.map((c) => <li><span class="tape">{c.k}</span><a href={c.href}>{c.v}</a></li>)}
+      </ul>
+    </Win>
+
+    <Win title="write" class="wfull reveal" id="transmit">
+      <div class="comms" data-comms data-url={supabase.url} data-key={supabase.key}>
+        <div class="tabs" role="radiogroup" aria-label="Form type">
+          <label><input type="radio" name="mode" value="message" checked /><span>Message</span></label>
+          <label><input type="radio" name="mode" value="task" /><span>Task request</span></label>
+        </div>
+
+        <form class="form form--message" data-form="message" novalidate>
+          <div class="grid-2">
+            <label class="field"><span>name *</span><input class="input" name="name" required maxlength="100" autocomplete="name" /></label>
+            <label class="field"><span>email *</span><input class="input" name="email" type="email" required maxlength="160" autocomplete="email" /></label>
+          </div>
+          <label class="field"><span>subject *</span><input class="input" name="subject" required maxlength="200" /></label>
+          <label class="field"><span>message *</span><textarea class="input" name="message" required maxlength="5000" rows="7"></textarea></label>
+          <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <div class="btns"><button class="btn btn--hot" type="submit">Send</button></div>
+          <p class="notice" data-status hidden role="status"></p>
+        </form>
+
+        <form class="form form--task" data-form="task" novalidate>
+                    <div class="grid-2">
+            <label class="field"><span>name *</span><input class="input" name="requester_name" required maxlength="100" autocomplete="name" /></label>
+            <label class="field"><span>email *</span><input class="input" name="requester_email" type="email" required maxlength="160" autocomplete="email" /></label>
+          </div>
+          <label class="field"><span>task title *</span><input class="input" name="title" required maxlength="200" /></label>
+          <label class="field"><span>description</span><textarea class="input" name="description" maxlength="5000" rows="5"></textarea></label>
+          <div class="grid-2">
+            <label class="field"><span>category</span>
+              <select class="input" name="category">
+                <option value="project" selected>project</option>
+                <option value="academic">academic</option>
+                <option value="work">work</option>
+                <option value="personal">personal</option>
+              </select>
+            </label>
+            <label class="field"><span>priority</span>
+              <select class="input" name="priority">
+                <option value="low">low</option>
+                <option value="medium" selected>medium</option>
+                <option value="high">high</option>
+              </select>
+            </label>
+            <label class="field"><span>due date</span><input class="input" name="due_date" type="date" /></label>
+            <label class="field"><span>due time</span><input class="input" name="due_time" type="time" /></label>
+            <label class="field"><span>estimated duration</span><input class="input" name="estimated_duration" maxlength="100" placeholder="e.g. 2 weeks" /></label>
+            <label class="field"><span>budget</span><input class="input" name="budget" maxlength="100" placeholder="optional" /></label>
+          </div>
+          <label class="field"><span>additional notes</span><textarea class="input" name="additional_notes" maxlength="3000" rows="3"></textarea></label>
+          <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <div class="btns"><button class="btn btn--hot" type="submit">Send request</button></div>
+          <p class="notice" data-status hidden role="status"></p>
+        </form>
+        <noscript><p class="notice">The forms need JavaScript. Email me instead: <a href={`mailto:${me.email}`}>{me.email}</a></p></noscript>
+      </div>
+    </Win>
+  </div>
+</Base>
+
+<script>
+  import { rest } from '../scripts/rest';
+
+  const root = document.querySelector<HTMLElement>('[data-comms]');
+  if (root) {
+    const db = rest(root.dataset.url!, root.dataset.key!);
+    const TABLE: Record<string, string> = { message: 'aneesh_contact_messages', task: 'aneesh_task_requests' };
+
+    root.querySelectorAll<HTMLFormElement>('form[data-form]').forEach((form) => {
+      const status = form.querySelector<HTMLElement>('[data-status]')!;
+      const say = (kind: 'ok' | 'err', text: string) => {
+        status.dataset.kind = kind;
+        status.textContent = text;
+        status.hidden = false;
+      };
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+        const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+        if (data.website) return; // honeypot: bots fill every field
+        delete data.website;
+        // Empty optional fields go in as NULL, not ''.
+        const row = Object.fromEntries(Object.entries(data).map(([k, v]) => [k, v.trim() === '' ? null : v.trim()]));
+
+        const btn = form.querySelector<HTMLButtonElement>('[type=submit]')!;
+        btn.disabled = true;
+        status.hidden = true;
+        try {
+          await db.insert(TABLE[form.dataset.form!], row);
+          form.reset();
+          say('ok', form.dataset.form === 'task'
+            ? 'Request sent. I\'ll reply by email.'
+            : 'Sent. I\'ll reply by email.');
+        } catch {
+          say('err', 'Couldn\'t send. Try again, or email me directly.');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+</script>
+
+<style>
+  .comms { display: grid; gap: 1.25rem; max-width: 60rem; }
+  .tabs { display: flex; gap: 0.6rem; }
+  .tabs input { position: absolute; opacity: 0; pointer-events: none; }
+  .tabs span {
+    display: inline-flex; align-items: center; min-height: 2.5rem; padding: 0.3rem 1rem;
+    border: var(--bw) solid var(--rule); border-radius: var(--radius);
+    font-family: var(--font-mono); font-size: 0.82rem; font-weight: 700; text-transform: uppercase;
+    background: var(--tile-2); cursor: pointer;
+  }
+  .tabs input:checked + span { background: var(--accent); color: var(--on-accent); }
+  .tabs input:focus-visible + span { outline: 3px solid var(--active); outline-offset: 2px; }
+  .form { display: grid; gap: 0.9rem; }
+  /* Tab switching is CSS-only. */
+  .comms:has(input[value='message']:checked) .form--task,
+  .comms:has(input[value='task']:checked) .form--message { display: none; }
+  .ports { list-style: none; display: grid; gap: 0.55rem; }
+  .ports li { display: grid; grid-template-columns: 4.6rem 1fr; gap: 0.6rem; align-items: center; min-width: 0; }
+  .ports .tape { text-align: center; }
+  .ports a { font-family: var(--font-mono); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  select.input { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%), linear-gradient(135deg, var(--ink) 50%, transparent 50%); background-position: calc(100% - 18px) 55%, calc(100% - 12px) 55%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 2rem; }
+</style>
