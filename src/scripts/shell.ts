@@ -305,3 +305,14 @@ document.querySelectorAll<HTMLButtonElement>('[data-share-edition]').forEach((b)
     }
   });
 });
+
+// External links open in a new tab. The build already marks them; this
+// catches links added at runtime (comments) and the dev server.
+document.addEventListener('click', (e) => {
+  const a = (e.target as HTMLElement).closest?.('a[href]') as HTMLAnchorElement | null;
+  if (!a || a.target || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+  if (/^https?:/i.test(a.href) && new URL(a.href).origin !== location.origin) {
+    e.preventDefault();
+    window.open(a.href, '_blank', 'noopener');
+  }
+});
