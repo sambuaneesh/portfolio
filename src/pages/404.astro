@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Spread from '../components/Spread.astro';
+import Ransom from '../components/Ransom.astro';
 import { u } from '../lib/site';
 import { getModules, getSiteSettings } from '../lib/db';
 
@@ -10,7 +11,7 @@ const [modules, settings] = await Promise.all([getModules(), getSiteSettings()])
   <Spread page={0} single zine={settings.zine_title} runL="page ??" label="Missing page">
     <div class="torn">
       <p class="kicker">errata</p>
-      <h1 class="hed hed--xl hed--outline">Page<br />missing</h1>
+      <h1 class="hed hed--xl"><Ransom text="Page missing" /></h1>
       <p class="copy dropcap">Do you like broken links? Somebody tore this page out of the zine: <code class="mono" data-path>?</code> isn't in this issue. I checked.</p>
       <div class="btns">
         <a class="btn btn--hot" href={u('/')}>cover</a>

@@ -163,22 +163,25 @@ if (location.hash === '#print') {
 }
 
 // For whoever opens devtools.
-console.log('%cwhy not one more?', 'font: 700 14px monospace; background:#ff48b0; color:#111; padding:2px 6px');
-console.log('source: https://github.com/sambuaneesh/portfolio · press : on the page for commands');
+console.log('%cTHE BORING ZINE', 'font: 900 14px monospace; background:#e4605b; color:#141414; padding:2px 6px');
+console.log('you opened devtools on a zine. source: https://github.com/sambuaneesh/portfolio');
 
-// Admin theme preview (?preview=<theme>, set up by the inline head script):
-// keep the parameter on internal links and say clearly that it's a preview.
+// Admin preview (?preview=<theme>, ?punk=0|1; set up by the inline head
+// script): keep the parameters on internal links and flag it clearly.
 const preview = document.documentElement.dataset.preview;
-if (preview) {
+const previewPunk = document.documentElement.dataset.previewPunk;
+if (preview || previewPunk) {
   document.querySelectorAll<HTMLAnchorElement>('a[href^="/"]').forEach((a) => {
     const url = new URL(a.href);
     if (url.origin === location.origin && !url.pathname.includes('/admin/')) {
-      url.searchParams.set('preview', preview);
+      if (preview) url.searchParams.set('preview', preview);
+      if (previewPunk) url.searchParams.set('punk', previewPunk);
       a.href = url.href;
     }
   });
   const flag = document.createElement('div');
   flag.className = 'preview-flag';
-  flag.innerHTML = `<span>previewing theme: ${preview}</span><a href="${location.pathname}">exit</a>`;
+  const what = [preview && `theme: ${preview}`, previewPunk && `punk: ${previewPunk === '1' ? 'on' : 'off'}`].filter(Boolean).join(' · ');
+  flag.innerHTML = `<span>previewing ${what}</span><a href="${location.pathname}">exit</a>`;
   document.body.append(flag);
 }

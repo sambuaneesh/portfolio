@@ -1,0 +1,9 @@
+---
+// Ransom-note lettering: each character is its own span so the punk layer
+// can give it a different cut-out (font, paper, tilt). Without the punk
+// layer it's just the word. Screen readers get the plain text.
+interface Props { text: string; class?: string; as?: 'span' | 'p' | 'h2' | 'h3' }
+const { text, class: cls = '', as: Tag = 'span' } = Astro.props;
+const chars = [...text];
+---
+<Tag class:list={['rn', cls]}><span class="sr-only">{text}</span><span aria-hidden="true">{chars.map((c) => (c === ' ' ? <span class="rn__sp"> </span> : <span class="rn__c">{c}</span>))}</span></Tag>

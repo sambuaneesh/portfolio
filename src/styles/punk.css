@@ -1,0 +1,149 @@
+/* ==========================================================================
+   Punk layer (experiment). Everything here is scoped to [data-punk], which
+   /admin -> Appearance switches on or off; off gives the clean zine back.
+   The vocabulary is cut-and-paste punk on top of the photocopied zine:
+   ransom-note letters, tape, staples, rubber stamps, a two-ink misprint,
+   highlighter and torn paper. Flat CSS + tiny inline SVG, no images, no JS.
+   ========================================================================== */
+
+:root[data-theme='hotline'] { --cover: #ff2e88; --on-cover: #141414; }
+
+:root[data-punk] {
+  --misprint-a: color-mix(in srgb, var(--cover) 85%, transparent);
+  --misprint-b: rgb(0 120 191 / 0.55);
+  --tape: rgb(244 236 186 / 0.78);
+  --marker: #f2ea4c;
+}
+
+/* --- saddle-stitch staples through the fold -------------------------------- */
+@media (min-width: 62rem) {
+  :root[data-punk] .spread[data-staples] { position: relative; }
+  :root[data-punk] .spread[data-staples]::before,
+  :root[data-punk] .spread[data-staples]::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: 4px;
+    height: 46px;
+    translate: -50% 0;
+    z-index: 4;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #8d8a83, #e4e1da 45%, #8d8a83);
+    box-shadow: 0 1px 1px rgb(0 0 0 / 0.5);
+    pointer-events: none;
+  }
+  :root[data-punk] .spread[data-staples]::before { top: 22%; }
+  :root[data-punk] .spread[data-staples]::after { bottom: 22%; }
+}
+
+/* --- xerox: the lid wasn't quite shut --------------------------------------- */
+:root[data-punk] .page--l::after,
+:root[data-punk] .page--r:not(.page--cover)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to right, rgb(0 0 0 / 0.07), transparent 5%);
+}
+:root[data-punk] .page--l::after { background: linear-gradient(to right, rgb(0 0 0 / 0.08), transparent 6%); }
+:root[data-punk] .page--r:not(.page--cover)::after { background: linear-gradient(to left, rgb(0 0 0 / 0.08), transparent 6%); }
+
+/* --- two-ink misprint on the big type ------------------------------------- */
+:root[data-punk] :is(.hed--xl, .hed--l):not(.hed--outline):not(.hed--inverse) {
+  text-shadow: 0.03em 0.025em 0 var(--misprint-a), -0.02em -0.015em 0 var(--misprint-b);
+}
+:root[data-punk] .hed--outline { filter: drop-shadow(0.04em 0.03em 0 var(--misprint-a)); }
+
+/* --- cut-out strips: inverse heads look snipped from another magazine --------- */
+:root[data-punk] .hed--inverse {
+  rotate: -1.5deg;
+  clip-path: polygon(0 4%, 3% 0, 52% 6%, 100% 0, 98% 52%, 100% 100%, 46% 94%, 2% 100%, 0 56%);
+  padding: 0.18em 0.4em 0.12em;
+}
+
+/* --- ransom-note letters -------------------------------------------------------- */
+.rn__c, .rn__sp { display: inline; }
+:root[data-punk] .rn__c {
+  display: inline-block;
+  padding: 0.02em 0.08em 0.04em;
+  margin: 0 0.02em;
+  line-height: 1;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+:root[data-punk] .rn__sp { display: inline-block; width: 0.25em; }
+:root[data-punk] .rn__c:nth-child(7n + 1) { font-family: var(--font-sans); font-weight: 900; font-stretch: 62%; background: var(--ink); color: var(--paper); rotate: -3deg; }
+:root[data-punk] .rn__c:nth-child(7n + 2) { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 700; background: var(--paper); color: var(--ink); rotate: 2deg; }
+:root[data-punk] .rn__c:nth-child(7n + 3) { font-family: 'Courier New', Courier, monospace; font-weight: 700; background: var(--marker); color: var(--ink); rotate: -1deg; }
+:root[data-punk] .rn__c:nth-child(7n + 4) { font-family: var(--font-sans); font-weight: 800; font-stretch: 125%; background: var(--paper-2); color: var(--ink); outline: 2px solid var(--ink); outline-offset: -2px; rotate: 3deg; }
+:root[data-punk] .rn__c:nth-child(7n + 5) { font-family: Impact, 'Arial Black', var(--font-sans); font-weight: 900; background: var(--cover); color: var(--on-cover); rotate: -2deg; }
+:root[data-punk] .rn__c:nth-child(7n + 6) { font-family: 'Times New Roman', Times, serif; font-weight: 700; background: #0b5ea8; color: #fff; rotate: 1.5deg; }
+:root[data-punk] .rn__c:nth-child(7n + 7) { font-family: var(--font-mono); font-weight: 700; background: var(--paper); color: var(--ink); rotate: -0.5deg; border-bottom: 3px solid var(--ink); }
+/* on the cover the paper scraps need to stand out from the cover stock */
+:root[data-punk] .page--cover .rn__c:nth-child(7n + 5) { background: var(--ink); color: var(--cover); }
+
+/* --- tape --------------------------------------------------------------------------- */
+:root[data-punk] .taped { position: relative; }
+:root[data-punk] .taped::before,
+:root[data-punk] .taped::after {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  width: 74px;
+  height: 22px;
+  background: var(--tape);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+  clip-path: polygon(4% 0, 96% 6%, 100% 50%, 95% 100%, 3% 94%, 0 48%);
+  pointer-events: none;
+}
+:root[data-punk] .taped::before { top: -10px; left: -18px; rotate: -32deg; }
+:root[data-punk] .taped::after { bottom: -8px; right: -16px; rotate: -28deg; }
+:root[data-punk] .taped--top::before { top: -11px; left: 50%; translate: -50% 0; rotate: -3deg; }
+:root[data-punk] .taped--top::after { display: none; }
+
+/* --- rubber stamps & stickers -------------------------------------------------------- */
+.punk-only { display: none !important; }
+:root[data-punk] .punk-only { display: revert !important; }
+:root[data-punk] .stamp { color: #b3262b; opacity: 0.82; mix-blend-mode: multiply; }
+
+.burst {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 92px;
+  height: 92px;
+  background: var(--marker);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-stretch: 80%;
+  font-size: 0.82rem;
+  line-height: 0.95;
+  text-align: center;
+  text-transform: uppercase;
+  rotate: 12deg;
+  clip-path: polygon(50% 0, 61% 14%, 79% 7%, 80% 25%, 98% 28%, 88% 44%, 100% 58%, 83% 66%, 88% 85%, 69% 83%, 59% 100%, 47% 87%, 31% 98%, 27% 80%, 8% 82%, 14% 64%, 0 52%, 13% 40%, 4% 22%, 22% 21%, 25% 3%, 39% 13%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.pin { position: absolute; width: 74px; height: 26px; z-index: 4; pointer-events: none; }
+
+/* --- highlighter ---------------------------------------------------------------------- */
+:root[data-punk] .hl {
+  background: linear-gradient(100deg, transparent 0.12em, var(--marker) 0.2em, var(--marker) calc(100% - 0.25em), transparent calc(100% - 0.1em)) 0 60% / 100% 62% no-repeat;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding: 0 0.12em;
+}
+
+/* --- torn paper ------------------------------------------------------------------------ */
+:root[data-punk] .torn-top { clip-path: polygon(0 6px, 4% 0, 9% 5px, 15% 1px, 22% 6px, 30% 0, 37% 4px, 45% 0, 52% 6px, 60% 1px, 68% 5px, 75% 0, 83% 6px, 90% 1px, 96% 5px, 100% 0, 100% 100%, 0 100%); padding-top: 18px; }
+:root[data-punk] .torn-bottom { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), 95% 100%, 88% calc(100% - 5px), 80% 100%, 73% calc(100% - 6px), 65% 100%, 58% calc(100% - 4px), 50% 100%, 43% calc(100% - 6px), 35% 100%, 27% calc(100% - 5px), 19% 100%, 11% calc(100% - 6px), 5% 100%, 0 calc(100% - 4px)); padding-bottom: 20px; }
+
+/* --- hex phile numbers next to the folios ------------------------------------------- */
+:root[data-punk] .folio__n::after {
+  content: ' · ' attr(data-hex);
+  font-weight: 400;
+  opacity: 0.7;
+}

@@ -45,7 +45,7 @@ export type Row = Record<string, unknown> & { id?: string };
 
 const order = { k: 'order_index', type: 'number', label: 'order', help: 'lower comes first' } as const;
 
-export const THEMES = ['trash', 'riso', 'riso-blue', 'toner', 'blueprint', 'acid'];
+export const THEMES = ['trash', 'riso', 'riso-blue', 'hotline', 'toner', 'blueprint', 'acid'];
 
 export const TABLES: TableCfg[] = [
   {
@@ -227,6 +227,7 @@ export const TABLES: TableCfg[] = [
       { k: 'zine_tagline', label: 'masthead tagline', type: 'text', def: 'about things that did not need building' },
       { k: 'zine_issue_theme', label: 'cover line', type: 'text', def: 'the side-quest issue', help: '"the X issue": the middle word(s) print big on the cover.' },
       { k: 'zine_issue', label: 'issue number', type: 'text', def: '01' },
+      { k: 'zine_punk', label: 'punk layer (ransom letters, tape, stamps, staples, misprints)', type: 'bool', def: true, help: 'Off = the clean zine.' },
       { k: 'greetz', type: 'list', def: [], help: 'Optional thank-you list printed in the credits box (real people/labs only). Leave empty to hide.' },
     ],
   },

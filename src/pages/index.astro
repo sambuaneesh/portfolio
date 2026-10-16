@@ -8,6 +8,7 @@ import { optimize } from '../lib/images';
 import { toolchain } from '../lib/toolchain';
 import { getSteam, getSteamReviews } from '../lib/steam';
 import Scribble from '../components/Scribble.astro';
+import Ransom from '../components/Ransom.astro';
 import { pageMap, pad2 } from '../lib/zine';
 
 const [me, modules, experience, education, achievements, skills, posts, settings] = await Promise.all([
@@ -68,11 +69,16 @@ const ports = [
       </div>
       <div class="cover__art">
         {photo && (
-          <figure class="halftone cover__photo">
-            <img src={photo.src} width={photo.width} height={photo.height} alt={`Portrait of ${me.name}`} fetchpriority="high" decoding="async" />
-          </figure>
+          <div class="cover__pinned">
+            <figure class="halftone cover__photo">
+              <img src={photo.src} width={photo.width} height={photo.height} alt={`Portrait of ${me.name}`} fetchpriority="high" decoding="async" />
+            </figure>
+            <svg class="pin punk-only cover__pin" viewBox="0 0 74 26" aria-hidden="true"><path d="M8 13h50a9 9 0 1 0-9-9" fill="none" stroke="#141414" stroke-width="2.2" stroke-linecap="round" /><path d="M8 13h46" fill="none" stroke="#d9d6cf" stroke-width="1" /><circle cx="8" cy="13" r="5" fill="#d9d6cf" stroke="#141414" stroke-width="2" /><path d="M56 13l12 0" stroke="#141414" stroke-width="2.4" stroke-linecap="round" /></svg>
+    
+          </div>
         )}
-        <p class="issue-line" aria-hidden="true">{issPre && <small>{issPre}</small>}<b>{issBig}</b>{issPost && <small>{issPost}</small>}</p>
+        <p class="issue-line" aria-hidden="true">{issPre && <small>{issPre}</small>}<b><Ransom text={issBig} /></b>{issPost && <small>{issPost}</small>}</p>
+        <span class="burst punk-only cover__burst" aria-hidden="true">now with<br />pen<br />marks</span>
       </div>
       <div class="cover__foot">
         <div class="barcode" aria-hidden="true"><span></span><small>{me.name.toUpperCase()} · #{settings.zine_issue}</small></div>
@@ -88,7 +94,7 @@ const ports = [
   <Spread page={P.contents} zine={Z} runL="contents" runR="manifesto" id="contents" label="Contents and letter from the editor">
     <Fragment slot="left">
       <h2 class="hed hed--italic hed--l">Table of contents</h2>
-      <div class="credits">
+      <div class="credits torn-bottom">
         <dl>
           <div><dt>editor-in-chief</dt><dd>{me.name}</dd></div>
           {lab && <div><dt>lab</dt><dd>{lab.url ? <a href={lab.url} rel="noopener">{lab.label}</a> : lab.label}</dd></div>}
@@ -130,7 +136,7 @@ const ports = [
       <div class="letter" id="editor">
         <div class="letter__body">
           <p class="kicker">{me.location}</p>
-          <h2 class="hed hed--thin hed--m">{me.title}</h2>
+          <h2 class="hed hed--thin hed--m"><span class="hl">{me.title}</span></h2>
           <p class="copy dropcap">{me.bio}</p>
           <div class="rulebox ps">
             <p class="lbl">ps aux</p>
@@ -140,6 +146,7 @@ const ports = [
             </ul>
           </div>
           <p class="sign">— {me.name.split(' ')[0]}</p>
+          <span class="stamp punk-only letter__stamp" aria-hidden="true">approved by the editor</span>
         </div>
         <p class="letter__side" aria-hidden="true">letter from the editor</p>
       </div>
@@ -176,7 +183,7 @@ const ports = [
             </li>
           ))}
         </ol>
-        <div class="screenbox">
+        <div class="screenbox torn-top">
           <p class="boxhead">toolchain</p>
           <ul class="chain">
             {chain.proven.map(({ skill, mods }) => (
@@ -205,7 +212,7 @@ const ports = [
         <div class="off">
           <p class="boxhead">off hours · <a href={steam.url} rel="noopener">{steam.handle}</a></p>
           <p class="note note--tilt off__note">research, obviously →</p>
-          <ul class="games">
+          <ul class="games taped taped--top">
             {games.map((g) => (
               <li>
                 {g.img && <span class="halftone games__img"><img src={g.img.src} width="92" height="35" alt="" loading="lazy" decoding="async" /></span>}
@@ -232,7 +239,7 @@ const ports = [
       <div id="classifieds" class="stack">
         <p class="kicker">classifieds</p>
         <div class="ad">
-          <p class="ad__head"><span class="ringed">WANTED<Scribble kind="ring" /></span> <span class="note note--tilt">yes, you</span></p>
+          <p class="ad__head"><span class="ringed"><Ransom text="WANTED" /><Scribble kind="ring" /></span> <span class="note note--tilt">yes, you</span></p>
           <p class="copy">Research collaborations, internships, and problems that need a shell, a file system or an interpreter thrown at them.</p>
           <a class="btn btn--hot" href={u('/contact/')}>write to me</a>
         </div>
@@ -277,11 +284,16 @@ const ports = [
   }
   .mast__tag { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; }
   .cover__art { position: relative; display: grid; align-items: end; min-height: 0; }
+  .cover__pinned { position: relative; margin: 0 0 0 auto; width: 62%; }
   .cover__photo {
-    margin: 0 0 0 auto; width: 62%; aspect-ratio: 5 / 6; border: 3px solid var(--ink);
+    margin: 0; width: 100%; aspect-ratio: 5 / 6; border: 3px solid var(--ink);
     rotate: 2deg; box-shadow: 6px 6px 0 var(--ink);
   }
+  .cover__pin { top: -10px; left: 34%; rotate: -8deg; }
   .issue-line { position: absolute; left: 0; bottom: 18%; display: grid; line-height: 0.85; color: var(--on-cover); }
+  /* punk: the issue line is cut-out letters in the empty space above the photo */
+  :global([data-punk]) .issue-line { top: 0; bottom: auto; max-width: 100%; }
+  :global([data-punk]) .issue-line b { font-size: clamp(1.7rem, 8.5cqi, 3rem); -webkit-text-stroke: 0; }
   .issue-line small { font-family: var(--font-serif); font-style: italic; font-size: 1.1rem; }
   .issue-line b {
     font-family: var(--font-sans); font-weight: 900; font-stretch: 62%; text-transform: uppercase;
@@ -299,6 +311,9 @@ const ports = [
     position: absolute; right: 4px; top: 4px; font-family: var(--font-mono); font-size: 0.72rem;
     color: var(--on-cover); text-transform: uppercase; letter-spacing: 0.1em;
   }
+  .cover__burst { left: 4%; bottom: 12%; width: 108px; height: 108px; padding: 14px; font-size: 0.78rem; }
+  @media (max-width: 47.99rem) { .cover__burst { display: none !important; } }
+  .letter__stamp { align-self: flex-end; margin-top: -6px; }
   .hint { display: flex; align-items: flex-start; gap: 4px; margin: -4px 0 -10px 30%; }
   .hint .scrib--arrow-down { margin-top: 10px; rotate: 20deg; }
   .off__note { justify-self: end; margin-top: -6px; }

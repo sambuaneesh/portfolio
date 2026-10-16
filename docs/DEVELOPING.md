@@ -95,3 +95,7 @@ Edited under **Site settings** in `/admin/` (JSON values):
 | `extra_links` | `[{ "label", "url" }]` added to links and the command line; a Steam profile link also drives the games tile |
 | `theme`, `zine_title`, `zine_tagline`, `zine_issue_theme`, `zine_issue`, `greetz` | edited on the Appearance page; the cover colour is fixed for every visitor (Preview to try one) |
 | `project_extras` | `{ "<project id>": { "show_readme": bool, "readme_override": "markdown" } }`; edited from the project form |
+
+## Punk layer (experiment branch `experiment/punk-zine`)
+
+Everything punk lives in `src/styles/punk.css` and is scoped to `html[data-punk]`, which comes from the `zine_punk` site setting (Appearance → "punk layer"). Off = the clean zine from tag `checkpoint/zine-v1`. Preview without saving: `?punk=0` / `?punk=1` (localhost or signed-in admin).

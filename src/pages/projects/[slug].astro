@@ -39,6 +39,9 @@ if (opts.readme_override?.trim()) {
 // every article gets its own headline voice, like a real zine
 const voices = ['hed--wide', 'hed--cond', 'hed--outline', 'hed--inverse'];
 const voice = voices[i % voices.length];
+// long names step down a size instead of breaking mid-word
+const longest = Math.max(...m.title.split(/\s+/).map((w) => w.length));
+const size = longest <= 7 ? 'hed--xl' : longest <= 11 ? 'hed--l' : 'hed--m';
 
 const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const spec: [string, string | null][] = [
@@ -60,10 +63,11 @@ const nextHref = next ? u(`/projects/${next.slug}/`) : u('/cv/');
     next={{ href: nextHref, label: next ? next.title : 'field log' }}>
     <Fragment slot="left">
       <p class="kicker">workbench · {m.part}</p>
-      <h1 class:list={['hed', 'hed--xl', voice]}>{m.title}</h1>
+      <h1 class:list={['hed', size, voice, 'proj-title']}>{m.title}</h1>
       <p class="copy dropcap">{m.description}</p>
       {m.tags?.length ? <ul class="tags" aria-label="Tags">{m.tags.map((t) => <li>{t}</li>)}</ul> : null}
       <div class="btns">
+        <span class="stamp punk-only push-stamp" aria-hidden="true">{m.pushedAt ? `last push ${new Date(m.pushedAt).getFullYear()}` : m.github_url ? 'source on github' : 'unreleased'}</span>
         {m.github_url && <a class="btn btn--hot" href={m.github_url} rel="noopener">source</a>}
         {m.live_url && <a class="btn" href={m.live_url} rel="noopener">live</a>}
       </div>
@@ -75,7 +79,7 @@ const nextHref = next ? u(`/projects/${next.slug}/`) : u('/cv/');
         </dl>
       </div>
       {screens[0] && (
-        <figure class="fig fig--main">
+        <figure class="fig fig--main taped">
           <a class="shot" href={screens[0].orig}><img src={screens[0].src} width={screens[0].width} height={screens[0].height} alt={`${m.title} screenshot`} decoding="async" /></a>
           <figcaption class="mono">fig. 1 · {m.title}{screens.length > 1 ? ` · +${screens.length - 1} more` : ''}</figcaption>
         </figure>
@@ -113,6 +117,8 @@ const nextHref = next ? u(`/projects/${next.slug}/`) : u('/cv/');
 </script>
 
 <style>
+  .proj-title { overflow-wrap: normal; word-break: normal; hyphens: none; }
+  .push-stamp { order: 3; margin-left: auto; align-self: center; }
   .fig { margin: 0; display: grid; gap: 4px; }
   .fig a { display: block; border: 1.5px solid var(--ink); }
   .fig img { width: 100%; height: auto; }

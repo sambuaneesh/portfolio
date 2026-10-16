@@ -87,6 +87,8 @@ export interface SiteSettings {
   /** Big "THE ___ ISSUE" line on the cover. */
   zine_issue_theme: string;
   zine_issue: string;
+  /** Punk layer over the zine: ransom letters, tape, stamps, staples, misprints. */
+  zine_punk: boolean;
   /** Thank-you list printed in the colophon; hidden when empty. */
   greetz: string[];
   /** Per-project page options, keyed by project id (edited in /admin). */
@@ -145,11 +147,12 @@ const SETTINGS_DEFAULTS: SiteSettings = {
   zine_tagline: 'about things that did not need building',
   zine_issue_theme: 'the side-quest issue',
   zine_issue: '01',
+  zine_punk: true,
   greetz: [],
 };
 
 /** Cover colours. The interior is always the same photocopied grey. */
-export const THEMES = ['trash', 'riso', 'riso-blue', 'toner', 'blueprint', 'acid'] as const;
+export const THEMES = ['trash', 'riso', 'riso-blue', 'hotline', 'toner', 'blueprint', 'acid'] as const;
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   const rows = await rest<{ key: string; value: unknown }[]>('aneesh_site_settings?select=key,value');
