@@ -27,10 +27,16 @@ const lab = settings.badge_lab;
 
 const steamUrl = (settings.extra_links ?? []).find((l) => /steamcommunity\.com/.test(l.url))?.url;
 const steam = steamUrl ? await getSteam(steamUrl) : null;
-const games = steam
-  ? await Promise.all(steam.games.slice(0, 6).map(async (g) => ({ ...g, img: g.capsule ? await optimize(g.capsule, 184, 69) : null })))
-  : [];
 const reviews = steamUrl ? (await getSteamReviews(steamUrl)).slice(0, 3) : [];
+// Recently played (the public feed only exposes a few), topped up with
+// reviewed games, which also carry their hours on record.
+const played = steam ? [...steam.games] : [];
+for (const r of reviews) {
+  if (!played.some((g) => g.name.toLowerCase() === r.name.toLowerCase())) {
+    played.push({ name: r.name, link: `https://steamcommunity.com/app/${r.app}`, capsule: r.capsule, hours2wk: 0, hoursTotal: Number(r.hours.replace(/[^\d.]/g, '')) || 0 });
+  }
+}
+const games = await Promise.all(played.slice(0, 5).map(async (g) => ({ ...g, img: g.capsule ? await optimize(g.capsule, 184, 69) : null })));
 
 const photo = me.avatar_url ? await optimize(me.avatar_url, 520, 620) : null;
 
