@@ -98,6 +98,8 @@ export interface SiteSettings {
   project_extras: Record<string, { show_readme?: boolean; readme_override?: string | null }>;
 }
 
+import { record, recall } from './snapshot';
+
 const cache = new Map<string, Promise<unknown>>();
 const stamps = new Map<string, number>();
 
@@ -114,11 +116,24 @@ async function rest<T>(path: string): Promise<T> {
   if (!cache.has(path)) {
     stamps.set(path, Date.now());
     cache.set(path, (async () => {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
-      });
-      if (!res.ok) throw new Error(`Supabase ${path} -> ${res.status} ${await res.text()}`);
-      return res.json();
+      // two quick tries, then the snapshot of the last good build
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+            headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+            signal: AbortSignal.timeout(10000),
+          });
+          if (!res.ok) throw new Error(`Supabase ${path} -> ${res.status}`);
+          const json = await res.json();
+          record(`db:${path}`, json);
+          return json;
+        } catch (err) {
+          if (attempt === 1) {
+            console.warn(`[db] ${(err as Error).message}; falling back to snapshot`);
+            return recall(`db:${path}`);
+          }
+        }
+      }
     })());
   }
   return cache.get(path) as Promise<T>;

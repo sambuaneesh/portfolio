@@ -16,6 +16,14 @@ jobs:
 
       - run: npm ci
 
+      # Optimised remote images from earlier builds: if Supabase Storage or
+      # GitHub is down, the build reuses these instead of losing the images.
+      - uses: actions/cache@v4
+        with:
+          path: node_modules/.astro
+          key: astro-assets-${{ github.run_id }}
+          restore-keys: astro-assets-
+
       - name: Type check
         run: npm run check
 

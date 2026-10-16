@@ -99,3 +99,19 @@ Edited under **Site settings** in `/admin/` (JSON values):
 ## Punk layer (experiment branch `experiment/punk-zine`)
 
 Everything punk lives in `src/styles/punk.css` and is scoped to `html[data-punk]`, which comes from the `zine_punk` site setting (Appearance → "punk layer"). Off = the clean zine from tag `checkpoint/zine-v1`. Preview without saving: `?punk=0` / `?punk=1` (localhost or signed-in admin).
+
+## Speed and resilience
+
+- **Content is static.** Supabase is read only at build time; a visitor's reload never touches the database.
+- **Rendering:** spreads after the first two use `content-visibility: auto`; page sizes come from a computed `--pw` (no container queries or aspect-ratio in the grid). There is no page-turn animation (it cost ~250 ms per navigation).
+- **Service worker** (`public/sw.js`, versioned per build):
+  - hashed assets are served cache-first;
+  - pages use stale-while-revalidate;
+  - once the first page is idle, the whole zine is precached (skipped on Save-Data or 2G), so later navigation and reloads take about 100 ms, even offline.
+- **Prefetch:** speculation rules prefetch next/prev/section links eagerly and prerender other links on hover.
+- **Snapshot fallback** (`src/lib/snapshot.ts`):
+  - Every build records what it read (DB rows, READMEs, Steam) to `src/data/snapshot.json` and publishes it at `/data/snapshot.json`.
+  - If a source is down, the build uses the live snapshot, then the repo copy, so a deploy never depends on the database being up.
+  - Such builds show a small `†` after "printed …" in the footer (hover for details).
+  - Commit `src/data/snapshot.json` now and then to keep the repo copy fresh.
+- **Image cache:** CI caches `node_modules/.astro`, so already-optimised images survive a storage outage.

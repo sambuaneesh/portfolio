@@ -1,6 +1,22 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import fs from 'node:fs';
+
+// Publish the content snapshot with the site, so the next build can fall
+// back to it if the database is down (see src/lib/snapshot.ts).
+/** @type {import('astro').AstroIntegration} */
+const snapshot = {
+  name: 'zine-snapshot',
+  hooks: {
+    'astro:build:done': ({ dir }) => {
+      const src = new URL('./src/data/snapshot.json', import.meta.url);
+      if (!fs.existsSync(src)) return;
+      fs.mkdirSync(new URL('data/', dir), { recursive: true });
+      fs.copyFileSync(src, new URL('data/snapshot.json', dir));
+    },
+  },
+};
 
 // Served from GitHub Pages as a project site: https://sambuaneesh.github.io/portfolio/
 export default defineConfig({
@@ -8,7 +24,7 @@ export default defineConfig({
   base: '/portfolio',
   trailingSlash: 'always',
   output: 'static',
-  integrations: [sitemap({ filter: (page) => !page.includes('/admin/') })],
+  integrations: [sitemap({ filter: (page) => !page.includes('/admin/') }), snapshot],
   build: {
     // Every page's CSS is small enough to inline: zero render-blocking requests.
     inlineStylesheets: 'always',

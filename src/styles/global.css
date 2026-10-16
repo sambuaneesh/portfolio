@@ -116,7 +116,7 @@ body {
 
 img, svg, video { max-width: 100%; height: auto; display: block; }
 h1, h2, h3, h4 { margin: 0; line-height: 1.05; text-wrap: balance; }
-p { margin: 0; text-wrap: pretty; }
+p { margin: 0; }
 p + p { margin-top: 0.8em; }
 ul, ol { margin: 0; padding: 0; }
 
@@ -207,7 +207,11 @@ a:hover { text-decoration-thickness: 3px; }
   gap: 48px;
 }
 
-.spread { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.spread { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; --pw: calc(100vw - 32px); }
+.spread--single { --pw: min(620px, 100vw - 32px); }
+/* --pw is each page's width, computed from the viewport instead of measured
+   (container queries + aspect-ratio inside the grid cost ~0.5 s of layout on
+   a slow phone). Headline sizes and page height are derived from it. */
 .spread--single { justify-content: center; grid-template-columns: minmax(0, 620px); }
 .spread--wide { grid-template-columns: minmax(0, 1fr); }
 
@@ -229,7 +233,6 @@ a:hover { text-decoration-thickness: 3px; }
   background: var(--tex), var(--grain), var(--paper);
   color: var(--ink);
   box-shadow: 0 12px 30px rgb(0 0 0 / 0.38);
-  container-type: inline-size;
   /* aspect-ratio items don't stretch by default: both pages of a spread
      must always be the same height. The explicit width stops the browser
      from deriving the width from the stretched height (which overflows). */
@@ -238,8 +241,12 @@ a:hover { text-decoration-thickness: 3px; }
 }
 
 @media (min-width: 62rem) {
-  .page { aspect-ratio: 5.5 / 8.5; }
-  .spread--wide .page { aspect-ratio: auto; min-height: 70vh; }
+  .spread { --pw: calc((min(100vw, 1240px) - 32px) / 2); }
+  .spread--single { --pw: min(600px, 100vw - 32px); }
+  .spread--wide { --pw: calc(min(100vw, 1240px) - 32px); }
+  /* digest page proportions (5.5 x 8.5), as a minimum: content can grow it */
+  .page { min-height: calc(var(--pw) * 8.5 / 5.5); }
+  .spread--wide .page { min-height: 70vh; }
   /* the fold: shading into the gutter, and stacked page edges outside */
   .page--l {
     background: linear-gradient(to left, var(--fold), var(--fold-soft) 4%, transparent 9%), var(--tex), var(--grain), var(--paper);
@@ -304,9 +311,9 @@ a:hover { text-decoration-thickness: 3px; }
 /* --- headlines: every article gets its own voice ------------------------------ */
 
 .hed { font-family: var(--font-sans); font-weight: 900; text-transform: uppercase; line-height: 0.9; letter-spacing: -0.01em; overflow-wrap: anywhere; }
-.hed--xl { font-size: clamp(2.3rem, 12cqi, 4.6rem); }
-.hed--l { font-size: clamp(1.8rem, 9cqi, 3.2rem); }
-.hed--m { font-size: clamp(1.3rem, 6cqi, 2rem); }
+.hed--xl { font-size: clamp(2.3rem, calc(var(--pw) * 0.12), 4.6rem); }
+.hed--l { font-size: clamp(1.8rem, calc(var(--pw) * 0.09), 3.2rem); }
+.hed--m { font-size: clamp(1.3rem, calc(var(--pw) * 0.06), 2rem); }
 .hed--s { font-size: 1.05rem; }
 .hed--wide { font-stretch: 125%; letter-spacing: 0.04em; }
 .hed--cond { font-stretch: 62%; letter-spacing: 0; }
@@ -593,26 +600,12 @@ kbd.k {
 
 /* --- motion (opt-in only) ------------------------------------------------------ */
 
-@view-transition { navigation: auto; }
-
-@media (prefers-reduced-motion: no-preference) {
-  /* The page turn: the booklet is one snapshot; the old one swings away
-     around the spine and the next pages are underneath. Lite 3D, no JS. */
-  .zine { view-transition-name: zine; }
-  ::view-transition-old(zine) { animation: turn-out 480ms cubic-bezier(.5, 0, .3, 1) both; }
-  ::view-transition-new(zine) { animation: turn-in 480ms cubic-bezier(.4, 0, .2, 1) both; }
-  @keyframes turn-out {
-    from { transform: perspective(2200px) rotateY(0); opacity: 1; }
-    to { transform: perspective(2200px) rotateY(-22deg) translateX(-5%); opacity: 0; }
-  }
-  @keyframes turn-in {
-    from { transform: perspective(2200px) rotateY(9deg) translateX(3%); opacity: 0; }
-    to { transform: none; opacity: 1; }
-  }
-}
+/* No cross-document page-turn animation: measured on Slow 3G it added
+   ~250 ms to every page change (the browser holds the old page until the new
+   one can animate). Pages come out of the service-worker cache in ~100 ms,
+   so the swap itself is the fastest "transition" there is. */
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
   .btn { transition: none; }
 }
 
@@ -627,7 +620,7 @@ kbd.k {
 /* fixed spreads: exactly one zine page each; overflowing content gets cut */
 .spread--fixed .page__body { min-height: 0; }
 @media (min-width: 62rem) {
-  .spread--fixed .page { aspect-ratio: 5.5 / 8.5; min-height: 0; overflow: hidden; }
+  .spread--fixed .page { height: calc(var(--pw) * 8.5 / 5.5); overflow: hidden; }
 }
 
 /* screenshots print grey; colour comes back on hover/focus */
@@ -703,3 +696,28 @@ kbd.k {
 .trail__back { padding: 0.1rem 0.5rem; border: 1px solid var(--desk-muted); text-decoration: none !important; }
 .trail__back:hover { background: var(--paper); color: var(--ink); }
 .trail__path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* folio row: prev | page number | next, never overlapping */
+.folio { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; }
+.folio .prev, .folio .next {
+  position: static;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.folio .prev { grid-column: 1; justify-self: start; max-width: 100%; }
+.folio .folio__n { grid-column: 2; }
+.folio .next { grid-column: 3; justify-self: end; max-width: 100%; }
+
+
+/* --- render only what's on screen ------------------------------------------
+   Spreads after the first two skip style, layout and paint until they're
+   about to scroll into view (still searchable, still linkable by #id). */
+.spread + .spread + .spread {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 940px;
+}
+
+/* build used the archived snapshot (admin-only hint, see snapshot.ts) */
+.fallback { margin-left: 1px; color: var(--desk-ink); cursor: help; }

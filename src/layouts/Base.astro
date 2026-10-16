@@ -5,6 +5,7 @@ import '../styles/themes.css';
 import archivo from '../assets/fonts/archivo-subset.woff2?url';
 import { WORKSPACES, BUILD, u, fmtDate, type WorkspaceKey } from '../lib/site';
 import { getPersonalInfo, getModules, getSiteSettings, THEMES } from '../lib/db';
+import { isFallback } from '../lib/snapshot';
 
 interface Props {
   title?: string;
@@ -16,9 +17,11 @@ interface Props {
   nextHref?: string;
   /** Short name for this page in the reading trail. */
   crumb?: string;
+  /** The page's LCP image, fetched from the <head> at top priority. */
+  preloadImage?: string;
 }
 
-const { title, description, ws = null, noindex = false, image, prevHref, nextHref, crumb } = Astro.props;
+const { title, description, ws = null, noindex = false, image, prevHref, nextHref, crumb, preloadImage } = Astro.props;
 const [me, modules, settings] = await Promise.all([getPersonalInfo(), getModules(), getSiteSettings()]);
 
 // One cover colour for everyone, picked in /admin and baked in at build.
@@ -80,6 +83,7 @@ const jsonLd = {
     <link rel="icon" href={u('/favicon.svg')} type="image/svg+xml" />
     <link rel="sitemap" href={u('/sitemap-index.xml')} />
     <link rel="preload" href={archivo} as="font" type="font/woff2" crossorigin />
+    {preloadImage && <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />}
     {prevHref && <link rel="prev" href={prevHref} />}
     {nextHref && <link rel="next" href={nextHref} />}
 
@@ -140,6 +144,9 @@ const jsonLd = {
     </script>
     <!-- Chromium prerenders same-site links on hover: page turns feel instant. -->
     <script type="speculationrules" is:inline set:html={JSON.stringify({
+      // the obvious next pages (next/prev, sections) are fetched as soon as
+      // this one has loaded; anything else is prerendered on hover/press
+      prefetch: [{ where: { selector_matches: '.next, .prev, .ws, .dock a, .trail a' }, eagerness: 'eager' }],
       prerender: [{ where: { and: [{ href_matches: `${u('/')}*` }, { not: { href_matches: `${u('/admin/')}*` } }] }, eagerness: 'moderate' }],
     })} />
     <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
@@ -171,7 +178,7 @@ const jsonLd = {
     </main>
 
     <footer class="statusline">
-      <span data-mode>{settings.footer_text} · printed {fmtDate(BUILD.at)}</span>
+      <span data-mode>{settings.footer_text} · printed {fmtDate(BUILD.at)}{isFallback() && <sup class="fallback" title="Built from the archived snapshot: a live source (database, GitHub or Steam) was unreachable at build time.">†</sup>}</span>
       <a href={settings.footer_github_url}>src@{BUILD.commit}</a>
       <span class="no-print">← → turn pages · <kbd class="k">:</kbd> commands</span>
     </footer>
@@ -201,9 +208,22 @@ const jsonLd = {
 
     <script type="application/json" id="cmd-data" set:html={JSON.stringify(commands)} />
     {import.meta.env.PROD && (
-      <script is:inline define:vars={{ sw: `${u('/sw.js')}?v=${BUILD.commit}`, scope: u('/') }}>
+      <script is:inline define:vars={{ sw: `${u('/sw.js')}?v=${BUILD.at.getTime()}`, scope: u('/'), list: u('/zine-pages.json') }}>
         if ('serviceWorker' in navigator && !location.pathname.includes('/admin/')) {
-          addEventListener('load', function () { navigator.serviceWorker.register(sw, { scope: scope }).catch(function () {}); });
+          addEventListener('load', function () {
+            navigator.serviceWorker.register(sw, { scope: scope }).then(function () {
+              return navigator.serviceWorker.ready;
+            }).then(function (reg) {
+              // precache the rest of the zine when idle, unless the visitor saves data
+              var c = navigator.connection || {};
+              if (c.saveData || /(^|-)2g$/.test(c.effectiveType || '')) return;
+              (window.requestIdleCallback || setTimeout)(function () {
+                fetch(list).then(function (r) { return r.json(); }).then(function (urls) {
+                  (reg.active || navigator.serviceWorker.controller).postMessage({ type: 'precache', urls: urls });
+                }).catch(function () {});
+              }, { timeout: 4000 });
+            }).catch(function () {});
+          });
         }
       </script>
     )}

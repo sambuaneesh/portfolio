@@ -1,3 +1,5 @@
+import { record, recall } from './snapshot';
+
 // Reads a public Steam profile's XML feed at build time (no API key needed):
 // display name and recently played games with hours. Never fails the build.
 
@@ -17,7 +19,7 @@ export function getSteam(profileUrl: string): Promise<SteamProfile | null> {
     memo.set(profileUrl, (async () => {
       try {
         const res = await fetch(`${profileUrl.replace(/\/$/, '')}/?xml=1`, { signal: AbortSignal.timeout(6000) });
-        if (!res.ok) return null;
+        if (!res.ok) throw new Error(`steam ${res.status}`);
         const xml = await res.text();
         if (tag(xml, 'privacyState') !== 'public') return null;
         const games = [...xml.matchAll(/<mostPlayedGame>([\s\S]*?)<\/mostPlayedGame>/g)].map(([, g]) => ({
@@ -27,9 +29,11 @@ export function getSteam(profileUrl: string): Promise<SteamProfile | null> {
           hours2wk: Number(tag(g, 'hoursPlayed')) || 0,
           hoursTotal: Number(tag(g, 'hoursOnRecord').replace(/,/g, '')) || 0,
         }));
-        return { url: profileUrl, handle: decode(tag(xml, 'steamID')), summary: decode(tag(xml, 'summary')), games };
+        const profile = { url: profileUrl, handle: decode(tag(xml, 'steamID')), summary: decode(tag(xml, 'summary')), games };
+        record(`steam:${profileUrl}`, profile);
+        return profile;
       } catch {
-        return null;
+        try { return await recall<SteamProfile>(`steam:${profileUrl}`); } catch { return null; }
       }
     })());
   }
@@ -47,7 +51,7 @@ export function getSteamReviews(profileUrl: string): Promise<SteamReview[]> {
       try {
         const base = profileUrl.replace(/\/$/, '');
         const res = await fetch(`${base}/recommended/`, { signal: AbortSignal.timeout(6000) });
-        if (!res.ok) return [];
+        if (!res.ok) throw new Error(`steam ${res.status}`);
         const html = await res.text();
         const blocks = html.split('class="review_box"').slice(1);
         const out: SteamReview[] = [];
@@ -71,9 +75,11 @@ export function getSteamReviews(profileUrl: string): Promise<SteamReview[]> {
             url: verdict[1],
           });
         }
-        return out.filter((r) => r.text);
+        const reviews = out.filter((r) => r.text);
+        record(`steamrev:${profileUrl}`, reviews);
+        return reviews;
       } catch {
-        return [];
+        try { return await recall<SteamReview[]>(`steamrev:${profileUrl}`); } catch { return []; }
       }
     })());
   }

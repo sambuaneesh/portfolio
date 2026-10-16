@@ -41,7 +41,7 @@ const filterCss = langs
 
 <style>
   .list { display: grid; gap: 12px; }
-  .one-line { white-space: nowrap; font-size: clamp(1.4rem, 7.4cqi, 3rem); }
+  .one-line { white-space: nowrap; font-size: clamp(1.4rem, calc(var(--pw) * 0.074), 3rem); }
   .filters { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
   .filters legend { float: left; margin-right: 6px; }
   .filters label { cursor: pointer; }

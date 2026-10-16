@@ -70,7 +70,7 @@ const ports = [
   ...(settings.extra_links ?? []).map((l) => ({ k: l.label.slice(0, 5).toUpperCase(), v: l.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''), href: l.url })),
 ].filter(Boolean) as { k: string; v: string; href: string }[];
 ---
-<Base ws="home" nextHref={u('/projects/')}>
+<Base ws="home" nextHref={u('/projects/')} preloadImage={photo?.src}>
   <h1 class="sr-only">{me.name}: {me.title}</h1>
 
   <!-- 01 · cover -->
@@ -312,11 +312,11 @@ const ports = [
   .mast { display: grid; justify-items: start; gap: 2px; }
   .mast__small {
     padding: 0.1rem 0.5rem; background: var(--paper); color: var(--ink); border: 2px solid var(--ink);
-    font-family: var(--font-mono); font-weight: 700; font-size: clamp(1.4rem, 7cqi, 2.4rem); letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.1;
+    font-family: var(--font-mono); font-weight: 700; font-size: clamp(1.4rem, calc(var(--pw) * 0.07), 2.4rem); letter-spacing: 0.02em; text-transform: uppercase; line-height: 1.1;
   }
   .mast__big {
     font-family: var(--font-sans); font-weight: 900; font-stretch: 125%; text-transform: uppercase;
-    font-size: clamp(4rem, 26cqi, 9.5rem); line-height: 0.82; letter-spacing: -0.02em;
+    font-size: clamp(4rem, calc(var(--pw) * 0.26), 9.5rem); line-height: 0.82; letter-spacing: -0.02em;
     color: var(--paper); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill;
   }
   .mast__tag { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; }
@@ -330,11 +330,11 @@ const ports = [
   .issue-line { position: absolute; left: 0; bottom: 18%; display: grid; line-height: 0.85; color: var(--on-cover); }
   /* punk: the issue line is cut-out letters in the empty space above the photo */
   :global([data-punk]) .issue-line { top: 0; bottom: auto; max-width: 100%; }
-  :global([data-punk]) .issue-line b { font-size: clamp(1.7rem, 8.5cqi, 3rem); -webkit-text-stroke: 0; }
+  :global([data-punk]) .issue-line b { font-size: clamp(1.7rem, calc(var(--pw) * 0.085), 3rem); -webkit-text-stroke: 0; }
   .issue-line small { font-family: var(--font-serif); font-style: italic; font-size: 1.1rem; }
   .issue-line b {
     font-family: var(--font-sans); font-weight: 900; font-stretch: 62%; text-transform: uppercase;
-    font-size: clamp(2.6rem, 14cqi, 4.6rem); color: var(--paper); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill;
+    font-size: clamp(2.6rem, calc(var(--pw) * 0.14), 4.6rem); color: var(--paper); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill;
   }
   .cover__foot { display: flex; justify-content: space-between; align-items: end; gap: 14px; }
   .coverlines {
