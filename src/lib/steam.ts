@@ -18,7 +18,8 @@ const memo = new Map<string, Promise<SteamProfile | null>>();
  *  the browser): the whole library, most played first. Needs the profile's
  *  "Game details" set to public; returns null otherwise. */
 async function ownedGames(steamid: string): Promise<SteamGame[] | null> {
-  const key = process.env.STEAM_API_KEY;
+  // .env (local dev/build) arrives via import.meta.env; CI passes a real env var
+  const key = import.meta.env.STEAM_API_KEY ?? process.env.STEAM_API_KEY;
   if (!key || !steamid) return null;
   try {
     const res = await fetch(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${key}&steamid=${steamid}&include_appinfo=1&include_played_free_games=1&format=json`, { signal: AbortSignal.timeout(8000) });
