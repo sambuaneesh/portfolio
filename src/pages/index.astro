@@ -6,7 +6,8 @@ import { u } from '../lib/site';
 import { glyph } from '../lib/glyphs';
 import { optimize } from '../lib/images';
 import { toolchain } from '../lib/toolchain';
-import { getSteam } from '../lib/steam';
+import { getSteam, getSteamReviews } from '../lib/steam';
+import Scribble from '../components/Scribble.astro';
 import { pageMap, pad2 } from '../lib/zine';
 
 const [me, modules, experience, education, achievements, skills, posts, settings] = await Promise.all([
@@ -26,8 +27,9 @@ const lab = settings.badge_lab;
 const steamUrl = (settings.extra_links ?? []).find((l) => /steamcommunity\.com/.test(l.url))?.url;
 const steam = steamUrl ? await getSteam(steamUrl) : null;
 const games = steam
-  ? await Promise.all(steam.games.slice(0, 3).map(async (g) => ({ ...g, img: g.capsule ? await optimize(g.capsule, 184, 69) : null })))
+  ? await Promise.all(steam.games.slice(0, 6).map(async (g) => ({ ...g, img: g.capsule ? await optimize(g.capsule, 184, 69) : null })))
   : [];
+const reviews = steamUrl ? (await getSteamReviews(steamUrl)).slice(0, 3) : [];
 
 const photo = me.avatar_url ? await optimize(me.avatar_url, 520, 620) : null;
 
@@ -78,7 +80,7 @@ const ports = [
           {coverLines.map((l) => <li>{l}</li>)}
         </ul>
       </div>
-      <a class="cover__open" href="#contents">open it</a>
+      <p class="cover__open"><span class="note">psst.</span> <span class="ringed"><a href="#contents">open it</a><Scribble kind="ring" /></span></p>
     </div>
   </Spread>
 
@@ -95,10 +97,11 @@ const ports = [
           {settings.greetz?.length > 0 && <div><dt>greetz</dt><dd>{settings.greetz.join(' · ')}</dd></div>}
         </dl>
       </div>
+      <p class="hint"><span class="note note--tilt">dotted = clickable. try it.</span><Scribble kind="arrow-down" /></p>
       <div class="toc-wrap">
         <p class="toc__sec">manifesto</p>
         <ul class="toc">
-          <li><span class="toc__n">{pad2(P.contents + 1)}</span><a href="#editor">Letter from the editor</a></li>
+          <li><span class="toc__n">{pad2(P.contents + 1)}</span><a href="#editor">Letter from the editor</a> <span class="note">← start here</span></li>
         </ul>
         <p class="toc__sec">this issue</p>
         <ul class="toc">
@@ -147,7 +150,7 @@ const ports = [
   <Spread page={P.issue} zine={Z} runL="this issue" runR="research" id="issue" label="Featured projects and research">
     <Fragment slot="left">
       <p class="kicker">workbench · featured</p>
-      <h2 class="hed hed--xl hed--wide">This issue</h2>
+      <h2 class="hed hed--xl hed--wide"><span class="underlined">This issue<Scribble kind="underline" /></span></h2>
       <div class="feat">
         {featured.map((m) => (
           <article class="feat__item">
@@ -167,7 +170,7 @@ const ports = [
             <li>
               <span class="lbl">{pad2(i + 1)}</span>
               <div>
-                <h3 class="hed hed--s">{a.certificate_url ? <a href={a.certificate_url} rel="noopener">{a.title}</a> : a.title}</h3>
+                <h3 class="hed hed--s">{a.certificate_url ? <a href={a.certificate_url} rel="noopener">{a.title}</a> : a.title}{i === 0 && <> <Scribble kind="star" /><span class="note">the big one</span></>}</h3>
                 {a.description && <p class="copy">{a.description}</p>}
               </div>
             </li>
@@ -201,6 +204,7 @@ const ports = [
       {games.length > 0 && steam && (
         <div class="off">
           <p class="boxhead">off hours · <a href={steam.url} rel="noopener">{steam.handle}</a></p>
+          <p class="note note--tilt off__note">research, obviously →</p>
           <ul class="games">
             {games.map((g) => (
               <li>
@@ -210,6 +214,17 @@ const ports = [
               </li>
             ))}
           </ul>
+          {reviews.length > 0 && (
+            <ul class="reviews">
+              {reviews.map((r) => (
+                <li>
+                  <span class:list={['lbl', !r.recommended && 'lbl--line']}>{r.recommended ? 'rec' : 'not rec'}</span>
+                  <a href={r.url} rel="noopener">{r.name}</a>
+                  <q>{r.text.length > 90 ? `${r.text.slice(0, 88)}…` : r.text}</q>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </Fragment>
@@ -217,7 +232,7 @@ const ports = [
       <div id="classifieds" class="stack">
         <p class="kicker">classifieds</p>
         <div class="ad">
-          <p class="ad__head">WANTED</p>
+          <p class="ad__head"><span class="ringed">WANTED<Scribble kind="ring" /></span> <span class="note note--tilt">yes, you</span></p>
           <p class="copy">Research collaborations, internships, and problems that need a shell, a file system or an interpreter thrown at them.</p>
           <a class="btn btn--hot" href={u('/contact/')}>write to me</a>
         </div>
@@ -281,9 +296,16 @@ const ports = [
   .barcode span { display: block; width: 92px; height: 34px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 3px, var(--ink) 3px 4px, transparent 4px 7px, var(--ink) 7px 10px, transparent 10px 11px); }
   .barcode small { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em; }
   .cover__open {
-    position: absolute; right: 0; top: 0; font-family: var(--font-mono); font-size: 0.7rem;
+    position: absolute; right: 4px; top: 4px; font-family: var(--font-mono); font-size: 0.72rem;
     color: var(--on-cover); text-transform: uppercase; letter-spacing: 0.1em;
   }
+  .hint { display: flex; align-items: flex-start; gap: 4px; margin: -4px 0 -10px 30%; }
+  .hint .scrib--arrow-down { margin-top: 10px; rotate: 20deg; }
+  .off__note { justify-self: end; margin-top: -6px; }
+  .reviews { list-style: none; display: grid; gap: 8px; font-size: 0.82rem; margin-top: 6px; }
+  .reviews li { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; align-items: baseline; }
+  .reviews a { font-family: var(--font-sans); font-weight: 800; }
+  .reviews q { grid-column: 2; font-family: var(--font-serif); font-style: italic; color: var(--muted); }
 
   /* contents --------------------------------------------------------------- */
   .credits { background: var(--black); color: var(--on-black); padding: 12px 14px; rotate: -1.5deg; }

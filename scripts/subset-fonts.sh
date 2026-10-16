@@ -20,5 +20,8 @@ sub node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.wo
 pin "$TMP/a.woff2" src/assets/fonts/archivo-subset.woff2 wght=400:900 wdth=62:125
 sub node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2 "$TMP/j.woff2"
 pin "$TMP/j.woff2" src/assets/fonts/jetbrains-mono-subset.woff2 wght=400:700
+# Ballpoint handwriting for the pen notes scribbled on the zine pages.
+uvx --from 'fonttools[woff]' --with brotli pyftsubset node_modules/@fontsource/shadows-into-light/files/shadows-into-light-latin-400-normal.woff2 \
+  --unicodes="U+0020-007E,U+2190-2193,U+2014,U+2026" --flavor=woff2 --output-file=src/assets/fonts/hand-subset.woff2 --no-hinting --desubroutinize
 rm -rf "$TMP"
 ls -l src/assets/fonts

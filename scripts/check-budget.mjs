@@ -14,7 +14,7 @@ const BASE = '/portfolio';
 const BUDGET = {
   html: 40 * 1024,  // HTML + inlined CSS
   js: 30 * 1024,    // JS before interaction
-  fonts: 110 * 1024, // woff2 (already compressed)
+  fonts: 120 * 1024, // woff2 (already compressed); incl. 10 KB handwriting for pen notes
   total: 250 * 1024,
 };
 // The admin console is never on a visitor's path.

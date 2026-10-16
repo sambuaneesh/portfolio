@@ -142,8 +142,8 @@ const SETTINGS_DEFAULTS: SiteSettings = {
   project_extras: {},
   theme: 'trash',
   zine_title: 'The Boring Zine',
-  zine_tagline: 'a systems zine by aneesh sambu',
-  zine_issue_theme: 'the systems issue',
+  zine_tagline: 'about things that did not need building',
+  zine_issue_theme: 'the side-quest issue',
   zine_issue: '01',
   greetz: [],
 };

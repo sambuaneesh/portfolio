@@ -1,0 +1,31 @@
+---
+// Pen marks on the zine: a hand-drawn ring around something, an arrow, a
+// star or an underline. Pure inline SVG in "ballpoint" ink, decorative only.
+interface Props { kind: 'ring' | 'arrow' | 'arrow-down' | 'star' | 'underline'; class?: string }
+const { kind, class: cls = '' } = Astro.props;
+---
+{kind === 'ring' && (
+  <svg class:list={['scrib', 'scrib--ring', cls]} viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M24 30C52 8 150 6 182 26c22 14 14 46-14 58C130 100 54 98 24 80 2 66 6 40 34 26c30-15 102-18 136-4" vector-effect="non-scaling-stroke" />
+  </svg>
+)}
+{kind === 'arrow' && (
+  <svg class:list={['scrib', 'scrib--arrow', cls]} viewBox="0 0 80 30" aria-hidden="true">
+    <path d="M3 20c18-12 40-14 66-6M58 5c5 4 9 7 12 10-5 2-9 5-13 9" />
+  </svg>
+)}
+{kind === 'arrow-down' && (
+  <svg class:list={['scrib', 'scrib--arrow-down', cls]} viewBox="0 0 40 70" aria-hidden="true">
+    <path d="M10 3c14 14 18 34 12 60M12 52c3 4 7 8 10 12 3-5 7-9 11-12" />
+  </svg>
+)}
+{kind === 'star' && (
+  <svg class:list={['scrib', 'scrib--star', cls]} viewBox="0 0 40 40" aria-hidden="true">
+    <path d="M20 4l4 11 12 1-10 7 4 12-10-7-10 7 4-12-10-7 12-1z" />
+  </svg>
+)}
+{kind === 'underline' && (
+  <svg class:list={['scrib', 'scrib--underline', cls]} viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M2 8c30-5 60-6 96-3 30 2 60 1 100-4" vector-effect="non-scaling-stroke" />
+  </svg>
+)}

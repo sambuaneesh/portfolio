@@ -21,6 +21,13 @@
   font-display: swap;
 }
 
+/* Ballpoint handwriting for the pen notes (only fetched where notes appear). */
+@font-face {
+  font-family: 'Hand AS';
+  src: url('../assets/fonts/hand-subset.woff2') format('woff2');
+  font-display: swap;
+}
+
 /* Metric-matched fallbacks so swapping to the webfonts doesn't shift layout. */
 @font-face {
   font-family: 'Archivo Fallback';
@@ -57,6 +64,10 @@
   --rule: #141414;
   --black: #141414;
   --on-black: #e9e6df;
+  --pen: #2440a8;         /* blue ballpoint for the scribbles */
+  --font-hand: 'Hand AS', 'Segoe Print', 'Bradley Hand', cursive;
+  /* hand-drawn pointing hand, hotspot on the fingertip */
+  --hand-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 32 32'%3E%3Cpath d='M11 3c1.4 0 2.3 1 2.3 2.4V14l1-.2c.3-1.2 1.2-1.9 2.3-1.8 1.1.1 1.8.9 1.9 1.9l.8-.1c.4-1 1.3-1.5 2.3-1.3 1 .2 1.6 1 1.6 2l.6.1c.5-.8 1.4-1.1 2.2-.8.9.3 1.3 1.1 1.3 2.1v5.4c0 4.6-3.2 8.2-7.8 8.2h-2.2c-2.6 0-4.4-1-5.9-3.1L6.1 20.6c-.7-1-.5-2.3.5-3 1-.6 2.2-.4 2.9.5l1.2 1.6V5.4C8.7 4 9.6 3 11 3z' fill='%23fff' stroke='%23141414' stroke-width='1.7' stroke-linejoin='round'/%3E%3Cpath d='M13.3 14v5M17.2 13.6v5M21.2 14.4v4.6' stroke='%23141414' stroke-width='1.2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 9 2;
 
   /* cover colour = the theme */
   --cover: #e4605b;
@@ -619,3 +630,48 @@ kbd.k {
 /* Nothing on a page may push the page wider than the page (clamped blurbs
    report their unwrapped width as a minimum otherwise). */
 .page__body :where(*) { min-width: 0; }
+
+
+/* --- links on paper: black, dotted underline, a pen scribble on hover ----- */
+.page a:not(.btn):not(.next):not(.prev) {
+  color: var(--ink);
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.page a:not(.btn):not(.next):not(.prev):hover,
+.page a:not(.btn):not(.next):not(.prev):focus-visible {
+  text-decoration-color: transparent;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 8' preserveAspectRatio='none'%3E%3Cpath d='M1 5c8-3 14-3 20 0s13 3 19 0 13-3 19 0' fill='none' stroke='%232440a8' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") left 100% / 60px 7px repeat-x;
+  padding-bottom: 3px;
+}
+.page a, .page button, .page label, .btn { cursor: var(--hand-cursor), pointer; }
+.page--cover a:not(.btn) { color: var(--on-cover); }
+
+/* --- pen notes -------------------------------------------------------------- */
+.note {
+  display: inline-block;
+  font-family: var(--font-hand);
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--pen);
+  rotate: -3deg;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+.note--tilt { rotate: 4deg; }
+.page--cover .note { color: var(--on-cover); }
+.scrib { fill: none; stroke: var(--pen); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; overflow: visible; pointer-events: none; }
+.page--cover .scrib { stroke: var(--on-cover); }
+.scrib--arrow { display: inline-block; width: 3.2rem; height: 1.3rem; vertical-align: middle; }
+.scrib--arrow-down { width: 1.6rem; height: 2.8rem; }
+.scrib--star { display: inline-block; width: 1.4rem; height: 1.4rem; vertical-align: -0.3em; }
+.ringed { position: relative; display: inline-block; }
+.ringed > .scrib--ring { position: absolute; inset: -12px -18px; width: calc(100% + 36px); height: calc(100% + 24px); }
+.underlined { position: relative; display: inline-block; }
+.underlined > .scrib--underline { position: absolute; left: -4px; right: -4px; bottom: -8px; width: calc(100% + 8px); height: 10px; }
+.note { text-transform: none; letter-spacing: 0; }
+/* links printed on black boxes keep the box's ink */
+.page :is(.credits, .pull, .coverlines) a:not(.btn):not(.next):not(.prev) { color: inherit; }

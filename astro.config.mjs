@@ -21,7 +21,7 @@ export default defineConfig({
     remotePatterns: ['com', 'co', 'app', 'io', 'dev', 'net', 'org', 'in', 'me'].flatMap((tld) => [
       { protocol: 'https', hostname: `**.${tld}` },
       { protocol: 'https', hostname: `*.${tld}` },
-    ]),
+    ]).concat(['github.com', 'gitlab.com', 'vercel.app', 'netlify.app'].map((hostname) => ({ protocol: 'https', hostname }))),
   },
   devToolbar: { enabled: false },
 });

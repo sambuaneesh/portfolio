@@ -224,8 +224,8 @@ export const TABLES: TableCfg[] = [
     fields: [
       { k: 'theme', label: 'cover colour', type: 'select', options: THEMES, def: 'trash', help: 'Every visitor sees this. The inside pages stay photocopy grey. Use Preview to look before saving.' },
       { k: 'zine_title', label: 'masthead', type: 'text', def: 'The Boring Zine', help: 'Last word prints huge, the rest goes in the box above it.' },
-      { k: 'zine_tagline', label: 'masthead tagline', type: 'text', def: 'a systems zine by aneesh sambu' },
-      { k: 'zine_issue_theme', label: 'cover line', type: 'text', def: 'the systems issue', help: '"the X issue": the middle word(s) print big on the cover.' },
+      { k: 'zine_tagline', label: 'masthead tagline', type: 'text', def: 'about things that did not need building' },
+      { k: 'zine_issue_theme', label: 'cover line', type: 'text', def: 'the side-quest issue', help: '"the X issue": the middle word(s) print big on the cover.' },
       { k: 'zine_issue', label: 'issue number', type: 'text', def: '01' },
       { k: 'greetz', type: 'list', def: [], help: 'Optional thank-you list printed in the credits box (real people/labs only). Leave empty to hide.' },
     ],
