@@ -163,6 +163,7 @@ export function mountAdmin(root: HTMLElement) {
       return;
     }
 
+    if (cfg.settings) return renderSettings(cfg, main, rows);
     if (cfg.single) return renderForm(cfg, main, rows[0] ?? null);
 
     const filter = h('input', { class: 'input', type: 'search', placeholder: `filter ${rows.length} rows…`, 'aria-label': 'Filter rows' }) as HTMLInputElement;
@@ -271,6 +272,48 @@ export function mountAdmin(root: HTMLElement) {
       h('div', { class: 'win__body' }, form),
     ));
     form.querySelector<HTMLElement>('input, textarea, select')?.focus();
+  }
+
+  /** A form whose fields are individual site_settings keys. */
+  function renderSettings(cfg: TableCfg, main: HTMLElement, rows: Row[]) {
+    const current = new Map(rows.map((r) => [String(r.key), r.value]));
+    const status = h('p', { class: 'notice', hidden: true, role: 'status' });
+    const getters: Record<string, () => unknown> = {};
+    const form = h('form', { class: 'edit', novalidate: true });
+    for (const f of cfg.fields) {
+      const { node, get } = fieldInput(f, current.get(f.k) ?? f.def, api, cfg, false);
+      getters[f.k] = get;
+      form.append(node);
+    }
+    const save = h('button', { class: 'btn btn--hot', type: 'submit' }, 'Save');
+    form.append(h('div', { class: 'btns' }, save), status);
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      save.disabled = true;
+      try {
+        for (const f of cfg.fields) {
+          const v = getters[f.k]();
+          if (JSON.stringify(v) === JSON.stringify(current.get(f.k))) continue;
+          await api.upsert('aneesh_site_settings', { key: f.k, value: v ?? f.def }, 'key');
+          current.set(f.k, v);
+        }
+        markDirty(cfg);
+        status.hidden = false;
+        status.dataset.kind = 'ok';
+        status.textContent = 'Saved. Press "Publish site" to apply it to the live site.';
+      } catch (err) {
+        if (err instanceof AuthError) return renderLogin();
+        status.hidden = false;
+        status.dataset.kind = 'err';
+        status.textContent = (err as Error).message;
+      } finally {
+        save.disabled = false;
+      }
+    });
+    main.replaceChildren(h('section', { class: 'win' },
+      h('div', { class: 'win__bar' }, h('span', { class: 'win__title' }, cfg.label)),
+      h('div', { class: 'win__body' }, form),
+    ));
   }
 
   function markDirty(cfg: TableCfg) {

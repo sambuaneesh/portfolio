@@ -1,8 +1,9 @@
 ---
 import '../styles/global.css';
+import '../styles/zine.css';
 import archivo from '../assets/fonts/archivo-subset.woff2?url';
 import { WORKSPACES, BUILD, u, fmtDate, type WorkspaceKey } from '../lib/site';
-import { getPersonalInfo, getModules, getSiteSettings } from '../lib/db';
+import { getPersonalInfo, getModules, getSiteSettings, THEMES } from '../lib/db';
 
 interface Props {
   title?: string;
@@ -16,6 +17,12 @@ interface Props {
 const { title, description, ws = null, path = '~', noindex = false, image } = Astro.props;
 const [me, modules, settings] = await Promise.all([getPersonalInfo(), getModules(), getSiteSettings()]);
 
+// One theme for everyone, picked in /admin and baked in at build.
+const theme = (THEMES as readonly string[]).includes(settings.theme) ? settings.theme : 'zine';
+const THEME_COLOR: Record<string, string> = {
+  zine: '#e8e4d8', 'zine-night': '#111111', putty: '#d9d2bf', nostromo: '#0d0c09', phosphor: '#050805', paper: '#ffffff', aero: '#2f8fd8',
+};
+
 const fullTitle = title ? `${title} · ${me.name}` : `${me.name} · ${me.title}`;
 const desc = description ?? me.bio.split('. ').slice(0, 2).join('. ').replace(/\.?$/, '.');
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
@@ -27,7 +34,6 @@ const handle = me.name.split(' ')[0].toLowerCase();
 const commands = [
   ...WORKSPACES.map((w) => ({ l: `go ${w.label}`, h: `${w.n}`, u: u(w.href) })),
   ...modules.map((m) => ({ l: `open ${m.title}`, h: m.part, u: u(`/projects/${m.slug}/`) })),
-  ...['auto', 'putty', 'nostromo', 'phosphor', 'paper'].map((t) => ({ l: `theme ${t}`, h: 'rice', a: `theme:${t}` })),
   { l: 'download resume.pdf', h: 'pdf', u: u('/resume.pdf') },
   me.github && { l: 'github', h: 'ext', u: me.github },
   me.linkedin && { l: 'linkedin', h: 'ext', u: me.linkedin },
@@ -53,7 +59,7 @@ const jsonLd = {
 };
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme={theme}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -62,8 +68,7 @@ const jsonLd = {
     <meta name="author" content={me.name} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
-    <meta name="theme-color" content="#d9d2bf" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0d0c09" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content={THEME_COLOR[theme]} />
     <link rel="icon" href={u('/favicon.svg')} type="image/svg+xml" />
     <link rel="sitemap" href={u('/sitemap-index.xml')} />
     <link rel="preload" href={archivo} as="font" type="font/woff2" crossorigin />
@@ -75,15 +80,6 @@ const jsonLd = {
     {ogImage && <meta property="og:image" content={ogImage} />}
     <meta name="twitter:card" content="summary" />
 
-    <!-- Rice (theme) before first paint: no flash. -->
-    <script is:inline>
-      (function () {
-        var t = 'auto';
-        try { t = localStorage.getItem('as-rice') || 'auto'; } catch (e) {}
-        if (t === 'auto') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'nostromo' : 'putty';
-        document.documentElement.dataset.theme = t;
-      })();
-    </script>
     <!-- Chromium prerenders same-site links on hover: navigation feels instant. -->
     <script type="speculationrules" is:inline set:html={JSON.stringify({
       prerender: [{ where: { and: [{ href_matches: `${u('/')}*` }, { not: { href_matches: `${u('/admin/')}*` } }] }, eagerness: 'moderate' }],
@@ -110,7 +106,6 @@ const jsonLd = {
       <div class="bar__group bar__group--right">
         <span class="bar__path" title="current path">{handle}@iiith:{path}</span>
         <span class="clock" data-clock title="Local time in Hyderabad">HYD --:--</span>
-        <button class="chip" type="button" data-rice title="Switch theme"><span class="sr-only">theme </span><span data-rice-name>auto</span></button>
         <button class="chip" type="button" data-cmd-open title="Command line"><kbd>:</kbd><span>cmd</span></button>
         <button class="chip chip--help" type="button" data-help-open title="Keyboard shortcuts"><kbd>?</kbd><span class="sr-only"> help</span></button>
       </div>
@@ -120,6 +115,9 @@ const jsonLd = {
       <slot />
     </main>
 
+    {settings.greetz?.length > 0 && (
+      <p class="greetz"><span class="greetz__k">greetz</span> {settings.greetz.join(' · ')}</p>
+    )}
     <footer class="statusline">
       <span class="mode" data-mode>NORMAL</span>
       <span class="grow">{settings.footer_text} · built {fmtDate(BUILD.at)} · <a href={settings.footer_github_url}>src@{BUILD.commit}</a></span>
@@ -133,7 +131,7 @@ const jsonLd = {
     </nav>
 
     <dialog id="cmd" aria-label="Command line">
-      <div class="cmd__in"><span aria-hidden="true">:</span><input id="cmd-q" type="text" autocomplete="off" spellcheck="false" placeholder="go to a page, project or theme" aria-controls="cmd-list" role="combobox" aria-expanded="true" /></div>
+      <div class="cmd__in"><span aria-hidden="true">:</span><input id="cmd-q" type="text" autocomplete="off" spellcheck="false" placeholder="go to a page or project" aria-controls="cmd-list" role="combobox" aria-expanded="true" /></div>
       <ul id="cmd-list" class="cmd__list" role="listbox"></ul>
       <div class="cmd__foot">↑↓ select · ↵ run · esc close</div>
     </dialog>
@@ -145,7 +143,6 @@ const jsonLd = {
         <dt><kbd class="k">h</kbd><kbd class="k">j</kbd><kbd class="k">k</kbd><kbd class="k">l</kbd></dt><dd>move focus between tiles</dd>
         <dt><kbd class="k">↵</kbd></dt><dd>open the focused tile</dd>
         <dt><kbd class="k">:</kbd> / <kbd class="k">ctrl</kbd><kbd class="k">k</kbd></dt><dd>command line</dd>
-        <dt><kbd class="k">t</kbd></dt><dd>switch theme</dd>
         <dt><kbd class="k">?</kbd></dt><dd>this help</dd>
         <dt><kbd class="k">esc</kbd></dt><dd>close</dd>
       </dl>

@@ -14,7 +14,8 @@ const [posts, me] = await Promise.all([getBlogPosts(), getPersonalInfo()]);
 
     {posts.length === 0 && (
       <Win title="posts" class="w2 reveal" id="empty">
-        <p class="muted">No posts here yet. Older writing is on {me.website ? <a href={me.website}>The Boring Blog</a> : 'my blog'}.</p>
+        <p class="muted">Nothing here yet. The older, louder stuff is on {me.website ? <a href={me.website}>The Boring Blog</a> : 'my blog'}.</p>
+        <span class="stamp" aria-hidden="true">tape empty</span>
       </Win>
     )}
 

@@ -93,4 +93,5 @@ Edited under **Site settings** in `/admin/` (JSON values):
 | `auth_title`, `auth_description` | admin sign-in screen |
 | `badge_lab` | `{ "label", "url" }` on the home ID badge |
 | `extra_links` | `[{ "label", "url" }]` added to links and the command line; a Steam profile link also drives the games tile |
+| `theme`, `cassette_tagline`, `greetz` | edited on the Appearance page; theme is fixed for every visitor |
 | `project_extras` | `{ "<project id>": { "show_readme": bool, "readme_override": "markdown" } }`; edited from the project form |

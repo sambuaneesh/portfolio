@@ -906,3 +906,42 @@ kbd.k {
   .desk { padding: 0; max-width: none; }
   a { color: #000; text-decoration: none; }
 }
+
+/* --- Rubber stamp ------------------------------------------------------- */
+.stamp {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0.2rem 0.6rem;
+  border: 3px double currentColor;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-stretch: 80%;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  rotate: -6deg;
+  opacity: 0.85;
+  user-select: none;
+}
+:root:not([data-theme='zine-night']):not([data-theme='nostromo']):not([data-theme='phosphor']) .stamp { color: color-mix(in srgb, var(--accent) 75%, var(--ink)); }
+
+/* --- Greetz (zine-style thanks) ---------------------------------------- */
+.greetz {
+  margin: 0;
+  padding: 0.6rem var(--gap);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  border-top: 1px dashed var(--rule);
+}
+.greetz__k {
+  display: inline-block;
+  margin-right: 0.4rem;
+  padding: 0 0.35rem;
+  background: var(--tape);
+  color: var(--on-tape);
+  font-weight: 700;
+}
+@media (max-width: 47.99rem) { .greetz { padding-bottom: 0.8rem; } }

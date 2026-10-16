@@ -16,7 +16,7 @@ const trace = ['route_lookup', 'vfs_open', 'path_walk', 'link_path_walk', 'do_fi
 ${trace.map((t) => ` <TASK>  ${addr()}  ${t}+0x${Math.floor(Math.random() * 0xff).toString(16)}/0x${(Math.floor(Math.random() * 0xff) + 0x100).toString(16)}`).join('\n')}
  </TASK>
 ---[ end Kernel panic - not syncing: page not found ]---`}</pre>
-    <p class="lede">This page doesn't exist.</p>
+    <p class="lede">Do you like broken links? This page doesn't exist. I checked.</p>
     <div class="btns">
       <a class="btn btn--hot" href={u('/')}>Home</a>
       <a class="btn" href={u('/projects/')}>Projects</a>

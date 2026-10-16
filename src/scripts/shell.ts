@@ -1,44 +1,8 @@
-// The whole site's runtime JS: rice switching, the HYD clock, the `:`
-// command line, tile focus with hjkl, and the cartridge tilt. Plain DOM, no
-// framework - every page still works fully without it.
+// The whole site's runtime JS: the HYD clock, the `:` command line, tile
+// focus with hjkl, and the cartridge tilt. Plain DOM, no framework - every
+// page still works fully without it. (The theme is fixed at build time.)
 
 type Cmd = { l: string; h: string; u?: string; a?: string };
-
-const root = document.documentElement;
-const RICES = ['auto', 'putty', 'nostromo', 'phosphor', 'paper'] as const;
-const ALL_RICES = [...RICES, 'aero'];
-
-// --- rice -------------------------------------------------------------
-
-function storedRice(): string {
-  try { return localStorage.getItem('as-rice') || 'auto'; } catch { return 'auto'; }
-}
-
-function applyRice(name: string) {
-  if (!ALL_RICES.includes(name)) return;
-  try { localStorage.setItem('as-rice', name); } catch { /* private mode */ }
-  root.dataset.theme = resolve(name);
-  document.querySelectorAll<HTMLElement>('[data-rice-name]').forEach((el) => (el.textContent = name));
-  flash(`theme: ${name}`);
-}
-
-const resolve = (name: string) =>
-  name === 'auto' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'nostromo' : 'putty') : name;
-
-/** Next rice that actually looks different (auto may equal putty/nostromo). */
-function cycleRice() {
-  let i = RICES.indexOf(storedRice() as (typeof RICES)[number]);
-  const shown = root.dataset.theme;
-  do i = (i + 1) % RICES.length;
-  while (resolve(RICES[i]) === shown);
-  applyRice(RICES[i]);
-}
-
-document.querySelectorAll<HTMLElement>('[data-rice-name]').forEach((el) => (el.textContent = storedRice()));
-document.querySelectorAll('[data-rice]').forEach((b) => b.addEventListener('click', cycleRice));
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-  if (storedRice() === 'auto') applyRice('auto');
-});
 
 // --- statusline mode flash ----------------------------------------------
 
@@ -48,7 +12,7 @@ function flash(text: string) {
   if (!modeEl) return;
   modeEl.textContent = text.toUpperCase();
   clearTimeout(modeTimer);
-  modeTimer = window.setTimeout(() => (modeEl.textContent = 'NORMAL'), 1600);
+  modeTimer = window.setTimeout(() => (modeEl.textContent = 'NORMAL'), Math.max(1600, text.length * 70));
 }
 
 // --- clock (Hyderabad time) ---------------------------------------------
@@ -122,10 +86,18 @@ function mark() {
   input?.setAttribute('aria-activedescendant', `cmd-${sel}`);
 }
 
+// Things nobody will type. Unlisted on purpose.
+const EGGS: [RegExp, string][] = [
+  [/^xyzzy$/i, 'nothing happens.'],
+  [/^sudo\b/i, 'you are not in the sudoers file. this incident will be reported.'],
+  [/^(rm -rf|:\(\)\{)/i, 'nice try.'],
+  [/^(vim|vi|nvim)$/i, 'you are already in it.'],
+  [/^(exit|quit|:q!?)$/i, "there's no leaving. there's only esc."],
+];
+
 function run(c: Cmd) {
   dlg?.close();
   if (c.a === 'help') return openHelp();
-  if (c.a?.startsWith('theme:')) return applyRice(c.a.slice(6));
   if (c.u) {
     if (/^(https?:|mailto:)/.test(c.u) && !c.u.startsWith(location.origin)) window.open(c.u, '_blank', 'noopener');
     else location.href = c.u;
@@ -148,8 +120,8 @@ input?.addEventListener('keydown', (e) => {
   else if (e.key === 'Enter') {
     e.preventDefault();
     const q = input.value.trim().replace(/^:/, '');
-    // secret rice
-    if (/^theme\s+aero$/i.test(q)) { dlg?.close(); return applyRice('aero'); }
+    const egg = EGGS.find(([re]) => re.test(q));
+    if (egg) { dlg?.close(); return flash(egg[1]); }
     if (shown[sel]) run(shown[sel]);
   }
 });
@@ -221,7 +193,6 @@ document.addEventListener('keydown', (e) => {
 
   if (e.key === ':' || e.key === '/') { e.preventDefault(); return openCmd(); }
   if (e.key === '?') { e.preventDefault(); return openHelp(); }
-  if (e.key === 't') return cycleRice();
   if (WS[e.key]) { location.href = WS[e.key]; return; }
   if ('hjkl'.includes(e.key) && e.key.length === 1) { e.preventDefault(); return move(e.key as 'h'); }
   if (e.key === 'Enter' && active && el === active) {
@@ -259,3 +230,7 @@ if (location.hash === '#print') {
   history.replaceState(null, '', location.pathname);
   addEventListener('load', () => setTimeout(() => print(), 300), { once: true });
 }
+
+// For whoever opens devtools.
+console.log('%cwhy not one more?', 'font: 700 14px monospace; background:#ff48b0; color:#111; padding:2px 6px');
+console.log('source: https://github.com/sambuaneesh/portfolio · press : on the page for commands');

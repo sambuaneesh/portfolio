@@ -1,0 +1,215 @@
+/* ==========================================================================
+   Zine rice: the site as an issue of a photocopied hacker zine.
+   Every tile is a numbered "phile" (Phrack-style), pasted onto paper with
+   tape; one static grain layer stands in for the photocopier. All of it is
+   CSS + one tiny inline SVG: no images, no extra fonts, no JS.
+   ========================================================================== */
+
+:root[data-theme^='zine'] {
+  color-scheme: light;
+  --font-display: 'Archivo AS', 'Archivo Fallback', 'Arial Black', sans-serif;
+  --font-sans: var(--font-mono);
+  --radius: 0px;
+  --bw: 2px;
+  --press: 4px;
+
+  --bg: #e8e4d8;
+  --grid: transparent;
+  --tile: #f6f3ea;
+  --tile-2: #ece8dc;
+  --ink: #121212;
+  --muted: #4a473f;
+  --rule: #121212;
+  --accent: #ff48b0;   /* riso fluorescent pink: fills and marks only */
+  --on-accent: #121212;
+  --accent-2: #0063a0; /* riso blue, darkened for text contrast */
+  --active: #ff48b0;
+  --edge: #121212;
+  --link: #0063a0;
+  --link-deco: #ff48b0;
+  --tape: #121212;
+  --on-tape: #f6f3ea;
+  --ok: #1f7a43;
+  --glow: none;
+  --tape-strip: rgb(250 240 170 / 0.72);
+  --grain-opacity: 0.11;
+  --grain-blend: multiply;
+}
+
+:root[data-theme='zine-night'] {
+  color-scheme: dark;
+  --bg: #0e0e0e;
+  --tile: #161616;
+  --tile-2: #1e1e1e;
+  --ink: #ece8dc;
+  --muted: #a8a395;
+  --rule: #ece8dc;
+  --on-accent: #111111;
+  --accent-2: #6cc4ff;
+  --edge: #ff48b0;
+  --link: #6cc4ff;
+  --tape: #ece8dc;
+  --on-tape: #111111;
+  --ok: #7ad97a;
+  --tape-strip: rgb(255 72 176 / 0.35);
+  --grain-opacity: 0.09;
+  --grain-blend: screen;
+}
+
+:root[data-theme^='zine'] body { font-size: clamp(14.5px, 0.3vw + 13.5px, 16px); line-height: 1.6; }
+
+/* --- photocopier grain: one static layer, painted once ------------------ */
+:root[data-theme^='zine'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.6 -.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* --- philes: hex-numbered tiles ----------------------------------------- */
+@counter-style hex2 {
+  system: numeric;
+  symbols: '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' 'A' 'B' 'C' 'D' 'E' 'F';
+  pad: 2 '0';
+}
+
+:root[data-theme^='zine'] .tiles { counter-reset: phile -1; gap: calc(var(--gap) + 6px); }
+:root[data-theme^='zine'] .win {
+  counter-increment: phile;
+  box-shadow: 3px 3px 0 var(--edge);
+}
+:root[data-theme^='zine'] .win:hover,
+:root[data-theme^='zine'] .win:focus-within,
+:root[data-theme^='zine'] .win.is-active { border-color: var(--rule); box-shadow: 5px 5px 0 var(--accent); }
+
+:root[data-theme^='zine'] .win__bar {
+  border-bottom: 1px dashed var(--rule);
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+  font-size: 0.74rem;
+}
+:root[data-theme^='zine'] .win:hover .win__bar,
+:root[data-theme^='zine'] .win:focus-within .win__bar,
+:root[data-theme^='zine'] .win.is-active .win__bar { border-bottom-color: var(--rule); }
+:root[data-theme^='zine'] .win__title {
+  background: none;
+  color: var(--ink);
+  padding-left: 0.7rem;
+  font-weight: 700;
+}
+:root[data-theme^='zine'] .win__title::before {
+  content: '[0x' counter(phile, hex2) '] ';
+  color: var(--muted);
+  font-weight: 400;
+  white-space: pre;
+}
+:root[data-theme^='zine'] .win__ctl { display: none; }
+:root[data-theme^='zine'] .win__meta { margin-left: auto; }
+
+/* Pasted-on look: a couple of degrees of slop and some tape. */
+@media (min-width: 40rem) {
+  :root[data-theme^='zine'] .tiles > :nth-child(5n + 2) { rotate: -0.35deg; }
+  :root[data-theme^='zine'] .tiles > :nth-child(5n + 4) { rotate: 0.3deg; }
+}
+:root[data-theme^='zine'] .tiles > :nth-child(4n + 3).win::before,
+:root[data-theme^='zine'] .tiles > :nth-child(4n + 3) > .win::before {
+  content: '';
+  position: absolute;
+  top: -0.7rem;
+  left: 50%;
+  width: 5.5rem;
+  height: 1.3rem;
+  translate: -50% 0;
+  rotate: -3deg;
+  background: var(--tape-strip);
+  clip-path: polygon(3% 0, 97% 4%, 100% 50%, 96% 100%, 2% 96%, 0 45%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* --- headings: misregistered two-ink print ------------------------------ */
+:root[data-theme^='zine'] .h-page {
+  font-stretch: 75%;
+  letter-spacing: -0.01em;
+  text-shadow: 0.035em 0.03em 0 var(--accent), -0.025em -0.02em 0 color-mix(in srgb, var(--accent-2) 70%, transparent);
+}
+:root[data-theme^='zine'] .h-tile { font-family: var(--font-display); }
+
+/* Highlighter, for the few things that deserve it. */
+:root[data-theme^='zine'] .hl,
+:root[data-theme^='zine'] mark {
+  background: linear-gradient(100deg, transparent 0.15em, var(--accent) 0.25em, var(--accent) calc(100% - 0.3em), transparent calc(100% - 0.1em)) 0 62% / 100% 58% no-repeat;
+  color: var(--ink);
+  padding: 0 0.15em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+:root[data-theme='zine-night'] .hl,
+:root[data-theme='zine-night'] mark { color: #111; }
+
+/* --- ransom-note name (letters split at build time) --------------------- */
+:root[data-theme^='zine'] .ransom { font-size: clamp(2.3rem, 7.2cqi, 4.6rem); line-height: 1.15; text-transform: none; text-shadow: none; letter-spacing: 0; }
+:root[data-theme^='zine'] .ransom .ch {
+  display: inline-block;
+  padding: 0.02em 0.1em 0.04em;
+  margin: 0 0.015em;
+  line-height: 1;
+}
+:root[data-theme^='zine'] .ransom .ch:nth-child(7n + 1) { font-family: var(--font-display); font-weight: 900; font-stretch: 62%; background: var(--ink); color: var(--tile); rotate: -3deg; text-transform: uppercase; }
+:root[data-theme^='zine'] .ransom .ch:nth-child(7n + 2) { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 700; rotate: 2deg; }
+:root[data-theme^='zine'] .ransom .ch:nth-child(7n + 3) { font-family: 'Courier New', Courier, monospace; font-weight: 700; background: var(--accent); color: #121212; rotate: -1.5deg; text-transform: uppercase; }
+:root[data-theme^='zine'] .ransom .ch:nth-child(7n + 4) { font-family: var(--font-display); font-weight: 800; font-stretch: 125%; background: var(--tile-2); outline: 2px solid var(--rule); outline-offset: -2px; rotate: 3deg; }
+:root[data-theme^='zine'] .ransom .ch:nth-child(7n + 5) { font-family: Impact, 'Arial Black', 'Archivo AS', sans-serif; font-weight: 900; rotate: -2deg; text-transform: uppercase; }
+:root[data-theme^='zine'] .ransom .ch:nth-child(7n + 6) { font-family: 'Times New Roman', Times, serif; font-weight: 700; background: #0063a0; color: #fff; rotate: 1deg; }
+:root[data-theme^='zine'] .ransom .ch:nth-child(7n + 7) { font-family: var(--font-mono); font-weight: 700; background: #f2e94e; color: #121212; rotate: -0.5deg; }
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-theme^='zine'] .ransom .ch { transition: rotate 160ms ease, translate 160ms ease; }
+  :root[data-theme^='zine'] .ransom .ch:hover { rotate: 0deg; translate: 0 -3px; font-stretch: inherit; color: inherit; }
+}
+:root[data-theme^='zine'] .kinetic { animation: none; }
+
+/* --- cover furniture -------------------------------------------------------- */
+.zine-only { display: none; }
+:root[data-theme^='zine'] .zine-only { display: block; }
+
+.phrack {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* two staples through the cover */
+:root[data-theme^='zine'] .hero::after {
+  content: '';
+  position: absolute;
+  top: 2.6rem;
+  left: -0.55rem;
+  width: 1.1rem;
+  height: 9rem;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--muted), var(--muted)) 0 0 / 100% 3px no-repeat,
+    linear-gradient(var(--muted), var(--muted)) 0 100% / 100% 3px no-repeat;
+  filter: drop-shadow(1px 1px 0 var(--tile));
+}
+
+:root[data-theme^='zine'] .cart__front { background: var(--tile); }
+:root[data-theme^='zine'] .cart__label { background: var(--tile-2); }
+:root[data-theme^='zine'] .cart__label b { font-family: Georgia, serif; font-style: italic; font-stretch: 100%; text-transform: none; }
+
+/* --- buttons: inked blocks ---------------------------------------------- */
+:root[data-theme^='zine'] .btn { text-transform: lowercase; letter-spacing: 0.02em; }
+:root[data-theme^='zine'] .btn--hot { --face: var(--accent); --fg: #121212; }
+
+/* --- bars ------------------------------------------------------------------ */
+:root[data-theme^='zine'] .ws[aria-current='page'] { background: var(--ink); color: var(--tile); }
+:root[data-theme^='zine'] .statusline .mode { background: var(--ink); color: var(--tile); }
+:root[data-theme^='zine'] .tape--accent { background: var(--accent); color: #121212; }

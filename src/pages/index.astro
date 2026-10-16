@@ -22,6 +22,11 @@ const games = steam
   : [];
 
 const featured = modules.filter((m) => m.featured).slice(0, 4);
+const built = new Date();
+const issue = `${built.getFullYear()}.${String(built.getMonth() + 1).padStart(2, '0')}`;
+// philes in this issue = tiles on the page (hero, id, now, featured, subsystems,
+// research, toolchain, i/o, writing, games?, keys)
+const philes = (9 + featured.length + (games.length ? 1 : 0)).toString(16).toUpperCase().padStart(2, '0');
 const current = experience.filter((e) => /present/i.test(e.duration));
 const now = current.length ? current : experience.slice(0, 1);
 const last = experience.filter((e) => !/present/i.test(e.duration)).slice(0, 1);
@@ -30,7 +35,7 @@ const school = education[0];
 
 const avatar = me.avatar_url ? await optimize(me.avatar_url, 192, 192) : null;
 
-const words = me.name.toUpperCase().split(' ');
+const words = me.name.split(' ');
 const ports = [
   me.github && { k: 'GIT', v: me.github.replace(/^https?:\/\/(www\.)?/, ''), href: me.github },
   me.linkedin && { k: 'LNK', v: 'linkedin/aneesh-sambu', href: me.linkedin },
@@ -47,12 +52,13 @@ const ports = [
     <Win title="about" meta={me.location ?? ''} class="w3 h2 hero scan boot" id="hero">
       <div class="hero__grid">
         <div class="hero__text">
-          <p class="display kinetic" aria-hidden="true">
+          <p class="phrack zine-only" aria-hidden="true">==[ {me.name.toLowerCase()} ]== issue {issue} · phile 0x00 of 0x{philes}</p>
+          <p class="display kinetic ransom" aria-hidden="true">
             {words.map((w, i) => (
               <><span class="hero__word" aria-hidden="true">{[...w].map((c) => <span class="ch">{c}</span>)}</span>{i < words.length - 1 && ' '}</>
             ))}
           </p>
-          <p class="hero__title mono">{me.title}</p>
+          <p class="hero__title mono"><span class="hl">{me.title}</span></p>
           <p class="lede">{me.bio}</p>
           <div class="btns lift">
             <a class="btn btn--hot" href={u('/projects/')}>Projects</a>
@@ -60,7 +66,7 @@ const ports = [
             <a class="btn" href={u('/contact/')}>Contact</a>
           </div>
         </div>
-        <Cart part="AS-00" kicker={me.title.split(' & ')[0]} title={me.name} foot={me.location?.split(',')[0] ?? ''} tilt />
+        <Cart part="AS-00" kicker={settings.cassette_tagline} title={me.name} foot={me.location?.split(',')[0] ?? ''} tilt />
       </div>
     </Win>
 
@@ -146,7 +152,8 @@ const ports = [
         </ul>
       ) : (
         <>
-          <p class="muted">No posts here yet. Older writing is on <a class="lift" href={me.website ?? '#'}>The Boring Blog</a>.</p>
+          <p class="muted">Nothing here yet. The older, louder stuff is on <a class="lift" href={me.website ?? '#'}>The Boring Blog</a>.</p>
+          <span class="stamp" aria-hidden="true">tape empty</span>
         </>
       )}
     </Win>
@@ -171,7 +178,6 @@ const ports = [
         <kbd class="k">h</kbd><kbd class="k">j</kbd><kbd class="k">k</kbd><kbd class="k">l</kbd> move &nbsp;·&nbsp;
         <kbd class="k">↵</kbd> open &nbsp;·&nbsp;
         <kbd class="k">:</kbd> command &nbsp;·&nbsp;
-        <kbd class="k">t</kbd> theme &nbsp;·&nbsp;
         <kbd class="k">?</kbd> help
       </p>
     </Win>

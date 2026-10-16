@@ -88,7 +88,7 @@ const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').split('/')
       </div>
     </Win>
 
-    <Win title="research & awards" class="w2 reveal" id="record">
+    <Win title="research & awards" class="wfull reveal" id="record">
       <ol class="record">
         {achievements.map((a, i) => (
           <li>
@@ -143,6 +143,7 @@ const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').split('/')
 </script>
 
 <style>
+  .manual { align-items: start; }
   .head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1.25rem; }
   .sub { text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.6rem; }
   .contact { font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem; }

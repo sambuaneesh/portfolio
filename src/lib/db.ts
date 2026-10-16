@@ -78,6 +78,12 @@ export interface SiteSettings {
   badge_lab: { label: string; url: string | null } | null;
   /** Links with no column of their own (Steam, etc.): [{ label, url }]. */
   extra_links: { label: string; url: string }[];
+  /** Site theme every visitor gets (set in /admin -> Appearance). */
+  theme: string;
+  /** Label line on the home cassette. */
+  cassette_tagline: string;
+  /** Hacker-zine style thank-you list in the footer. */
+  greetz: string[];
   /** Per-project page options, keyed by project id (edited in /admin). */
   project_extras: Record<string, { show_readme?: boolean; readme_override?: string | null }>;
 }
@@ -129,7 +135,12 @@ const SETTINGS_DEFAULTS: SiteSettings = {
   badge_lab: { label: 'SA4S@SERC', url: 'https://sa4s-serc.github.io/' },
   extra_links: [{ label: 'steam', url: 'https://steamcommunity.com/id/phant0mble3d/' }],
   project_extras: {},
+  theme: 'zine',
+  cassette_tagline: 'why not one more?',
+  greetz: ['SA4S@SERC', 'the Arch wiki', 'man pages', 'everyone who reads the README'],
 };
+
+export const THEMES = ['zine', 'zine-night', 'putty', 'nostromo', 'phosphor', 'paper', 'aero'] as const;
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   const rows = await rest<{ key: string; value: unknown }[]>('aneesh_site_settings?select=key,value');
