@@ -27,7 +27,7 @@ const prevHref = lastProject ? u(`/projects/${lastProject.slug}/`) : u('/project
     <Fragment slot="left">
       <p class="kicker">field log · cv</p>
       <h1 class="hed hed--xl hed--cond">{me.name}</h1>
-      <p class="mono contact">{[me.location, me.email, me.phone].filter(Boolean).join('  ·  ')}</p>
+      <p class="mono contact">{[me.location, me.email].filter(Boolean).join('  ·  ')}</p>
       <div class="btns no-print">
         <a class="btn btn--hot" href={u('/resume.pdf')} download>download pdf</a>
         <button class="btn" type="button" data-print>print</button>
@@ -104,7 +104,7 @@ const prevHref = lastProject ? u(`/projects/${lastProject.slug}/`) : u('/project
           {sortedCourses.map((c) => (
             <tr class:list={{ fav: c.is_favorite }}>
               <td>{c.certificate_url ? <a href={c.certificate_url}>{c.name}</a> : c.name}</td>
-              <td class="mono">{c.completion_date}</td>
+              <td class="mono">{/^\d{4}-\d{2}-\d{2}$/.test(c.completion_date ?? '') ? c.completion_date!.slice(0, 4) : c.completion_date}</td>
             </tr>
           ))}
         </tbody>

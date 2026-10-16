@@ -59,7 +59,7 @@ insert into public.aneesh_personal_info (
   'B.Tech + MS by Research student in Computer Science at IIIT Hyderabad. I work as an undergraduate researcher at SERC, and in my free time I build small systems projects to understand how things like shells, file systems, and interpreters actually work.',
   'Hyderabad, India',
   'sambu.aneesh@research.iiit.ac.in',
-  '+91 9030304583',
+  null,
   'https://theboringblog.netlify.app',
   'https://www.linkedin.com/in/aneesh-sambu/',
   'https://github.com/sambuaneesh',

@@ -612,12 +612,45 @@ kbd.k {
   .btn { transition: none; }
 }
 
+/* --- print: the zine itself -------------------------------------------------
+   Each zine page becomes one physical digest page (5.5 x 8.5 in), laid out
+   exactly as on screen (600 px page, zoomed to 5.5 in) and printed with its
+   paper, inks and stamps. Desk furniture (bars, trail, buttons) stays off. */
+@page { size: 5.5in 8.5in; margin: 0; }
+
 @media print {
-  .bar, .dock, .statusline, .no-print, dialog, .next, .prev { display: none !important; }
-  body { background: #fff; }
-  .zine { padding: 0; gap: 0; }
-  .spread { display: block; }
-  .page { box-shadow: none !important; background: #fff !important; aspect-ratio: auto !important; break-after: page; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  html, body { background: none !important; padding: 0 !important; margin: 0 !important; }
+  .bar, .dock, .statusline, .trail, .no-print, dialog, .next, .prev, .preview-flag, .skip, .btn, .chip { display: none !important; }
+  .zine { display: block; max-width: none; margin: 0; padding: 0; }
+  .spread {
+    display: block;
+    content-visibility: visible !important;
+    contain-intrinsic-size: none !important;
+    --pw: 600px;
+  }
+  .spread::before, .spread::after { display: none !important; }   /* staples */
+  .page {
+    width: 600px;
+    height: calc(600px * 8.5 / 5.5);
+    min-height: 0 !important;
+    margin: 0;
+    overflow: hidden;
+    zoom: 0.88;              /* 600 px -> 528 px = 5.5 in */
+    break-after: page;
+    break-inside: avoid;
+    box-shadow: none !important;
+    rotate: 0deg;
+  }
+  /* single sheets: no fold shading on the printed page */
+  .page--l, .page--r { background: var(--tex), var(--grain), var(--paper) !important; }
+  .page--cover { background: var(--cover) !important; }
+  .spread:last-child .page:last-child { break-after: auto; }
+  /* the printed sheet is fixed: set the contents a size smaller so long
+     pages (field log, research & skills) still fit one sheet */
+  .page__body { zoom: 0.84; }
+  :root[data-theme='blueprint'] .page__body { zoom: 0.79; }
+  a { text-decoration-style: solid !important; }
 }
 
 /* fixed spreads: exactly one zine page each; overflowing content gets cut */

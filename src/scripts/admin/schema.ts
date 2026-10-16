@@ -58,7 +58,7 @@ export const TABLES: TableCfg[] = [
       { k: 'avatar_url', label: 'avatar', type: 'image' },
       { k: 'location', type: 'text' },
       { k: 'email', type: 'email' },
-      { k: 'phone', type: 'text' },
+      { k: 'phone', type: 'text', help: 'Private: never shown on the site.' },
       { k: 'website', type: 'url', help: 'blog / personal site' },
       { k: 'github', type: 'url' },
       { k: 'linkedin', type: 'url' },
