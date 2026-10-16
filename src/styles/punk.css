@@ -137,8 +137,12 @@
   clip-path: polygon(50% 0, 61% 14%, 79% 7%, 80% 25%, 98% 28%, 88% 44%, 100% 58%, 83% 66%, 88% 85%, 69% 83%, 59% 100%, 47% 87%, 31% 98%, 27% 80%, 8% 82%, 14% 64%, 0 52%, 13% 40%, 4% 22%, 22% 21%, 25% 3%, 39% 13%);
   z-index: 3;
 }
-.burst > span { display: block; }
-.burst__name { font-size: 1.15em; }
+/* set like the cover's "the SIDE-QUEST issue" line: big condensed name,
+   small italic "edition", one tight centred stack */
+.burst { display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 0 !important; }
+.burst > span { display: block; line-height: 0.82; }
+.burst__name { font-family: var(--font-sans); font-weight: 900; font-stretch: 62%; font-size: 1.95rem; letter-spacing: -0.01em; text-transform: uppercase; }
+.burst__ed { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 0.95rem; text-transform: none; letter-spacing: 0; margin-top: 2px; }
 .burst:hover, .burst:focus-visible { rotate: 4deg; scale: 1.06; }
 .burst:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
 
@@ -162,3 +166,7 @@
   font-weight: 400;
   opacity: 0.7;
 }
+/* longer edition names step down so they stay inside the star */
+:root[data-theme='blueprint'] .burst__name { font-size: 1.32rem; }
+:root[data-theme='hotline'] .burst__name { font-size: 1.55rem; }
+:root[data-theme='toner'] .burst__name { font-size: 1.75rem; }

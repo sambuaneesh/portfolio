@@ -87,7 +87,7 @@ const ports = [
           </div>
         )}
         <p class="issue-line" aria-hidden="true">{issPre && <small>{issPre}</small>}<b><Ransom text={issBig} /></b>{issPost && <small>{issPost}</small>}</p>
-        <button class="burst cover__burst" type="button" popovertarget="editions" aria-label="Pick an edition"><span class="burst__name"></span><span>edition</span></button>
+        <button class="burst cover__burst" type="button" popovertarget="editions" aria-label="Pick an edition"><span class="burst__name"></span><span class="burst__ed">edition</span></button>
       </div>
       <div class="cover__foot">
         <div class="barcode" aria-hidden="true"><span></span><small>{me.name.toUpperCase()} · #{settings.zine_issue}</small></div>
@@ -368,7 +368,7 @@ const ports = [
   .scrap__sw--rand { display: grid; place-items: center; background: repeating-conic-gradient(#e4605b 0 25%, #1e4c98 0 50%, #ff48b0 0 75%, #d4f53c 0); font-weight: 700; font-size: 0.7rem; }
   .scrap__foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; }
   .scrap__close { background: none; border: 0; padding: 0; font-family: var(--font-mono); font-size: 0.75rem; text-decoration: underline dotted; color: #141414; cursor: pointer; }
-  .cover__burst { left: 4%; bottom: 12%; width: 116px; height: 116px; padding: 16px; font-size: 0.8rem; }
+  .cover__burst { left: 4%; bottom: 12%; width: 124px; height: 124px; }
   .hint { display: flex; align-items: flex-start; gap: 4px; margin: -4px 0 -10px 30%; }
   .hint .scrib--arrow-down { margin-top: 10px; rotate: 20deg; }
   .off__note { justify-self: end; margin-top: -6px; }
