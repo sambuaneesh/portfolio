@@ -399,7 +399,7 @@ a:hover { text-decoration-thickness: 3px; }
 
 .toc { list-style: none; display: grid; gap: 0.3rem; font-family: var(--font-mono); font-size: 0.78rem; }
 .toc li { display: flex; align-items: baseline; gap: 0.6rem; }
-.toc .toc__n { font-weight: 700; min-width: 1.6rem; }
+.toc .toc__n { font-weight: 700; min-width: 2.4rem; }
 .toc a { text-decoration: none; }
 .toc a:hover { text-decoration: underline; }
 .toc__sec { font-family: var(--font-sans); font-weight: 900; font-size: 0.74rem; letter-spacing: 0.24em; text-transform: uppercase; margin: 0.7rem 0 0.15rem; }

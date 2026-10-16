@@ -10,8 +10,9 @@ import { getSteam, getSteamReviews } from '../lib/steam';
 import { getMonkeytype } from '../lib/monkeytype';
 import Scribble from '../components/Scribble.astro';
 import Ransom from '../components/Ransom.astro';
-import { pageMap, pad2 } from '../lib/zine';
+import { pageMap, pad2, pg } from '../lib/zine';
 import { code128Svg } from '../lib/code128';
+import signature from '../assets/signature.svg?raw';
 import { BUILD } from '../lib/site';
 
 const [me, modules, experience, education, achievements, skills, posts, settings] = await Promise.all([
@@ -155,33 +156,33 @@ const ports = [
         <section class="toc-group">
           <p class="toc__sec">manifesto <span class="note">← start here</span></p>
           <ul class="toc">
-            <li><span class="toc__n">{pad2(P.contents + 1)}</span><a href="#editor">Letter from the editor</a></li>
+            <li><span class="toc__n">{pg(P.contents + 1)}</span><a href="#editor">Letter from the editor</a></li>
           </ul>
         </section>
         <section class="toc-group">
           <p class="toc__sec">this issue</p>
           <ul class="toc">
-            <li><span class="toc__n">{pad2(P.issue)}</span><a href="#issue">Featured projects</a></li>
-            <li><span class="toc__n">{pad2(P.issue + 1)}</span><a href="#research">Research &amp; awards</a></li>
-            <li><span class="toc__n">{pad2(P.offHours)}</span><a href="#offhours">Subsystems, off hours</a></li>
-            <li><span class="toc__n">{pad2(P.offHours + 1)}</span><a href="#classifieds">Classifieds</a></li>
+            <li><span class="toc__n">{pg(P.issue)}</span><a href="#issue">Featured projects</a></li>
+            <li><span class="toc__n">{pg(P.issue + 1)}</span><a href="#research">Research &amp; awards</a></li>
+            <li><span class="toc__n">{pg(P.offHours)}</span><a href="#offhours">Subsystems, off hours</a></li>
+            <li><span class="toc__n">{pg(P.offHours + 1)}</span><a href="#classifieds">Classifieds</a></li>
           </ul>
         </section>
         <section class="toc-group">
           <p class="toc__sec">workbench</p>
           <ul class="toc">
-            <li><span class="toc__n">{pad2(P.workbench)}</span><a href={u('/projects/')}>The catalogue</a></li>
+            <li><span class="toc__n">{pg(P.workbench)}</span><a href={u('/projects/')}>The catalogue</a></li>
             {modules.map((m) => (
-              <li><span class="toc__n">{pad2(P.projects[m.slug])}</span><a href={u(`/projects/${m.slug}/`)}>{m.title}</a></li>
+              <li><span class="toc__n">{pg(P.projects[m.slug])}</span><a href={u(`/projects/${m.slug}/`)}>{m.title}</a></li>
             ))}
           </ul>
         </section>
         <section class="toc-group">
           <p class="toc__sec">back of the book</p>
           <ul class="toc">
-            <li><span class="toc__n">{pad2(P.log)}</span><a href={u('/cv/')}>Field log (cv)</a></li>
-            <li><span class="toc__n">{pad2(P.writing)}</span><a href={u('/writing/')}>Writing</a></li>
-            <li><span class="toc__n">{pad2(P.contact)}</span><a href={u('/contact/')}>Write to me</a></li>
+            <li><span class="toc__n">{pg(P.log)}</span><a href={u('/cv/')}>Field log (cv)</a></li>
+            <li><span class="toc__n">{pg(P.writing)}</span><a href={u('/writing/')}>Writing</a></li>
+            <li><span class="toc__n">{pg(P.contact)}</span><a href={u('/contact/')}>Write to me</a></li>
           </ul>
         </section>
       </div>
@@ -200,7 +201,7 @@ const ports = [
               {last.map((e) => <li><span class="lbl lbl--line">EXIT 0</span> <b>{e.title}</b>, {e.company} <span class="muted">· {e.duration}</span></li>)}
             </ul>
           </div>
-          <p class="sign">— {me.name.split(' ')[0]}</p>
+          <p class="sign"><span class="sr-only">— {me.name}</span><span class="sig" aria-hidden="true" set:html={signature} /></p>
         </div>
         <p class="letter__side" aria-hidden="true">letter from the editor</p>
       </div>
@@ -215,7 +216,7 @@ const ports = [
       <div class="feat">
         {featured.map((m) => (
           <article class="feat__item">
-            <p class="feat__meta"><span class="lbl">{m.part}</span> <span class="mono muted">{m.language}</span><span class="mono turn">→ p. {pad2(P.projects[m.slug])}</span></p>
+            <p class="feat__meta"><span class="lbl">{m.part}</span> <span class="mono muted">{m.language}</span><span class="mono turn">→ p. {pg(P.projects[m.slug])}</span></p>
             <h3 class="hed hed--m hed--cond"><a href={u(`/projects/${m.slug}/`)}>{m.title}</a></h3>
             <p class="copy">{m.description}</p>
           </article>
@@ -262,7 +263,7 @@ const ports = [
                 {typing.rank && <div><dt>standing</dt><dd>top {typing.rank.pct}% ({typing.rank.mode})</dd></div>}
               </dl>
             </div>
-            <footer class="ticket__foot"><span class="mono">issued by monkeytype.com</span><span class="ticket__sig">a. sambu</span></footer>
+            <footer class="ticket__foot"><span class="mono">issued by monkeytype.com</span><span class="ticket__sig" aria-hidden="true" set:html={signature} /></footer>
           </article>
         )}
         <div class="screenbox torn-top">
@@ -464,7 +465,10 @@ const ports = [
     letter-spacing: 0.32em; font-size: 0.95rem; border-left: 2px solid var(--ink); padding-left: 8px;
   }
   .ps ul { list-style: none; display: grid; gap: 6px; margin-top: 8px; font-family: var(--font-mono); font-size: 0.76rem; }
-  .sign { font-family: var(--font-serif); font-style: italic; font-size: 1.15rem; align-self: flex-end; }
+  .sign { align-self: flex-end; }
+  /* the real signature, traced to SVG; inked in the edition's pen colour */
+  .sig { display: block; width: 150px; color: var(--pen); rotate: -3deg; }
+  .sig :global(svg), .ticket__sig :global(svg) { display: block; width: 100%; height: auto; }
 
   /* this issue ----------------------------------------------------------------- */
   .feat { display: grid; gap: 12px; }
@@ -507,7 +511,7 @@ const ports = [
   .ticket__rows dd { order: 2; margin: 0; text-align: right; }
   .ticket__rows b { font-weight: 700; }
   .ticket__foot { display: flex; justify-content: space-between; align-items: end; padding: 0 12px 6px 16px; border-top: 1px dashed var(--ink); margin: 4px 0 0; color: var(--muted); font-size: 0.62rem; }
-  .ticket__sig { font-family: var(--font-hand); font-size: 1.35rem; color: var(--pen); line-height: 1; rotate: -4deg; }
+  .ticket__sig { display: block; width: 84px; color: var(--pen); rotate: -4deg; margin-top: -6px; }
   .gauge { width: 88px; height: auto; overflow: visible; }
   .gauge__arc, .gauge__red { fill: none; stroke-width: 6; }
   .gauge__arc { stroke: var(--paper-2); }

@@ -2,7 +2,7 @@
 // One project in the catalogue: a small classified-style write-up.
 import type { Module } from '../lib/db';
 import { u } from '../lib/site';
-import { pad2 } from '../lib/zine';
+import { pg } from '../lib/zine';
 import { optimize } from '../lib/images';
 import { slugify } from '../lib/db';
 
@@ -17,7 +17,7 @@ const img = shot ? await optimize(shot, 360, 200) : null;
     <p class="entry__meta"><span class="lbl">{m.part}</span> {m.language && <span class="mono"><span class="dot" style={`--c:${m.language_color ?? 'var(--ink)'}`} aria-hidden="true"></span> {m.language}</span>}{m.stars ? <span class="mono"> · ★ {m.stars}</span> : null}</p>
     <h3 class="hed hed--m hed--cond"><a href={u(`/projects/${m.slug}/`)}>{m.title}</a></h3>
     <p class="copy">{m.description}</p>
-    <p class="mono entry__turn">→ p. {pad2(page)}</p>
+    <p class="mono entry__turn">→ p. {pg(page)}</p>
   </div>
 </article>
 

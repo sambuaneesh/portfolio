@@ -2,9 +2,7 @@
 // A two-page spread of the zine. Left/right pages each get a running head and
 // a page number; on phones the two pages simply stack. `single` is a lone
 // right-hand page (the cover), `wide` one full-width sheet (admin).
-import { pad2 } from '../lib/zine';
-
-const hex = (n: number) => `0x${n.toString(16).toUpperCase().padStart(2, '0')}`;
+import { pg } from '../lib/zine';
 
 interface Props {
   page: number;          // number of the left page (or the only page)
@@ -30,7 +28,7 @@ const { page, runL = '', runR = '', zine = '', single = false, wide = false, lab
       <div class="page__body"><slot name="left" /></div>
       <div class="folio">
         {prev && <a class="prev" href={prev.href}>{prev.label ?? 'prev'}</a>}
-        <span class="folio__n" data-hex={hex(page)}>{pad2(page)}</span>
+        <span class="folio__n">{pg(page)}</span>
       </div>
     </div>
   )}
@@ -39,7 +37,7 @@ const { page, runL = '', runR = '', zine = '', single = false, wide = false, lab
     <div class="page__body"><slot name="right" /><slot /></div>
     {!cover && <div class="folio">
       {(single || wide) && prev && <a class="prev" href={prev.href}>{prev.label ?? 'prev'}</a>}
-      <span class="folio__n" data-hex={hex(single || wide ? page : page + 1)}>{pad2(single || wide ? page : page + 1)}</span>
+      <span class="folio__n">{pg(single || wide ? page : page + 1)}</span>
       {next && <a class="next" href={next.href}>{next.label ?? 'next page'}</a>}
     </div>}
   </div>

@@ -21,3 +21,6 @@ export function pageMap(modules: Module[], posts: number) {
 }
 
 export const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/** Page numbers are printed in hex, like phile numbers: 12 -> "0x0C". */
+export const pg = (n: number) => `0x${n.toString(16).toUpperCase().padStart(2, '0')}`;

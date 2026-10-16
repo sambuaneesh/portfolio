@@ -94,8 +94,7 @@
   letter-spacing: 0.08em;
 }
 :root[data-theme='blueprint'] .folio__n::before { content: 'SHEET '; font-weight: 400; }
-:root[data-theme='blueprint'] .folio__n::after { content: ' · DWG AS-ZINE · SCALE 1:1'; font-weight: 400; opacity: 0.75; }
-:root[data-theme='blueprint'][data-punk] .folio__n::after { content: ' · DWG ' attr(data-hex) ' · SCALE 1:1'; }
+:root[data-theme='blueprint'] .folio__n::after { content: ' · SCALE 1:1'; font-weight: 400; opacity: 0.75; }
 :root[data-theme='blueprint'] .note { font-size: 1.35rem; }
 :root[data-theme='blueprint'] .pull, :root[data-theme='blueprint'] .credits { background: transparent; border: 1.5px solid var(--ink); color: var(--ink); }
 :root[data-theme='blueprint'] .credits dt { color: var(--muted); }
