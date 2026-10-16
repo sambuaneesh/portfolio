@@ -200,6 +200,13 @@ const jsonLd = {
     </dialog>
 
     <script type="application/json" id="cmd-data" set:html={JSON.stringify(commands)} />
+    {import.meta.env.PROD && (
+      <script is:inline define:vars={{ sw: `${u('/sw.js')}?v=${BUILD.commit}`, scope: u('/') }}>
+        if ('serviceWorker' in navigator && !location.pathname.includes('/admin/')) {
+          addEventListener('load', function () { navigator.serviceWorker.register(sw, { scope: scope }).catch(function () {}); });
+        }
+      </script>
+    )}
     <script>
       import '../scripts/shell';
     </script>

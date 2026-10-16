@@ -20,7 +20,7 @@ const Z = settings.zine_title;
 const featured = modules.filter((m) => m.featured).slice(0, 4);
 const running = experience.filter((e) => /present/i.test(e.duration));
 const now = running.length ? running : experience.slice(0, 1);
-const last = experience.filter((e) => !/present/i.test(e.duration)).slice(0, 1);
+const last = experience.filter((e) => !/present/i.test(e.duration));
 const chain = toolchain(skills.filter((s) => s.category === 'Languages'), modules);
 const school = education[0];
 const lab = settings.badge_lab;
