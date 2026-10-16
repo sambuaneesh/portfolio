@@ -14,7 +14,7 @@ const BASE = '/portfolio';
 const BUDGET = {
   html: 40 * 1024,  // HTML + inlined CSS
   js: 30 * 1024,    // JS before interaction
-  fonts: 120 * 1024, // woff2 (already compressed); incl. 10 KB handwriting for pen notes
+  fonts: 120 * 1024, // the heaviest edition's faces + shared mono/pen faces (woff2)
   total: 250 * 1024,
 };
 // The admin console is never on a visitor's path.
@@ -31,9 +31,22 @@ function pages(dir) {
   });
 }
 
-const fontBytes = readdirSync(join(DIST, '_astro'))
-  .filter((f) => f.endsWith('.woff2'))
-  .reduce((n, f) => n + statSync(join(DIST, '_astro', f)).size, 0);
+// A visit downloads only the current edition's faces (fonts are fetched on
+// first use), plus the shared mono and pen-note faces.
+const woff = readdirSync(join(DIST, '_astro')).filter((f) => f.endsWith('.woff2'));
+const size = (names) => woff.filter((f) => names.some((n) => f.startsWith(`${n}.`) || f.startsWith(`${n}-subset.`))).reduce((n, f) => n + statSync(join(DIST, '_astro', f)).size, 0);
+const SHARED = ['jetbrains-mono', 'hand'];
+const EDITIONS = {
+  trash: ['archivo'],
+  blueprint: ['b612-400', 'b612-700', 'b612-mono-400'],
+  riso: ['bricolage', 'newsreader-400', 'newsreader-400i'],
+  toner: ['anton-400', 'courier-prime-400', 'courier-prime-700'],
+  hotline: ['bungee-400', 'chakra-petch-400', 'chakra-petch-700'],
+  acid: ['unbounded', 'space-grotesk-400', 'space-grotesk-700'],
+};
+const perEdition = Object.fromEntries(Object.entries(EDITIONS).map(([k, v]) => [k, size([...v, ...SHARED])]));
+const fontBytes = Math.max(...Object.values(perEdition));
+console.log('fonts per edition:', Object.entries(perEdition).map(([k, v]) => `${k} ${kb(v)}`).join(' · '));
 
 const jsCache = new Map();
 function jsSize(src, seen = new Set()) {

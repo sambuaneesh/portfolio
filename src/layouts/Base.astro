@@ -2,7 +2,6 @@
 import '../styles/global.css';
 import '../styles/punk.css';
 import '../styles/themes.css';
-import archivo from '../assets/fonts/archivo-subset.woff2?url';
 import { WORKSPACES, BUILD, u, fmtDate, type WorkspaceKey } from '../lib/site';
 import { getPersonalInfo, getModules, getSiteSettings, THEMES } from '../lib/db';
 import { isFallback } from '../lib/snapshot';
@@ -83,7 +82,6 @@ const jsonLd = {
     <meta name="theme-color" content="#2a2926" />
     <link rel="icon" href={u('/favicon.svg')} type="image/svg+xml" />
     <link rel="sitemap" href={u('/sitemap-index.xml')} />
-    <link rel="preload" href={archivo} as="font" type="font/woff2" crossorigin />
     {preloadImage && <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />}
     {prevHref && <link rel="prev" href={prevHref} />}
     {nextHref && <link rel="next" href={nextHref} />}
