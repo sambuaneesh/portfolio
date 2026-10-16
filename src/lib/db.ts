@@ -89,6 +89,9 @@ export interface SiteSettings {
   zine_issue: string;
   /** Punk layer over the zine: ransom letters, tape, stamps, staples, misprints. */
   zine_punk: boolean;
+  /** Phones: 'desktop' = the full spread, zoomed out (pinch to zoom);
+   *  'reflow' = one page at a time at phone width. */
+  mobile_layout: 'desktop' | 'reflow';
   /** Thank-you list printed in the colophon; hidden when empty. */
   greetz: string[];
   /** Per-project page options, keyed by project id (edited in /admin). */
@@ -148,6 +151,7 @@ const SETTINGS_DEFAULTS: SiteSettings = {
   zine_issue_theme: 'the side-quest issue',
   zine_issue: '01',
   zine_punk: true,
+  mobile_layout: 'desktop',
   greetz: [],
 };
 

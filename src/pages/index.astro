@@ -146,7 +146,6 @@ const ports = [
             </ul>
           </div>
           <p class="sign">— {me.name.split(' ')[0]}</p>
-          <span class="stamp punk-only letter__stamp" aria-hidden="true">approved by the editor</span>
         </div>
         <p class="letter__side" aria-hidden="true">letter from the editor</p>
       </div>
@@ -215,7 +214,7 @@ const ports = [
           <ul class="games taped taped--top">
             {games.map((g) => (
               <li>
-                {g.img && <span class="halftone games__img"><img src={g.img.src} width="92" height="35" alt="" loading="lazy" decoding="async" /></span>}
+                {g.img && <span class="games__img"><img src={g.img.src} width="92" height="35" alt="" loading="lazy" decoding="async" /></span>}
                 <span class="games__name">{g.name}</span>
                 <span class="mono">{g.hoursTotal} h</span>
               </li>
@@ -313,7 +312,6 @@ const ports = [
   }
   .cover__burst { left: 4%; bottom: 12%; width: 108px; height: 108px; padding: 14px; font-size: 0.78rem; }
   @media (max-width: 47.99rem) { .cover__burst { display: none !important; } }
-  .letter__stamp { align-self: flex-end; margin-top: -6px; }
   .hint { display: flex; align-items: flex-start; gap: 4px; margin: -4px 0 -10px 30%; }
   .hint .scrib--arrow-down { margin-top: 10px; rotate: 20deg; }
   .off__note { justify-self: end; margin-top: -6px; }
@@ -365,7 +363,8 @@ const ports = [
   .off { display: grid; gap: 10px; margin-top: auto; }
   .games { list-style: none; display: grid; gap: 8px; }
   .games li { display: grid; grid-template-columns: 92px 1fr auto; gap: 10px; align-items: center; font-size: 0.85rem; }
-  .games__img { width: 92px; height: 35px; border: 1.5px solid var(--ink); }
+  .games__img { width: 92px; height: 35px; border: 1.5px solid var(--ink); overflow: hidden; }
+  .games__img img { width: 100%; height: 100%; object-fit: cover; }
   .games__name { font-family: var(--font-sans); font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* classifieds ------------------------------------------------------------------- */

@@ -227,6 +227,7 @@ export const TABLES: TableCfg[] = [
       { k: 'zine_tagline', label: 'masthead tagline', type: 'text', def: 'about things that did not need building' },
       { k: 'zine_issue_theme', label: 'cover line', type: 'text', def: 'the side-quest issue', help: '"the X issue": the middle word(s) print big on the cover.' },
       { k: 'zine_issue', label: 'issue number', type: 'text', def: '01' },
+      { k: 'mobile_layout', label: 'on phones', type: 'select', options: ['desktop', 'reflow'], def: 'desktop', help: 'desktop = the full two-page zine, zoomed out (pinch to zoom; Google ranks non-mobile layouts lower). reflow = one page at a time at phone width.' },
       { k: 'zine_punk', label: 'punk layer (ransom letters, tape, stamps, staples, misprints)', type: 'bool', def: true, help: 'Off = the clean zine.' },
       { k: 'greetz', type: 'list', def: [], help: 'Optional thank-you list printed in the credits box (real people/labs only). Leave empty to hide.' },
     ],

@@ -675,3 +675,23 @@ kbd.k {
 .note { text-transform: none; letter-spacing: 0; }
 /* links printed on black boxes keep the box's ink */
 .page :is(.credits, .pull, .coverlines) a:not(.btn):not(.next):not(.prev) { color: inherit; }
+
+/* --- reading trail (back stack) -------------------------------------------- */
+.trail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  padding: 6px 16px;
+  background: var(--desk);
+  border-bottom: 1px solid #3a3935;
+  color: var(--desk-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+.trail[hidden] { display: none; }
+.trail a { color: var(--desk-ink); text-decoration: underline dotted; text-underline-offset: 3px; }
+.trail b { color: var(--desk-ink); }
+.trail__back { padding: 0.1rem 0.5rem; border: 1px solid var(--desk-muted); text-decoration: none !important; }
+.trail__back:hover { background: var(--paper); color: var(--ink); }
+.trail__path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

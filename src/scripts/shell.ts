@@ -185,3 +185,66 @@ if (preview || previewPunk) {
   flag.innerHTML = `<span>previewing ${what}</span><a href="${location.pathname}">exit</a>`;
   document.body.append(flag);
 }
+
+// --- reading trail: a stack of the pages you came through ------------------
+// Opening a page pushes it; going back to an earlier page (by the trail, a
+// link or the browser's back button) trims everything after it.
+
+type Crumb = { u: string; t: string };
+const TRAIL_KEY = 'zine-trail';
+
+function renderTrail() {
+  const nav = document.querySelector<HTMLElement>('[data-trail]');
+  if (!nav) return;
+  const url = new URL(location.href);
+  url.searchParams.delete('preview');
+  url.searchParams.delete('punk');
+  const here = url.pathname + url.search;
+  const label = (document.getElementById('main')?.dataset.crumb || document.title.split(' · ')[0]).toLowerCase();
+
+  let trail: Crumb[] = [];
+  try { trail = JSON.parse(sessionStorage.getItem(TRAIL_KEY) || '[]'); } catch { /* fresh */ }
+  const at = trail.findIndex((c) => c.u === here);
+  if (at >= 0) trail = trail.slice(0, at + 1);
+  else trail.push({ u: here, t: label });
+  trail = trail.slice(-8);
+  try { sessionStorage.setItem(TRAIL_KEY, JSON.stringify(trail)); } catch { /* private mode */ }
+
+  if (trail.length < 2) { nav.hidden = true; return; }
+  const prev = trail[trail.length - 2];
+  const back = document.createElement('a');
+  back.className = 'trail__back';
+  back.href = prev.u;
+  back.textContent = `← back to ${prev.t}`;
+  const crumbs = trail.map((c, i) => {
+    if (i === trail.length - 1) {
+      const b = document.createElement('b');
+      b.textContent = c.t;
+      b.setAttribute('aria-current', 'page');
+      return b;
+    }
+    const a = document.createElement('a');
+    a.href = c.u;
+    a.textContent = c.t;
+    return a;
+  });
+  const path = document.createElement('span');
+  path.className = 'trail__path';
+  crumbs.forEach((c, i) => { if (i) path.append(' › '); path.append(c); });
+  nav.replaceChildren(back, path);
+  nav.hidden = false;
+
+  // The previous page is also the browser's previous entry: use real back
+  // navigation so the scroll position comes back too.
+  nav.querySelectorAll<HTMLAnchorElement>('a').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      if (a.getAttribute('href') === prev.u && history.length > 1 && document.referrer.startsWith(location.origin)) {
+        e.preventDefault();
+        history.back();
+      }
+    });
+  });
+}
+
+renderTrail();
+addEventListener('pageshow', (e) => { if (e.persisted) renderTrail(); });

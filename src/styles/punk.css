@@ -104,6 +104,7 @@
 /* --- rubber stamps & stickers -------------------------------------------------------- */
 .punk-only { display: none !important; }
 :root[data-punk] .punk-only { display: revert !important; }
+:root[data-punk] .burst.punk-only { display: grid !important; place-items: center; }
 :root[data-punk] .stamp { color: #b3262b; opacity: 0.82; mix-blend-mode: multiply; }
 
 .burst {

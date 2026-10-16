@@ -13,9 +13,11 @@ interface Props {
   image?: string;
   prevHref?: string;
   nextHref?: string;
+  /** Short name for this page in the reading trail. */
+  crumb?: string;
 }
 
-const { title, description, ws = null, noindex = false, image, prevHref, nextHref } = Astro.props;
+const { title, description, ws = null, noindex = false, image, prevHref, nextHref, crumb } = Astro.props;
 const [me, modules, settings] = await Promise.all([getPersonalInfo(), getModules(), getSiteSettings()]);
 
 // One cover colour for everyone, picked in /admin and baked in at build.
@@ -58,7 +60,13 @@ const jsonLd = {
 <html lang="en" data-theme={theme} data-punk={settings.zine_punk !== false ? '' : undefined}>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="viewport" id="vp" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- Phones get the full desktop zine, zoomed out, unless /admin says reflow. -->
+    <script is:inline define:vars={{ mobileLayout: settings.mobile_layout }}>
+      if (mobileLayout === 'desktop' && Math.min(screen.width, screen.height) < 900) {
+        document.getElementById('vp').setAttribute('content', 'width=1280, viewport-fit=cover');
+      }
+    </script>
     <title>{fullTitle}</title>
     <meta name="description" content={desc} />
     <meta name="author" content={me.name} />
@@ -121,7 +129,9 @@ const jsonLd = {
       </div>
     </header>
 
-    <main id="main" class="zine" tabindex="-1">
+    <nav class="trail" data-trail aria-label="Reading trail" hidden></nav>
+
+    <main id="main" class="zine" tabindex="-1" data-crumb={crumb ?? title ?? 'cover'}>
       <slot />
     </main>
 

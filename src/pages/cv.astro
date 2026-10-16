@@ -21,7 +21,7 @@ const sortedCourses = [...courses].sort((a, b) => Number(!!b.is_favorite) - Numb
 const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
 const prevHref = lastProject ? u(`/projects/${lastProject.slug}/`) : u('/projects/');
 ---
-<Base title="CV" ws="cv" description={`Experience, education, research, skills and coursework of ${me.name}.`} prevHref={prevHref} nextHref={u('/writing/')}>
+<Base title="CV" crumb="field log" ws="cv" description={`Experience, education, research, skills and coursework of ${me.name}.`} prevHref={prevHref} nextHref={u('/writing/')}>
   <Spread page={P.log} zine={Z} runL="field log" runR="field log · education" label="CV: experience and education"
     prev={{ href: prevHref, label: 'workbench' }}>
     <Fragment slot="left">

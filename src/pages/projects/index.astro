@@ -17,13 +17,13 @@ const filterCss = langs
   .map(([l]) => `.catalog:has(#f-${slugify(l)}:checked) .entry:not([data-lang="${slugify(l)}"]){display:none}`)
   .join('\n');
 ---
-<Base title="Projects" ws="projects" description={`${modules.length} projects by Aneesh Sambu: shells, file systems, interpreters, distributed systems and tools.`} prevHref={u('/')} nextHref={first ? u(`/projects/${first.slug}/`) : undefined}>
+<Base title="Projects" crumb="catalogue" ws="projects" description={`${modules.length} projects by Aneesh Sambu: shells, file systems, interpreters, distributed systems and tools.`} prevHref={u('/')} nextHref={first ? u(`/projects/${first.slug}/`) : undefined}>
   <div class="catalog">
     <Spread page={P.workbench} zine={settings.zine_title} runL="workbench" runR="the catalogue" label="Project catalogue"
       prev={{ href: u('/#offhours'), label: 'back' }} next={first ? { href: u(`/projects/${first.slug}/`), label: first.title } : null}>
       <Fragment slot="left">
         <p class="kicker">workbench</p>
-        <h1 class="hed hed--xl hed--wide">The catalogue</h1>
+        <h1 class="hed hed--l hed--wide one-line">The catalogue</h1>
         <fieldset class="filters">
           <legend class="lbl">language</legend>
           <label><input type="radio" name="lang" id="f-all" checked /><span>all</span></label>
@@ -41,6 +41,7 @@ const filterCss = langs
 
 <style>
   .list { display: grid; gap: 12px; }
+  .one-line { white-space: nowrap; font-size: clamp(1.4rem, 7.4cqi, 3rem); }
   .filters { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
   .filters legend { float: left; margin-right: 6px; }
   .filters label { cursor: pointer; }
