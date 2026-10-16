@@ -12,7 +12,7 @@ import Scribble from '../components/Scribble.astro';
 import Ransom from '../components/Ransom.astro';
 import { pageMap, pad2, pg } from '../lib/zine';
 import { code128Svg } from '../lib/code128';
-import signature from '../assets/signature.svg?raw';
+import signatureUrl from '../assets/signature.svg?url';
 import { BUILD } from '../lib/site';
 
 const [me, modules, experience, education, achievements, skills, posts, settings] = await Promise.all([
@@ -31,7 +31,8 @@ const lab = settings.badge_lab;
 
 const steamUrl = (settings.extra_links ?? []).find((l) => /steamcommunity\.com/.test(l.url))?.url;
 const steam = steamUrl ? await getSteam(steamUrl) : null;
-const reviews = steamUrl ? (await getSteamReviews(steamUrl)).slice(0, 3) : [];
+// only the games I'd recommend make it into the zine
+const reviews = steamUrl ? (await getSteamReviews(steamUrl)).filter((r) => r.recommended).slice(0, 3) : [];
 // Two lists for off hours: recently played (public feed, the default tab)
 // and most played across the whole library (needs STEAM_API_KEY).
 const withImg = <T extends { capsule: string }>(list: T[]) =>
@@ -201,7 +202,7 @@ const ports = [
               {last.map((e) => <li><span class="lbl lbl--line">EXIT 0</span> <b>{e.title}</b>, {e.company} <span class="muted">· {e.duration}</span></li>)}
             </ul>
           </div>
-          <p class="sign"><span class="sr-only">— {me.name}</span><span class="sig" aria-hidden="true" set:html={signature} /></p>
+          <p class="sign"><span class="sr-only">— {me.name}</span><span class="sig" aria-hidden="true" style={`--sig:url(${signatureUrl})`} /></p>
         </div>
         <p class="letter__side" aria-hidden="true">letter from the editor</p>
       </div>
@@ -474,8 +475,8 @@ const ports = [
   .ps ul { list-style: none; display: grid; gap: 6px; margin-top: 8px; font-family: var(--font-mono); font-size: 0.76rem; }
   /* signed off with the real signature (traced to SVG), in the edition's pen */
   .sign { align-self: flex-end; }
-  .sig { display: block; width: 170px; color: var(--pen); rotate: -3deg; }
-  .sig :global(svg) { display: block; width: 100%; height: auto; }
+  /* separate cached file, painted in the pen colour through a mask */
+  .sig { display: block; width: 170px; aspect-ratio: 3943 / 1095; background: var(--pen); -webkit-mask: var(--sig) center / contain no-repeat; mask: var(--sig) center / contain no-repeat; rotate: -3deg; }
 
   /* this issue ----------------------------------------------------------------- */
   .feat { display: grid; gap: 12px; }
