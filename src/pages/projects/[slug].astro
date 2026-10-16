@@ -80,14 +80,14 @@ const nextHref = next ? u(`/projects/${next.slug}/`) : u('/cv/');
       </div>
       {screens[0] && (
         <figure class="fig fig--main taped">
-          <a class="shot" href={screens[0].orig}><img src={screens[0].src} width={screens[0].width} height={screens[0].height} alt={`${m.title} screenshot`} decoding="async" /></a>
+          <a class="shot halftone" href={screens[0].orig}><img src={screens[0].src} width={screens[0].width} height={screens[0].height} alt={`${m.title} screenshot`} decoding="async" /></a>
           <figcaption class="mono">fig. 1 · {m.title}{screens.length > 1 ? ` · +${screens.length - 1} more` : ''}</figcaption>
         </figure>
       )}
       {screens.length > 1 && (
         <ul class="thumbs">
           {screens.slice(1).map((s, n) => (
-            <li><a class="shot" href={s.orig}><img src={s.src} width={s.width} height={s.height} alt={`${m.title} screenshot ${n + 2}`} loading="lazy" decoding="async" /></a></li>
+            <li><a class="shot halftone" href={s.orig}><img src={s.src} width={s.width} height={s.height} alt={`${m.title} screenshot ${n + 2}`} loading="lazy" decoding="async" /></a></li>
           ))}
         </ul>
       )}

@@ -4,7 +4,8 @@ import { record, recall } from './snapshot';
 // display name and recently played games with hours. Never fails the build.
 
 export interface SteamGame { name: string; link: string; capsule: string; hours2wk: number; hoursTotal: number }
-export interface SteamProfile { url: string; handle: string; summary: string; games: SteamGame[] }
+/** games = recently played (public feed); top = whole library by playtime (needs STEAM_API_KEY). */
+export interface SteamProfile { url: string; handle: string; summary: string; games: SteamGame[]; top: SteamGame[] }
 
 const tag = (xml: string, name: string) =>
   xml.match(new RegExp(`<${name}>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?</${name}>`))?.[1]?.trim() ?? '';
@@ -56,7 +57,7 @@ export function getSteam(profileUrl: string): Promise<SteamProfile | null> {
           hoursTotal: Number(tag(g, 'hoursOnRecord').replace(/,/g, '')) || 0,
         }));
         const owned = await ownedGames(tag(xml, 'steamID64'));
-        const profile = { url: profileUrl, handle: decode(tag(xml, 'steamID')), summary: decode(tag(xml, 'summary')), games: owned?.length ? owned : games };
+        const profile = { url: profileUrl, handle: decode(tag(xml, 'steamID')), summary: decode(tag(xml, 'summary')), games, top: owned ?? [] };
         record(`steam:${profileUrl}`, profile);
         return profile;
       } catch {

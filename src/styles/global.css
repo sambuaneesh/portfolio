@@ -626,9 +626,13 @@ kbd.k {
   .spread--fixed .page { height: calc(var(--pw) * 8.5 / 5.5); overflow: hidden; }
 }
 
-/* screenshots print grey; colour comes back on hover/focus */
-.shot img { filter: var(--photo-filter); transition: filter 200ms ease; }
-.shot:hover img, .shot:focus-visible img { filter: none; }
+/* screenshots are printed in the edition's inks: by default grey and
+   multiplied into the paper (white areas take the paper colour); themes can
+   swap in their own treatment. Real colour comes back on hover/focus. */
+.shot { background: var(--shot-bg, var(--paper)); }
+.shot img { filter: var(--shot-filter, grayscale(1) contrast(1.15)); mix-blend-mode: var(--shot-blend, multiply); transition: filter 200ms ease; }
+.shot:hover img, .shot:focus-visible img { filter: none; mix-blend-mode: normal; }
+.shot:hover::after, .shot:focus-visible::after { opacity: 0; }
 
 /* Nothing on a page may push the page wider than the page (clamped blurbs
    report their unwrapped width as a minimum otherwise). */

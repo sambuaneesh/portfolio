@@ -64,7 +64,7 @@
 /* lettering: single-stroke technical capitals */
 :root[data-theme='blueprint'] .hed { font-family: var(--font-mono); font-weight: 700; letter-spacing: 0.04em; font-stretch: 100%; }
 :root[data-theme='blueprint'] .hed--outline { color: transparent; -webkit-text-stroke: 1.2px var(--ink); }
-:root[data-theme='blueprint'] .copy, :root[data-theme='blueprint'] .prose { font-family: var(--font-mono); font-size: 0.86rem; text-align: left; }
+:root[data-theme='blueprint'] .copy, :root[data-theme='blueprint'] .prose { font-family: var(--font-mono); font-size: 0.8rem; text-align: left; }
 /* dimension line over the big headings: |<———————>| */
 :root[data-theme='blueprint'] :is(.hed--xl, .hed--l) { position: relative; padding-top: 16px; }
 :root[data-theme='blueprint'] :is(.hed--xl, .hed--l)::before {
@@ -273,7 +273,7 @@
   --on-black-muted: #a8bf3c;
   --cover: var(--acid);
   --on-cover: #0d0d0d;
-  --pen: #0d0d0d;               /* fat black marker */
+  --pen: #6b2bff;               /* UV marker: stands apart from the black type */
   --stamp: #0d0d0d;
   --marker: var(--acid);
   --sticker: #0d0d0d;
@@ -314,3 +314,11 @@
 :root[data-theme='blueprint'] .credits div { border-bottom: 1px solid rgb(238 244 255 / 0.35); }
 :root[data-theme='blueprint'] .credits div:last-child { border-bottom: 0; }
 :root[data-theme='blueprint'] .credits dt { color: var(--muted); }
+
+/* screenshots in each edition's inks (see .shot in global.css) */
+:root[data-theme='blueprint'] { --shot-bg: #1e4c98; --shot-filter: grayscale(1) invert(1) contrast(1.3) brightness(1.05); --shot-blend: screen; }
+:root[data-theme='toner'] { --shot-bg: #121212; --shot-filter: grayscale(1) invert(1) contrast(1.5); --shot-blend: screen; }
+:root[data-theme='riso'] { --shot-bg: var(--riso-pink); --shot-filter: grayscale(1) contrast(1.25) brightness(1.08); }
+:root[data-theme='hotline'] { --shot-bg: var(--hot); --shot-filter: grayscale(1) contrast(1.25) brightness(1.1); }
+:root[data-theme='acid'] { --shot-filter: grayscale(1) contrast(1.6) brightness(1.08); }
+:root[data-theme='blueprint'] .shot::after, :root[data-theme='toner'] .shot::after { mix-blend-mode: multiply; opacity: 0.5; }
