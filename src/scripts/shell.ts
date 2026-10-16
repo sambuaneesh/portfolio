@@ -263,8 +263,11 @@ function setEdition(name: string) {
   try {
     if (name === 'random') {
       sessionStorage.removeItem('zine-pin');
-      const others = THEMES.filter((t) => t !== html.dataset.theme);
-      next = others[Math.floor(Math.random() * others.length)];
+      // draw from the same shuffle bag the page load uses
+      let bag: string[] = JSON.parse(localStorage.getItem('zine-bag') || '[]').filter((t: string) => THEMES.includes(t) && t !== html.dataset.theme);
+      if (!bag.length) bag = THEMES.filter((t) => t !== html.dataset.theme).sort(() => Math.random() - 0.5);
+      next = bag.shift()!;
+      localStorage.setItem('zine-bag', JSON.stringify(bag));
       sessionStorage.setItem('zine-roll', next);
     } else {
       sessionStorage.setItem('zine-pin', name);
