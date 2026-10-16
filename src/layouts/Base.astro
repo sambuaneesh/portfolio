@@ -120,7 +120,12 @@ const jsonLd = {
         // A pick (sticker or ?edition= link) holds while turning pages; a
         // refresh or a fresh visit drops it and rolls again.
         var nav = performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
-        var fresh = !nav || nav.type === 'reload' || !document.referrer || document.referrer.indexOf(location.origin) !== 0;
+        // "fresh" = a refresh, or a new tab/session (nothing rolled yet).
+        // Deliberately not based on document.referrer: privacy-hardened
+        // browsers blank it, which made every page turn look fresh.
+        var seen = null;
+        try { seen = sessionStorage.getItem('zine-seen'); sessionStorage.setItem('zine-seen', '1'); } catch (e) {}
+        var fresh = (nav && nav.type === 'reload') || !seen;
         var shared = q.get('edition');
         var pin = null;
         try {

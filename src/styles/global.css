@@ -455,7 +455,10 @@ a:hover { text-decoration-thickness: 3px; }
 .prose blockquote { margin: 0; padding: 0.6em 1em; background: var(--screen); }
 .prose img { max-width: 100%; height: auto; }
 .prose :not(pre) > code { font-family: var(--font-mono); font-size: 0.85em; padding: 0.05em 0.3em; background: var(--paper-2); border: 1px solid var(--edge-2); }
-.prose pre { font-family: var(--font-mono); font-size: 0.78rem; padding: 0.9rem; overflow-x: auto; border: 1.5px solid var(--ink); background: #161616 !important; line-height: 1.5; }
+.prose pre { font-family: var(--font-mono); font-size: 0.78rem; padding: 0.9rem; overflow-x: auto; border: 1.5px solid var(--ink); background: #161616 !important; color: #e6e3dc; line-height: 1.5; }
+/* plain (unhighlighted) code blocks inherit the page ink otherwise, which
+   is unreadable on the dark code background in dark-ink editions */
+.prose pre code { color: inherit; }
 .prose table { border-collapse: collapse; width: 100%; font-size: 0.85rem; font-family: var(--font-mono); display: block; overflow-x: auto; }
 .prose th, .prose td { border: 1px solid var(--rule); padding: 0.35rem 0.55rem; text-align: left; }
 .prose hr { border: 0; border-top: 2px dotted var(--ink); }
