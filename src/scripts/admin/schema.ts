@@ -229,6 +229,7 @@ export const TABLES: TableCfg[] = [
       { k: 'zine_issue', label: 'issue number', type: 'text', def: '01' },
       { k: 'mobile_layout', label: 'on phones', type: 'select', options: ['desktop', 'reflow'], def: 'desktop', help: 'desktop = the full two-page zine, zoomed out (pinch to zoom; Google ranks non-mobile layouts lower). reflow = one page at a time at phone width.' },
       { k: 'zine_punk', label: 'punk layer (ransom letters, tape, stamps, staples, misprints)', type: 'bool', def: true, help: 'Off = the clean zine.' },
+      { k: 'barcode', label: 'cover barcode', type: 'text', def: 'src@{commit}', help: 'A real Code 128 barcode; scanners read this text. Tokens: {commit} (git commit of the build), {epoch} (unix time of printing), {issue}. Ideas: src@{commit} · arXiv:2502.00689 · 76561199204326203 (SteamID64) · {epoch}. Printable ASCII only.' },
       { k: 'greetz', type: 'list', def: [], help: 'Optional thank-you list printed in the credits box (real people/labs only). Leave empty to hide.' },
     ],
   },

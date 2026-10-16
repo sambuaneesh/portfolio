@@ -12,6 +12,7 @@ const channels = [
   me.email && { k: 'MAIL', v: me.email, href: `mailto:${me.email}` },
   me.linkedin && { k: 'LNK', v: 'linkedin.com/in/aneesh-sambu', href: me.linkedin },
   me.github && { k: 'GIT', v: me.github.replace(/^https?:\/\//, ''), href: me.github },
+  me.instagram && { k: 'IG', v: `@${me.instagram.replace(/\/$/, '').split('/').pop()}`, href: me.instagram },
 ].filter(Boolean) as { k: string; v: string; href: string }[];
 ---
 <Base title="Contact" crumb="write to me" ws="contact" description={`Send ${me.name} a message or a task request.`} prevHref={u('/writing/')}>

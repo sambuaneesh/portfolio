@@ -32,6 +32,8 @@ jobs:
           PUBLIC_SUPABASE_URL: https://egqcfennzkzywarpxmwi.supabase.co
           PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_z2rNXUryA3THtizNMA2p6w_H18Sgo9O
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: full Steam library for "off hours" (repo secret).
+          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
         run: npm run build
 
       - name: Performance budget

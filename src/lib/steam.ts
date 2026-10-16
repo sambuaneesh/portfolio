@@ -14,6 +14,31 @@ const decode = (s: string) =>
 
 const memo = new Map<string, Promise<SteamProfile | null>>();
 
+/** With a Steam Web API key (build-time secret STEAM_API_KEY, never sent to
+ *  the browser): the whole library, most played first. Needs the profile's
+ *  "Game details" set to public; returns null otherwise. */
+async function ownedGames(steamid: string): Promise<SteamGame[] | null> {
+  const key = process.env.STEAM_API_KEY;
+  if (!key || !steamid) return null;
+  try {
+    const res = await fetch(`https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${key}&steamid=${steamid}&include_appinfo=1&include_played_free_games=1&format=json`, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return null;
+    const list = ((await res.json())?.response?.games ?? []) as { appid: number; name: string; playtime_forever: number; playtime_2weeks?: number }[];
+    return list
+      .filter((g) => g.playtime_forever > 0)
+      .sort((a, b) => b.playtime_forever - a.playtime_forever)
+      .map((g) => ({
+        name: g.name,
+        link: `https://steamcommunity.com/app/${g.appid}`,
+        capsule: `https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/${g.appid}/capsule_184x69.jpg`,
+        hours2wk: Math.round(((g.playtime_2weeks ?? 0) / 60) * 10) / 10,
+        hoursTotal: Math.round((g.playtime_forever / 60) * 10) / 10,
+      }));
+  } catch {
+    return null;
+  }
+}
+
 export function getSteam(profileUrl: string): Promise<SteamProfile | null> {
   if (!memo.has(profileUrl)) {
     memo.set(profileUrl, (async () => {
@@ -29,7 +54,8 @@ export function getSteam(profileUrl: string): Promise<SteamProfile | null> {
           hours2wk: Number(tag(g, 'hoursPlayed')) || 0,
           hoursTotal: Number(tag(g, 'hoursOnRecord').replace(/,/g, '')) || 0,
         }));
-        const profile = { url: profileUrl, handle: decode(tag(xml, 'steamID')), summary: decode(tag(xml, 'summary')), games };
+        const owned = await ownedGames(tag(xml, 'steamID64'));
+        const profile = { url: profileUrl, handle: decode(tag(xml, 'steamID')), summary: decode(tag(xml, 'summary')), games: owned?.length ? owned : games };
         record(`steam:${profileUrl}`, profile);
         return profile;
       } catch {

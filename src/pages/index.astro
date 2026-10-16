@@ -10,6 +10,8 @@ import { getSteam, getSteamReviews } from '../lib/steam';
 import Scribble from '../components/Scribble.astro';
 import Ransom from '../components/Ransom.astro';
 import { pageMap, pad2 } from '../lib/zine';
+import { code128Svg } from '../lib/code128';
+import { BUILD } from '../lib/site';
 
 const [me, modules, experience, education, achievements, skills, posts, settings] = await Promise.all([
   getPersonalInfo(), getModules(), getExperience(), getEducation(), getAchievements(), getSkills(), getBlogPosts(), getSiteSettings(),
@@ -50,6 +52,15 @@ const issBig = iss.length >= 3 ? iss.slice(1, -1).join(' ') : iss.join(' ');
 const issPre = iss.length >= 3 ? iss[0] : '';
 const issPost = iss.length >= 3 ? iss[iss.length - 1] : '';
 
+// the cover barcode is real Code 128: scan it and you get this text
+const barcodeText = (settings.barcode || 'src@{commit}')
+  .replace(/\{commit\}/g, BUILD.commit)
+  .replace(/\{epoch\}/g, String(Math.floor(BUILD.at.getTime() / 1000)))
+  .replace(/\{issue\}/g, settings.zine_issue)
+  .replace(/[^\x20-\x7e]/g, '');
+let barcodeSvg = '';
+try { barcodeSvg = code128Svg(barcodeText || 'src', 40); } catch { barcodeSvg = code128Svg('src', 40); }
+
 const printed = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date());
 const coverLines = [...featured.map((m) => m.title), achievements[0]?.title, '...and more'].filter(Boolean) as string[];
 
@@ -67,6 +78,11 @@ const ports = [
   me.linkedin && { k: 'LNK', v: 'linkedin/aneesh-sambu', href: me.linkedin },
   me.email && { k: 'MAIL', v: me.email, href: `mailto:${me.email}` },
   me.website && { k: 'BLOG', v: me.website.replace(/^https?:\/\//, ''), href: me.website },
+  me.instagram && { k: 'IG', v: `@${me.instagram.replace(/\/$/, '').split('/').pop()}`, href: me.instagram },
+  me.twitter && { k: 'X', v: me.twitter.replace(/^https?:\/\/(www\.)?/, ''), href: me.twitter },
+  me.medium && { k: 'MED', v: me.medium.replace(/^https?:\/\/(www\.)?/, ''), href: me.medium },
+  me.youtube && { k: 'YT', v: me.youtube.replace(/^https?:\/\/(www\.)?/, ''), href: me.youtube },
+  me.codeforces && { k: 'CF', v: me.codeforces.replace(/^https?:\/\/(www\.)?/, ''), href: me.codeforces },
   ...(settings.extra_links ?? []).map((l) => ({ k: l.label.slice(0, 5).toUpperCase(), v: l.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''), href: l.url })),
 ].filter(Boolean) as { k: string; v: string; href: string }[];
 ---
@@ -96,7 +112,7 @@ const ports = [
         <button class="burst cover__burst" type="button" popovertarget="editions" aria-label="Pick an edition"><span class="burst__name"></span><span class="burst__ed">edition</span></button>
       </div>
       <div class="cover__foot">
-        <div class="barcode" aria-hidden="true"><span></span><small>{me.name.toUpperCase()} · #{settings.zine_issue}</small></div>
+        <div class="barcode" title="Code 128: scan me"><span class="barcode__bars" set:html={barcodeSvg} /><small>{barcodeText}</small></div>
         <ul class="coverlines">
           {coverLines.map((l) => <li>{l}</li>)}
         </ul>
@@ -342,8 +358,9 @@ const ports = [
     font-family: var(--font-mono); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; line-height: 1.5; max-width: 60%;
   }
   .barcode { display: grid; gap: 2px; background: var(--paper); color: var(--ink); padding: 6px 8px; border: 1.5px solid var(--ink); }
-  .barcode span { display: block; width: 92px; height: 34px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 3px, var(--ink) 3px 4px, transparent 4px 7px, var(--ink) 7px 10px, transparent 10px 11px); }
-  .barcode small { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em; }
+  .barcode__bars { display: block; width: 150px; height: 38px; background: #fff; }
+  .barcode__bars :global(svg) { width: 100%; height: 100%; color: #000; }
+  .barcode small { font-family: var(--font-mono); font-size: 0.55rem; letter-spacing: 0.06em; text-align: center; }
   .cover__open {
     position: absolute; right: 4px; top: 4px; font-family: var(--font-mono); font-size: 0.72rem;
     color: var(--on-cover); text-transform: uppercase; letter-spacing: 0.1em;

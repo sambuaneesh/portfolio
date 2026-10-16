@@ -44,12 +44,13 @@ const commands = [
   me.linkedin && { l: 'linkedin', h: 'ext', u: me.linkedin },
   me.email && { l: `mail ${me.email}`, h: 'ext', u: `mailto:${me.email}` },
   me.website && { l: 'blog (the boring blog)', h: 'ext', u: me.website },
+  me.instagram && { l: 'instagram', h: 'ext', u: me.instagram },
   ...(settings.extra_links ?? []).map((l) => ({ l: l.label, h: 'ext', u: l.url })),
   { l: 'print cv', h: 'cv', u: `${u('/cv/')}#print` },
   { l: 'help', h: '?', a: 'help' },
 ].filter(Boolean);
 
-const sameAs = [me.github, me.linkedin, me.website, me.twitter, me.medium, ...(settings.extra_links ?? []).map((l) => l.url)].filter(Boolean);
+const sameAs = [me.github, me.linkedin, me.website, me.twitter, me.medium, me.instagram, me.youtube, me.codeforces, ...(settings.extra_links ?? []).map((l) => l.url)].filter(Boolean);
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Person',

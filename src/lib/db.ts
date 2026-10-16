@@ -92,6 +92,9 @@ export interface SiteSettings {
   /** Phones: 'desktop' = the full spread, zoomed out (pinch to zoom);
    *  'reflow' = one page at a time at phone width. */
   mobile_layout: 'desktop' | 'reflow';
+  /** What the cover barcode encodes (real Code 128). Tokens: {commit},
+   *  {epoch}, {issue}; anything else is printed as-is. */
+  barcode: string;
   /** Thank-you list printed in the colophon; hidden when empty. */
   greetz: string[];
   /** Per-project page options, keyed by project id (edited in /admin). */
@@ -174,6 +177,7 @@ const SETTINGS_DEFAULTS: SiteSettings = {
   zine_punk: true,
   mobile_layout: 'desktop',
   greetz: [],
+  barcode: 'src@{commit}',
 };
 
 /** Cover colours. The interior is always the same photocopied grey. */
