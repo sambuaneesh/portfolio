@@ -1,8 +1,9 @@
 ---
 import Base from '../../layouts/Base.astro';
-import Win from '../../components/Win.astro';
-import { getBlogPosts, type BlogPost } from '../../lib/db';
+import Spread from '../../components/Spread.astro';
+import { getBlogPosts, getModules, getSiteSettings, type BlogPost } from '../../lib/db';
 import { u, fmtDate, readingTime } from '../../lib/site';
+import { pageMap } from '../../lib/zine';
 import { renderMarkdown } from '../../lib/markdown';
 import { optimize } from '../../lib/images';
 
@@ -15,42 +16,42 @@ interface Props { p: BlogPost }
 const { p } = Astro.props;
 const html = await renderMarkdown(p.content || '');
 const cover = p.image_url ? await optimize(p.image_url, 1400) : null;
+const [all, modules, settings] = await Promise.all([getBlogPosts(), getModules(), getSiteSettings()]);
+const P = pageMap(modules, all.length);
+const page = P.writing + 2 + all.findIndex((x) => x.id === p.id) * 2;
 const supabase = { url: import.meta.env.PUBLIC_SUPABASE_URL, key: import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY };
 ---
-<Base title={p.title} ws="writing" path={`~/writing/${p.slug}`} description={p.excerpt ?? undefined} image={cover ? new URL(cover.src, Astro.site).href : undefined}>
-  <div class="tiles">
-    <Win title={fmtDate(p.created_at)} meta={`${readingTime(p.content)} min read`} class="wfull boot" as="article" id="post">
-      <p class="label"><a href={u('/writing/')}>← writing</a></p>
-      <h1 class="h-page" style={`view-transition-name:p-${p.slug}`}>{p.title}</h1>
+<Base title={p.title} ws="writing" description={p.excerpt ?? undefined} image={cover ? new URL(cover.src, Astro.site).href : undefined} prevHref={u('/writing/')}>
+  <Spread page={page} wide zine={settings.zine_title} runL={`writing · ${fmtDate(p.created_at)}`} label={p.title} prev={{ href: u('/writing/'), label: 'writing' }}>
+    <article class="post">
+      <p class="kicker">{fmtDate(p.created_at)} · {readingTime(p.content)} min read</p>
+      <h1 class="hed hed--xl hed--cond">{p.title}</h1>
       {p.tags?.length ? <ul class="tags">{p.tags.map((t) => <li>#{t}</li>)}</ul> : null}
       {cover && <img class="cover" src={cover.src} width={cover.width} height={cover.height} alt="" />}
       <div class="prose" set:html={html} />
-      {p.external_link && <p><a class="btn" href={p.external_link} rel="noopener">Original post</a></p>}
-    </Win>
+      {p.external_link && <p><a class="btn" href={p.external_link} rel="noopener">original post</a></p>}
+    </article>
 
-    <Win title="comments" class="wfull reveal" id="engage">
-      <div class="engage" data-engage data-post={p.id} data-url={supabase.url} data-key={supabase.key}>
-        <div class="btns">
-          <button class="btn" type="button" data-like aria-pressed="false">♥ <span data-like-label>Like</span></button>
-        </div>
-        <section aria-labelledby="c-h">
-          <h2 class="h-tile" id="c-h">Comments <span class="label" data-count></span></h2>
-          <ol class="comments" data-comments><li class="muted">loading…</li></ol>
-        </section>
-        <form class="cform" data-cform>
-          <p class="label" data-replying hidden></p>
-          <div class="grid-2">
-            <label class="field"><span>name</span><input class="input" name="author_name" required maxlength="80" autocomplete="name" /></label>
-            <label class="field"><span>email (optional, never shown)</span><input class="input" name="author_email" type="email" maxlength="120" autocomplete="email" /></label>
-          </div>
-          <label class="field"><span>comment</span><textarea class="input" name="content" required maxlength="4000"></textarea></label>
-          <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
-          <div class="btns"><button class="btn btn--hot" type="submit">Post comment</button><button class="btn" type="button" data-cancel-reply hidden>Cancel reply</button></div>
-          <p class="notice" data-status hidden role="status"></p>
-        </form>
+    <section class="engage" data-engage data-post={p.id} data-url={supabase.url} data-key={supabase.key} aria-labelledby="c-h">
+      <p class="boxhead">letters to the editor</p>
+      <div class="btns">
+        <button class="btn" type="button" data-like aria-pressed="false">♥ <span data-like-label>Like</span></button>
       </div>
-    </Win>
-  </div>
+      <h2 class="hed hed--s" id="c-h">Comments <span class="mono muted" data-count></span></h2>
+      <ol class="comments" data-comments><li class="muted">loading…</li></ol>
+      <form class="cform" data-cform>
+        <p class="label" data-replying hidden></p>
+        <div class="grid-2">
+          <label class="field"><span>name</span><input class="input" name="author_name" required maxlength="80" autocomplete="name" /></label>
+          <label class="field"><span>email (optional, never shown)</span><input class="input" name="author_email" type="email" maxlength="120" autocomplete="email" /></label>
+        </div>
+        <label class="field"><span>comment</span><textarea class="input" name="content" required maxlength="4000"></textarea></label>
+        <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <div class="btns"><button class="btn btn--hot" type="submit">Post comment</button><button class="btn" type="button" data-cancel-reply hidden>Cancel reply</button></div>
+        <p class="notice" data-status hidden role="status"></p>
+      </form>
+    </section>
+  </Spread>
 </Base>
 
 <script>
@@ -66,16 +67,17 @@ const supabase = { url: import.meta.env.PUBLIC_SUPABASE_URL, key: import.meta.en
 </script>
 
 <style>
-  .cover { width: 100%; border: var(--bw) solid var(--rule); }
-  .engage { display: grid; gap: 1.5rem; max-width: 70ch; }
+  .post { display: flex; flex-direction: column; gap: 16px; max-width: 72ch; margin: 0 auto; width: 100%; }
+  .cover { width: 100%; border: 1.5px solid var(--ink); filter: grayscale(1) contrast(1.1); }
+  .engage { display: grid; gap: 1.2rem; max-width: 72ch; margin: 2rem auto 0; width: 100%; padding-top: 1.5rem; border-top: 2px dotted var(--ink); }
   .cform { display: grid; gap: 0.9rem; }
   .comments { list-style: none; display: grid; gap: 0.9rem; margin-top: 0.8rem; }
-  .comments :global(.c) { border-left: 4px solid var(--accent); padding: 0.2rem 0 0.2rem 0.9rem; display: grid; gap: 0.3rem; }
-  .comments :global(.c .c) { margin-top: 0.6rem; border-left-color: var(--rule); }
+  .comments :global(.c) { border-left: 4px solid var(--ink); padding: 0.2rem 0 0.2rem 0.9rem; display: grid; gap: 0.3rem; }
+  .comments :global(.c .c) { margin-top: 0.6rem; border-left-color: var(--muted); }
   .comments :global(.c__head) { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); display: flex; gap: 0.8rem; flex-wrap: wrap; }
   .comments :global(.c__head b) { color: var(--ink); }
   .comments :global(.c__body) { white-space: pre-wrap; overflow-wrap: anywhere; }
   .comments :global(.c__act) { display: flex; gap: 0.8rem; }
   .comments :global(.c__act button) { background: none; border: 0; padding: 0; color: var(--link); text-decoration: underline; text-decoration-color: var(--link-deco); font: inherit; font-family: var(--font-mono); font-size: 0.75rem; cursor: pointer; }
-  [data-like][aria-pressed='true'] { --face: var(--accent); --fg: var(--on-accent); }
+  [data-like][aria-pressed='true'] { --face: var(--black); --fg: var(--on-black); }
 </style>

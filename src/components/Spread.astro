@@ -1,0 +1,44 @@
+---
+// A two-page spread of the zine. Left/right pages each get a running head and
+// a page number; on phones the two pages simply stack. `single` is a lone
+// right-hand page (the cover), `wide` one full-width sheet (admin).
+import { pad2 } from '../lib/zine';
+
+interface Props {
+  page: number;          // number of the left page (or the only page)
+  runL?: string;         // running heads
+  runR?: string;
+  zine?: string;
+  single?: boolean;
+  wide?: boolean;
+  label?: string;
+  next?: { href: string; label?: string } | null;
+  prev?: { href: string; label?: string } | null;
+  id?: string;
+  bare?: boolean;        // no running head (cover)
+  cover?: boolean;       // printed on the coloured cover stock
+  fixed?: boolean;       // pages keep the zine's page size; content must fit (or be cut)
+}
+const { page, runL = '', runR = '', zine = '', single = false, wide = false, label, next, prev, id, bare = false, cover = false, fixed = false } = Astro.props;
+---
+<section class:list={['spread', single && 'spread--single', wide && 'spread--wide', fixed && 'spread--fixed']} aria-label={label} id={id}>
+  {!single && !wide && (
+    <div class="page page--l">
+      {!bare && <div class="run" aria-hidden="true"><span>{zine}</span><span>{runL}</span></div>}
+      <div class="page__body"><slot name="left" /></div>
+      <div class="folio">
+        {prev && <a class="prev" href={prev.href}>{prev.label ?? 'prev'}</a>}
+        <span class="folio__n">{pad2(page)}</span>
+      </div>
+    </div>
+  )}
+  <div class:list={['page', 'page--r', cover && 'page--cover']}>
+    {!bare && <div class="run" aria-hidden="true"><span>{zine}</span><span>{runR || runL}</span></div>}
+    <div class="page__body"><slot name="right" /><slot /></div>
+    {!cover && <div class="folio">
+      {(single || wide) && prev && <a class="prev" href={prev.href}>{prev.label ?? 'prev'}</a>}
+      <span class="folio__n">{pad2(single || wide ? page : page + 1)}</span>
+      {next && <a class="next" href={next.href}>{next.label ?? 'next page'}</a>}
+    </div>}
+  </div>
+</section>

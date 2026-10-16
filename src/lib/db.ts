@@ -78,11 +78,16 @@ export interface SiteSettings {
   badge_lab: { label: string; url: string | null } | null;
   /** Links with no column of their own (Steam, etc.): [{ label, url }]. */
   extra_links: { label: string; url: string }[];
-  /** Site theme every visitor gets (set in /admin -> Appearance). */
+  /** Cover colour every visitor gets (set in /admin -> Appearance). */
   theme: string;
-  /** Label line on the home cassette. */
-  cassette_tagline: string;
-  /** Hacker-zine style thank-you list in the footer. */
+  /** Zine masthead, e.g. "The Boring Zine". */
+  zine_title: string;
+  /** Small line under the masthead. */
+  zine_tagline: string;
+  /** Big "THE ___ ISSUE" line on the cover. */
+  zine_issue_theme: string;
+  zine_issue: string;
+  /** Thank-you list printed in the colophon; hidden when empty. */
   greetz: string[];
   /** Per-project page options, keyed by project id (edited in /admin). */
   project_extras: Record<string, { show_readme?: boolean; readme_override?: string | null }>;
@@ -135,12 +140,16 @@ const SETTINGS_DEFAULTS: SiteSettings = {
   badge_lab: { label: 'SA4S@SERC', url: 'https://sa4s-serc.github.io/' },
   extra_links: [{ label: 'steam', url: 'https://steamcommunity.com/id/phant0mble3d/' }],
   project_extras: {},
-  theme: 'zine',
-  cassette_tagline: 'why not one more?',
-  greetz: ['SA4S@SERC', 'the Arch wiki', 'man pages', 'everyone who reads the README'],
+  theme: 'trash',
+  zine_title: 'The Boring Zine',
+  zine_tagline: 'a systems zine by aneesh sambu',
+  zine_issue_theme: 'the systems issue',
+  zine_issue: '01',
+  greetz: [],
 };
 
-export const THEMES = ['zine', 'zine-night', 'putty', 'nostromo', 'phosphor', 'paper', 'aero'] as const;
+/** Cover colours. The interior is always the same photocopied grey. */
+export const THEMES = ['trash', 'riso', 'riso-blue', 'toner', 'blueprint', 'acid'] as const;
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   const rows = await rest<{ key: string; value: unknown }[]>('aneesh_site_settings?select=key,value');

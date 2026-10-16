@@ -1,0 +1,34 @@
+---
+// One project in the catalogue: a small classified-style write-up.
+import type { Module } from '../lib/db';
+import { u } from '../lib/site';
+import { pad2 } from '../lib/zine';
+import { optimize } from '../lib/images';
+import { slugify } from '../lib/db';
+
+interface Props { m: Module; page: number }
+const { m, page } = Astro.props;
+const shot = m.image_url ?? m.images?.[0] ?? null;
+const img = shot ? await optimize(shot, 360, 200) : null;
+---
+<article class="entry" data-lang={m.language ? slugify(m.language) : ''}>
+  {img && <a class="entry__img shot" href={u(`/projects/${m.slug}/`)} tabindex="-1" aria-hidden="true"><img src={img.src} width={img.width} height={img.height} alt="" loading="lazy" decoding="async" /></a>}
+  <div class="entry__txt">
+    <p class="entry__meta"><span class="lbl">{m.part}</span> {m.language && <span class="mono"><span class="dot" style={`--c:${m.language_color ?? 'var(--ink)'}`} aria-hidden="true"></span> {m.language}</span>}{m.stars ? <span class="mono"> · ★ {m.stars}</span> : null}</p>
+    <h3 class="hed hed--m hed--cond"><a href={u(`/projects/${m.slug}/`)}>{m.title}</a></h3>
+    <p class="copy">{m.description}</p>
+    <p class="mono entry__turn">→ p. {pad2(page)}</p>
+  </div>
+</article>
+
+<style>
+  .entry { display: grid; grid-template-columns: 7.5rem 1fr; gap: 12px; padding-bottom: 12px; border-bottom: 2px dotted var(--ink); }
+  .entry:not(:has(.entry__img)) { grid-template-columns: 1fr; }
+  .entry__img { display: block; align-self: start; border: 1.5px solid var(--ink); aspect-ratio: 9 / 5; overflow: hidden; }
+  .entry__img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+  .entry__txt { display: grid; gap: 4px; min-width: 0; }
+  .entry__meta { font-size: 0.72rem; }
+  .entry h3 a { text-decoration: none; }
+  .entry .copy { font-size: 0.86rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .entry__turn { font-size: 0.7rem; font-weight: 700; }
+</style>

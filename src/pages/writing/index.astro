@@ -1,33 +1,49 @@
 ---
 import Base from '../../layouts/Base.astro';
-import Win from '../../components/Win.astro';
-import { getBlogPosts, getPersonalInfo } from '../../lib/db';
+import Spread from '../../components/Spread.astro';
+import { getBlogPosts, getPersonalInfo, getModules, getSiteSettings } from '../../lib/db';
 import { u, fmtDate, readingTime } from '../../lib/site';
+import { pageMap, pad2 } from '../../lib/zine';
 
-const [posts, me] = await Promise.all([getBlogPosts(), getPersonalInfo()]);
+const [posts, me, modules, settings] = await Promise.all([getBlogPosts(), getPersonalInfo(), getModules(), getSiteSettings()]);
+const P = pageMap(modules, posts.length);
 ---
-<Base title="Writing" ws="writing" path="~/writing" description={`Notes and essays by ${me.name}.`}>
-  <div class="tiles">
-    <Win title="writing" class="wfull boot" id="writing-head">
-      <h1 class="h-page">Writing</h1>
-    </Win>
-
-    {posts.length === 0 && (
-      <Win title="posts" class="w2 reveal" id="empty">
-        <p class="muted">Nothing here yet. The older, louder stuff is on {me.website ? <a href={me.website}>The Boring Blog</a> : 'my blog'}.</p>
-        <span class="stamp" aria-hidden="true">tape empty</span>
-      </Win>
-    )}
-
-    {posts.map((p, i) => (
-      <Win title={fmtDate(p.created_at)} href={p.external_link && !p.content ? p.external_link : u(`/writing/${p.slug}/`)} class:list={['reveal', i === 0 && 'w2']} id={`post-${p.slug}`}>
-        <h2 class="h-tile" style={`view-transition-name:p-${p.slug}`}>{p.title}</h2>
-        {p.excerpt && <p class="muted">{p.excerpt}</p>}
-        <Fragment slot="foot">
-          <span>{readingTime(p.content)} min</span>
-          {p.tags?.map((t) => <span>#{t}</span>)}
-        </Fragment>
-      </Win>
-    ))}
-  </div>
+<Base title="Writing" ws="writing" description={`Writing by ${me.name}.`} prevHref={u('/cv/')} nextHref={u('/contact/')}>
+  <Spread page={P.writing} zine={settings.zine_title} runL="writing" runR="writing" label="Writing"
+    prev={{ href: u('/cv/'), label: 'field log' }} next={{ href: u('/contact/'), label: 'write to me' }}>
+    <Fragment slot="left">
+      <p class="kicker">columns</p>
+      <h1 class="hed hed--xl hed--outline">Writing</h1>
+      {posts.length ? (
+        <ol class="posts">
+          {posts.map((p, i) => (
+            <li>
+              <p class="mono meta">{fmtDate(p.created_at)} · {readingTime(p.content)} min · p. {pad2(P.writing + 2 + i * 2)}</p>
+              <h2 class="hed hed--m hed--cond"><a href={p.external_link && !p.content ? p.external_link : u(`/writing/${p.slug}/`)}>{p.title}</a></h2>
+              {p.excerpt && <p class="copy">{p.excerpt}</p>}
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <>
+          <p class="copy">Nothing here yet. The older, louder stuff is on {me.website ? <a href={me.website}>The Boring Blog</a> : 'my blog'}.</p>
+          <span class="stamp" aria-hidden="true">tape empty</span>
+        </>
+      )}
+    </Fragment>
+    <Fragment slot="right">
+      <div class="blank" aria-hidden="true">
+        <p class="mono">this page intentionally left blank</p>
+      </div>
+    </Fragment>
+  </Spread>
 </Base>
+
+<style>
+  .posts { list-style: none; display: grid; gap: 16px; }
+  .posts li { display: grid; gap: 4px; padding-bottom: 12px; border-bottom: 2px dotted var(--ink); }
+  .posts a { text-decoration: none; }
+  .meta { font-size: 0.68rem; color: var(--muted); }
+  .blank { flex: 1; display: grid; place-items: center; }
+  .blank p { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+</style>

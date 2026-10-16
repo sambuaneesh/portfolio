@@ -1,12 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
+import Spread from '../components/Spread.astro';
 import { getSiteSettings } from '../lib/db';
 
 const settings = await getSiteSettings();
 const supabase = { url: import.meta.env.PUBLIC_SUPABASE_URL, key: import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY };
 const repo = settings.footer_github_url.replace(/\/$/, '');
 ---
-<Base title="Admin" ws={null} path="/root" noindex>
+<Base title="Admin" noindex>
+  <Spread page={0} wide zine={settings.zine_title} runL="editorial desk" label="Admin">
   <div
     class="admin"
     data-admin
@@ -19,6 +21,7 @@ const repo = settings.footer_github_url.replace(/\/$/, '');
     <div data-view><p class="muted mono">loading…</p></div>
     <noscript><p class="notice">The admin console needs JavaScript.</p></noscript>
   </div>
+  </Spread>
 </Base>
 
 <script>
@@ -44,7 +47,7 @@ const repo = settings.footer_github_url.replace(/\/$/, '');
   .admin :global(.side__g:first-child) { margin-top: 0; }
   .admin :global(.side__link) { font-family: var(--font-mono); font-size: 0.85rem; text-decoration: none; padding: 0.3rem 0.5rem; border: 1px solid transparent; }
   .admin :global(.side__link:hover) { border-color: var(--rule); }
-  .admin :global(.side__link[aria-current='true']) { background: var(--accent); color: var(--on-accent); }
+  .admin :global(.side__link[aria-current='true']) { background: var(--black); color: var(--on-black); }
   @media (max-width: 55.99rem) {
     .admin :global(.side) { grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); }
     .admin :global(.side__g) { grid-column: 1 / -1; }
@@ -71,5 +74,7 @@ const repo = settings.footer_github_url.replace(/\/$/, '');
   .admin :global(.thumbs) { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .admin :global(.thumbs img) { height: 72px; width: auto; border: 1px solid var(--rule); }
   .admin :global(.danger) { --face: #d7263d; --fg: #fff; margin-left: auto; }
-  .admin :global([data-dirty]) { outline: 3px dashed var(--accent); outline-offset: 4px; }
+  .admin :global([data-dirty]) { outline: 3px dashed var(--cover); outline-offset: 4px; }
+  .admin :global(.side__link) { color: var(--ink); }
+  :global(.spread--wide .folio) { display: none; }
 </style>

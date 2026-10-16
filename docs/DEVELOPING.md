@@ -91,7 +91,7 @@ Edited under **Site settings** in `/admin/` (JSON values):
 |---|---|
 | `footer_text`, `footer_github_url` | statusline at the bottom of every page |
 | `auth_title`, `auth_description` | admin sign-in screen |
-| `badge_lab` | `{ "label", "url" }` on the home ID badge |
+| `badge_lab` | `{ "label", "url" }` in the credits box on the contents page |
 | `extra_links` | `[{ "label", "url" }]` added to links and the command line; a Steam profile link also drives the games tile |
-| `theme`, `cassette_tagline`, `greetz` | edited on the Appearance page; theme is fixed for every visitor |
+| `theme`, `zine_title`, `zine_tagline`, `zine_issue_theme`, `zine_issue`, `greetz` | edited on the Appearance page; the cover colour is fixed for every visitor (Preview to try one) |
 | `project_extras` | `{ "<project id>": { "show_readme": bool, "readme_override": "markdown" } }`; edited from the project form |

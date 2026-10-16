@@ -6,15 +6,14 @@ Live at **https://sambuaneesh.github.io/portfolio/**
 
 ## What it is
 
-- **A photocopied hacker zine on a tiling desk.** Every page is a grid of tiled windows, and each tile is a hex-numbered "phile" pasted on with tape: ransom-note name, highlighter, stamps, one layer of static photocopier grain. All CSS, no images.
-- **Keyboard-driven, never keyboard-only.**
-  - `1`–`5` switch pages, `h j k l` move between tiles, `↵` opens the focused tile.
-  - `:` (or `ctrl k`) opens a command line, `?` shows help.
-  - Mouse and touch work normally; on phones the pages become a bottom tab bar.
-- **One theme, chosen by me.** `/admin/` → Appearance picks it (`zine`, `zine-night`, plus the older `putty`, `nostromo`, `phosphor`, `paper`, `aero`) along with the cassette tagline and the greetz list; it's baked in at build.
+- **A zine.** The site is one photocopied booklet, "The Boring Zine" (modelled on the zines that shipped with EXAPUNKS).
+  - The home page is a coloured cover (masthead, halftoned photo, cover lines, barcode), then a contents page and a letter from the editor.
+  - Every project is a two-page article: specs and screenshot on the left, its GitHub README on the right, cut off at the page with "continued on github".
+  - The CV is a "field log"; contact is the classifieds. Pages have running heads, page numbers and a fold.
+- **Page turns.** `←` / `→` (and the links at the foot of each spread) go to the previous and next spread, with a CSS 3D page-turn transition. `:` / `ctrl k` opens a command line, `1`–`5` jump to sections, `?` shows help.
+- **Cover colour set by me.** `/admin/` → Appearance picks it (`trash`, `riso`, `riso-blue`, `toner`, `blueprint`, `acid`) plus the masthead, tagline, cover line and issue number. Its **Preview** button opens the site with a colour without saving; `?preview=<theme>` works on localhost and for signed-in admins only.
 - **Static and fast.** Content is read from Supabase **at build time** and baked into plain HTML.
-  - Pages ship about 2–3 KB of JS and about 111 KB total, fonts included.
-  - Lighthouse mobile: 100 performance, 100 SEO, 100 best practices.
+  - Pages ship about 2 KB of JS and about 110–115 KB total, fonts included.
   - A budget check in CI fails the build if a page gets heavier.
 - **Editable.** `/admin/` edits every table (profile, projects, experience, posts, settings, inbox) through a Supabase Edge Function. "Publish site" triggers a rebuild, which goes live in about a minute.
 

@@ -1,30 +1,34 @@
 ---
 import Base from '../../layouts/Base.astro';
-import Win from '../../components/Win.astro';
-import Cart from '../../components/Cart.astro';
-import { getModules, getSiteSettings, type Module } from '../../lib/db';
+import Spread from '../../components/Spread.astro';
+import { getModules, getBlogPosts, getSiteSettings, type Module } from '../../lib/db';
 import { u, fmtDate } from '../../lib/site';
 import { optimize } from '../../lib/images';
 import { getReadme } from '../../lib/readme';
 import { renderMarkdown } from '../../lib/markdown';
+import { pageMap } from '../../lib/zine';
 
 export async function getStaticPaths() {
   const modules = await getModules();
   return modules.map((m, i) => ({
     params: { slug: m.slug },
-    props: { m, prev: modules[i - 1] ?? modules[modules.length - 1], next: modules[i + 1] ?? modules[0] },
+    props: { m, i, prev: modules[i - 1] ?? null, next: modules[i + 1] ?? null },
   }));
 }
 
-interface Props { m: Module; prev: Module; next: Module }
-const { m, prev, next } = Astro.props;
+interface Props { m: Module; i: number; prev: Module | null; next: Module | null }
+const { m, i, prev, next } = Astro.props;
+const [modules, posts, settings] = await Promise.all([getModules(), getBlogPosts(), getSiteSettings()]);
+const P = pageMap(modules, posts.length);
 
 const shots = [...new Set([m.image_url, ...(m.images ?? [])].filter(Boolean) as string[])];
-const screens = await Promise.all(shots.map(async (src) => ({ ...(await optimize(src, 1280)), orig: src })));
-// Project write-up: a manual override from /admin wins; otherwise the repo's
-// README, unless it's been switched off for this project.
+const screens = await Promise.all(shots.map(async (src) => ({ ...(await optimize(src, 1100)), orig: src })));
+const ogImage = screens[0] ? new URL(screens[0].src, Astro.site).href : undefined;
+
+// The write-up: a manual one from /admin wins; otherwise the repo README,
+// unless it's been switched off for this project.
 let readme: { html: string; file: string; href: string | null } | null = null;
-const opts = (await getSiteSettings()).project_extras?.[m.id] ?? {};
+const opts = settings.project_extras?.[m.id] ?? {};
 if (opts.readme_override?.trim()) {
   readme = { html: await renderMarkdown(opts.readme_override, { demote: 1 }), file: 'notes', href: null };
 } else if (opts.show_readme !== false && m.repo) {
@@ -32,7 +36,9 @@ if (opts.readme_override?.trim()) {
   if (r) readme = { html: await renderMarkdown(r.markdown, { baseHref: r.baseHref, baseSrc: r.baseSrc, demote: 1 }), file: r.file, href: `${r.baseHref}${r.file}` };
 }
 
-const ogImage = screens[0] ? new URL(screens[0].src, Astro.site).href : undefined;
+// every article gets its own headline voice, like a real zine
+const voices = ['hed--wide', 'hed--cond', 'hed--outline', 'hed--inverse'];
+const voice = voices[i % voices.length];
 
 const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const spec: [string, string | null][] = [
@@ -44,65 +50,95 @@ const spec: [string, string | null][] = [
   ['forks', m.forks != null ? String(m.forks) : null],
   ['license', m.license],
   ['last push', m.pushedAt ? fmtDate(m.pushedAt) : null],
-  ['repo', m.repo ? `${m.repo.owner}/${m.repo.name}` : null],
 ];
+const prevHref = prev ? u(`/projects/${prev.slug}/`) : u('/projects/');
+const nextHref = next ? u(`/projects/${next.slug}/`) : u('/cv/');
 ---
-<Base title={m.title} ws="projects" path={`~/projects/${m.slug}`} description={m.description} image={ogImage}>
-  <div class="tiles">
-    <Win title={m.part} class="w2 boot" id="sheet">
-      <p class="label"><a href={u('/projects/')}>← projects</a></p>
-      <h1 class="h-page" style={`view-transition-name:t-${m.slug}`}>{m.title}</h1>
-      <p class="lede">{m.description}</p>
+<Base title={m.title} ws="projects" description={m.description} image={ogImage} prevHref={prevHref} nextHref={nextHref}>
+  <Spread fixed page={P.projects[m.slug]} zine={settings.zine_title} runL={`workbench · ${m.part}`} runR={m.title} label={m.title}
+    prev={{ href: prevHref, label: prev ? prev.title : 'catalogue' }}
+    next={{ href: nextHref, label: next ? next.title : 'field log' }}>
+    <Fragment slot="left">
+      <p class="kicker">workbench · {m.part}</p>
+      <h1 class:list={['hed', 'hed--xl', voice]}>{m.title}</h1>
+      <p class="copy dropcap">{m.description}</p>
       {m.tags?.length ? <ul class="tags" aria-label="Tags">{m.tags.map((t) => <li>{t}</li>)}</ul> : null}
       <div class="btns">
-        {m.github_url && <a class="btn btn--hot" href={m.github_url} rel="noopener">Source</a>}
-        {m.live_url && <a class="btn" href={m.live_url} rel="noopener">Live</a>}
+        {m.github_url && <a class="btn btn--hot" href={m.github_url} rel="noopener">source</a>}
+        {m.live_url && <a class="btn" href={m.live_url} rel="noopener">live</a>}
       </div>
-    </Win>
-
-    <Win title={m.language ?? 'project'} class="boot boot-2 cart-tile" id="unit" ctl={false}>
-      <Cart part={m.part} kicker={m.language ?? 'module'} title={m.title} color={m.language_color} foot={m.pushedAt ? fmtDate(m.pushedAt, { year: 'numeric' }) : ''} tilt />
-    </Win>
-
-    <Win title="spec sheet" class="boot boot-3" id="specs">
-      <dl class="spec">
-        {spec.filter(([, v]) => v).map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
-        {m.live_url && <div><dt>live</dt><dd><a href={m.live_url} rel="noopener">{host(m.live_url)}</a></dd></div>}
-      </dl>
-      <div class="hazard" aria-hidden="true"></div>
-    </Win>
-
-    {screens.map((s, i) => (
-      <Win title={screens.length > 1 ? `screenshot ${i + 1}` : 'screenshot'} class="wfull reveal screen" id={`screen-${i}`}>
-        <a href={s.orig} class="screen__img"><img src={s.src} alt={`${m.title} screenshot ${i + 1}`} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" width={s.width} height={s.height} /></a>
-      </Win>
-    ))}
-
-    {readme && (
-      <Win title="readme" meta={readme.file} class="wfull reveal" id="readme" as="article">
-        <div class="prose readme" set:html={readme.html} />
-        {readme.href && <p class="label"><a href={readme.href} rel="noopener">view on github</a></p>}
-      </Win>
-    )}
-
-    <Win title="prev" meta={prev.part} href={u(`/projects/${prev.slug}/`)} class="reveal" id="prev">
-      <p class="h-tile">← {prev.title}</p>
-    </Win>
-    <Win title="next" meta={next.part} href={u(`/projects/${next.slug}/`)} class="reveal" id="next">
-      <p class="h-tile">{next.title} →</p>
-    </Win>
-  </div>
+      <div class="rulebox">
+        <dl class="spec">
+          {spec.filter(([, v]) => v).map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+          {m.repo && <div><dt>repo</dt><dd><a href={m.github_url!} rel="noopener">{m.repo.owner}/{m.repo.name}</a></dd></div>}
+          {m.live_url && <div><dt>live</dt><dd><a href={m.live_url} rel="noopener">{host(m.live_url)}</a></dd></div>}
+        </dl>
+      </div>
+      {screens[0] && (
+        <figure class="fig fig--main">
+          <a class="shot" href={screens[0].orig}><img src={screens[0].src} width={screens[0].width} height={screens[0].height} alt={`${m.title} screenshot`} decoding="async" /></a>
+          <figcaption class="mono">fig. 1 · {m.title}{screens.length > 1 ? ` · +${screens.length - 1} more` : ''}</figcaption>
+        </figure>
+      )}
+      {screens.length > 1 && (
+        <ul class="thumbs">
+          {screens.slice(1).map((s, n) => (
+            <li><a class="shot" href={s.orig}><img src={s.src} width={s.width} height={s.height} alt={`${m.title} screenshot ${n + 2}`} loading="lazy" decoding="async" /></a></li>
+          ))}
+        </ul>
+      )}
+    </Fragment>
+    <Fragment slot="right">
+      {readme ? (
+        <article class="readme">
+          <p class="boxhead">{readme.file === 'notes' ? 'notes' : readme.file}</p>
+          <div class="readme__clip" data-clip><div class="prose" set:html={readme.html} /></div>
+          {readme.href && <p class="readme__more mono"><a href={readme.href} rel="noopener"><span data-cut-only>… </span>continued on github</a></p>}
+        </article>
+      ) : (
+        <p class="copy muted">No write-up for this one yet.</p>
+      )}
+    </Fragment>
+  </Spread>
 </Base>
 
+<script>
+  // Fade + "…" only when the README really overflows its page.
+  const mark = () => document.querySelectorAll<HTMLElement>('[data-clip]').forEach((el) => {
+    el.classList.toggle('is-cut', el.scrollHeight > el.clientHeight + 4);
+  });
+  mark();
+  addEventListener('load', mark, { once: true });
+  addEventListener('resize', mark, { passive: true });
+</script>
+
 <style>
-  :global(#sheet .win__body) { gap: 1.1rem; }
-  :global(.cart-tile .win__body) { justify-content: center; padding: 0; }
-  :global(.screen .win__body) { padding: 0; }
-  .screen__img { display: block; background: var(--tile-2); }
-  .readme { max-width: 78ch; }
-  .readme :global(img) { display: inline-block; max-width: 100%; height: auto; border: 0; vertical-align: middle; }
-  .readme :global(p > img:only-child), .readme :global(p > a:only-child > img) { display: block; border: var(--bw) solid var(--rule); }
-  .readme :global(h2:first-child) { margin-top: 0; }
-  .readme :global(pre) { max-width: 100%; }
-  .screen__img img { width: auto; max-width: 100%; height: auto; max-height: 72vh; margin: 0 auto; object-fit: contain; }
+  .fig { margin: 0; display: grid; gap: 4px; }
+  .fig a { display: block; border: 1.5px solid var(--ink); }
+  .fig img { width: 100%; height: auto; }
+  .fig figcaption { font-size: 0.68rem; color: var(--muted); }
+  /* the main screenshot takes whatever is left of the page */
+  .fig--main { flex: 1 1 auto; min-height: 0; grid-template-rows: minmax(0, 1fr) auto; }
+  .fig--main a { min-height: 0; overflow: hidden; background: var(--paper-2); }
+  .fig--main img { height: 100%; object-fit: cover; object-position: top; }
+  .thumbs { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr)); gap: 6px; }
+  .thumbs a { display: block; border: 1.5px solid var(--ink); aspect-ratio: 16 / 10; overflow: hidden; }
+  .thumbs img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+  .readme { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  /* one page of README, then it's cut off and continues on GitHub */
+  .readme__clip { position: relative; flex: 1 1 auto; min-height: 0; max-height: 150svh; overflow: hidden; }
+  @media (min-width: 62rem) { .readme__clip { max-height: none; } }
+  .readme__clip.is-cut::after {
+    content: ''; position: absolute; inset: auto 0 0 0; height: 7rem; pointer-events: none;
+    background: linear-gradient(to bottom, transparent, var(--paper) 85%);
+  }
+  .readme__more { font-size: 0.74rem; font-weight: 700; text-align: right; }
+  .readme__more a::after { content: ' ▸▸▸'; letter-spacing: -0.1em; }
+  [data-cut-only] { display: none; }
+  .readme:has(.is-cut) [data-cut-only] { display: inline; }
+  .readme .prose { font-size: 0.9rem; }
+  .readme .prose :global(h2:first-child) { margin-top: 0; }
+  .readme .prose :global(img) { display: inline-block; vertical-align: middle; }
+  .readme .prose :global(p > img:only-child), .readme .prose :global(p > a:only-child > img) { display: block; border: 1.5px solid var(--ink); }
+  .src { font-size: 0.72rem; }
 </style>

@@ -1,57 +1,51 @@
 ---
 import Base from '../../layouts/Base.astro';
-import Win from '../../components/Win.astro';
-import ModuleTile from '../../components/ModuleTile.astro';
-import { getModules } from '../../lib/db';
-import { slugify } from '../../lib/db';
+import Spread from '../../components/Spread.astro';
+import Entry from '../../components/Entry.astro';
+import { getModules, getBlogPosts, getSiteSettings, slugify } from '../../lib/db';
+import { u } from '../../lib/site';
+import { pageMap } from '../../lib/zine';
 
-const modules = await getModules();
+const [modules, posts, settings] = await Promise.all([getModules(), getBlogPosts(), getSiteSettings()]);
+const P = pageMap(modules, posts.length);
 const langs = [...new Map(modules.filter((m) => m.language).map((m) => [m.language!, m.language_color])).entries()];
+const half = Math.ceil(modules.length / 2);
+const first = modules[0];
 
 // Filtering is pure CSS: a radio per language + :has(). Zero JS.
 const filterCss = langs
-  .map(([l]) => `.catalog:has(#f-${slugify(l)}:checked) .module:not([data-lang="${slugify(l)}"]){display:none}`)
+  .map(([l]) => `.catalog:has(#f-${slugify(l)}:checked) .entry:not([data-lang="${slugify(l)}"]){display:none}`)
   .join('\n');
 ---
-<Base title="Projects" ws="projects" path="~/projects" description={`${modules.length} projects by Aneesh Sambu: shells, file systems, interpreters, distributed systems and tools.`}>
+<Base title="Projects" ws="projects" description={`${modules.length} projects by Aneesh Sambu: shells, file systems, interpreters, distributed systems and tools.`} prevHref={u('/')} nextHref={first ? u(`/projects/${first.slug}/`) : undefined}>
   <div class="catalog">
-    <div class="tiles">
-      <Win title="projects" meta={`${modules.length}`} class="wfull boot" id="catalog-head">
-        <div class="head">
-          <h1 class="h-page">Projects</h1>
-        </div>
-        <fieldset class="filters lift">
-          <legend class="label">language</legend>
+    <Spread page={P.workbench} zine={settings.zine_title} runL="workbench" runR="the catalogue" label="Project catalogue"
+      prev={{ href: u('/#offhours'), label: 'back' }} next={first ? { href: u(`/projects/${first.slug}/`), label: first.title } : null}>
+      <Fragment slot="left">
+        <p class="kicker">workbench</p>
+        <h1 class="hed hed--xl hed--wide">The catalogue</h1>
+        <fieldset class="filters">
+          <legend class="lbl">language</legend>
           <label><input type="radio" name="lang" id="f-all" checked /><span>all</span></label>
-          {langs.map(([l, c]) => (
-            <label><input type="radio" name="lang" id={`f-${slugify(l)}`} /><span><span class="dot" style={`--c:${c ?? 'var(--accent)'}`} aria-hidden="true"></span> {l}</span></label>
-          ))}
+          {langs.map(([l]) => <label><input type="radio" name="lang" id={`f-${slugify(l)}`} /><span>{l}</span></label>)}
         </fieldset>
-      </Win>
-      {modules.map((m) => (
-        <div class="slot" data-lang={m.language ? slugify(m.language) : ''}>
-          <ModuleTile m={m} thumb class={m.featured ? 'module--featured' : ''} />
-        </div>
-      ))}
-    </div>
+        <div class="list">{modules.slice(0, half).map((m) => <Entry m={m} page={P.projects[m.slug]} />)}</div>
+      </Fragment>
+      <Fragment slot="right">
+        <div class="list">{modules.slice(half).map((m) => <Entry m={m} page={P.projects[m.slug]} />)}</div>
+      </Fragment>
+    </Spread>
   </div>
-  <style set:html={filterCss.replaceAll('.module:not', '.slot:not')}></style>
+  <style set:html={filterCss}></style>
 </Base>
 
 <style>
-  .head { display: grid; gap: 0.75rem; }
-  .slot { display: grid; }
-  .filters { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .filters legend { margin-bottom: 0.5rem; padding: 0; }
+  .list { display: grid; gap: 12px; }
+  .filters { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .filters legend { float: left; margin-right: 6px; }
   .filters label { cursor: pointer; }
   .filters input { position: absolute; opacity: 0; pointer-events: none; }
-  .filters label > span {
-    display: inline-flex; align-items: center; gap: 0.4em;
-    min-height: 2.2rem; padding: 0.25rem 0.75rem;
-    border: var(--bw) solid var(--rule); border-radius: var(--radius);
-    font-family: var(--font-mono); font-size: 0.8rem;
-    background: var(--tile-2);
-  }
-  .filters input:checked + span { background: var(--accent); color: var(--on-accent); }
-  .filters input:focus-visible + span { outline: 3px solid var(--active); outline-offset: 2px; }
+  .filters label > span { display: inline-block; padding: 0.15rem 0.55rem; border: 1.5px solid var(--ink); font-family: var(--font-mono); font-size: 0.74rem; }
+  .filters input:checked + span { background: var(--black); color: var(--on-black); }
+  .filters input:focus-visible + span { outline: 3px solid var(--ink); outline-offset: 2px; }
 </style>

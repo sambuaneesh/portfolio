@@ -45,7 +45,7 @@ export type Row = Record<string, unknown> & { id?: string };
 
 const order = { k: 'order_index', type: 'number', label: 'order', help: 'lower comes first' } as const;
 
-export const THEMES = ['zine', 'zine-night', 'putty', 'nostromo', 'phosphor', 'paper', 'aero'];
+export const THEMES = ['trash', 'riso', 'riso-blue', 'toner', 'blueprint', 'acid'];
 
 export const TABLES: TableCfg[] = [
   {
@@ -222,9 +222,12 @@ export const TABLES: TableCfg[] = [
     key: 'appearance', table: 'aneesh_site_settings', label: 'Appearance', group: 'site', settings: true, order: 'key.asc',
     title: () => 'Appearance',
     fields: [
-      { k: 'theme', type: 'select', options: THEMES, def: 'zine', help: 'Every visitor sees this theme. zine / zine-night are the photocopied hacker-zine look; the rest are the older tiling-desk themes.' },
-      { k: 'cassette_tagline', label: 'cassette tagline', type: 'text', def: 'why not one more?', help: 'Label line on the 3D cassette on the home page.' },
-      { k: 'greetz', type: 'list', def: ['SA4S@SERC', 'the Arch wiki', 'man pages', 'everyone who reads the README'], help: 'Footer thank-you list, one per line.' },
+      { k: 'theme', label: 'cover colour', type: 'select', options: THEMES, def: 'trash', help: 'Every visitor sees this. The inside pages stay photocopy grey. Use Preview to look before saving.' },
+      { k: 'zine_title', label: 'masthead', type: 'text', def: 'The Boring Zine', help: 'Last word prints huge, the rest goes in the box above it.' },
+      { k: 'zine_tagline', label: 'masthead tagline', type: 'text', def: 'a systems zine by aneesh sambu' },
+      { k: 'zine_issue_theme', label: 'cover line', type: 'text', def: 'the systems issue', help: '"the X issue": the middle word(s) print big on the cover.' },
+      { k: 'zine_issue', label: 'issue number', type: 'text', def: '01' },
+      { k: 'greetz', type: 'list', def: [], help: 'Optional thank-you list printed in the credits box (real people/labs only). Leave empty to hide.' },
     ],
   },
   {

@@ -1,6 +1,6 @@
-// The whole site's runtime JS: the HYD clock, the `:` command line, tile
-// focus with hjkl, and the cartridge tilt. Plain DOM, no framework - every
-// page still works fully without it. (The theme is fixed at build time.)
+// The whole site's runtime JS: the HYD clock, the `:` command line, arrow-key
+// page turns and the admin theme-preview banner. Plain DOM, no framework -
+// every page still works fully without it. (The theme is fixed at build.)
 
 type Cmd = { l: string; h: string; u?: string; a?: string };
 
@@ -133,52 +133,6 @@ function openHelp() { help?.showModal(); }
 help?.addEventListener('click', (e) => { if (e.target === help) help.close(); });
 document.querySelectorAll('[data-help-open]').forEach((b) => b.addEventListener('click', openHelp));
 
-// --- tiles: hjkl spatial focus -------------------------------------------
-
-function tiles(): HTMLElement[] {
-  return [...document.querySelectorAll<HTMLElement>('[data-tile]')].filter((t) => t.offsetParent !== null);
-}
-
-let active: HTMLElement | null = null;
-function activate(t: HTMLElement) {
-  active?.classList.remove('is-active');
-  active = t;
-  t.classList.add('is-active');
-  if (!t.hasAttribute('tabindex')) t.tabIndex = -1;
-  t.focus({ preventScroll: true });
-  t.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-}
-
-function move(dir: 'h' | 'j' | 'k' | 'l') {
-  const all = tiles();
-  if (!all.length) return;
-  const cur = active && all.includes(active) ? active : null;
-  if (!cur) return activate(all[0]);
-  const a = cur.getBoundingClientRect();
-  const ax = a.left + a.width / 2, ay = a.top + a.height / 2;
-  let best: HTMLElement | null = null, bestD = Infinity;
-  for (const t of all) {
-    if (t === cur) continue;
-    const b = t.getBoundingClientRect();
-    const bx = b.left + b.width / 2, by = b.top + b.height / 2;
-    const dx = bx - ax, dy = by - ay;
-    const ok = dir === 'l' ? b.left >= a.right - 4
-      : dir === 'h' ? b.right <= a.left + 4
-      : dir === 'j' ? b.top >= a.bottom - 4
-      : b.bottom <= a.top + 4;
-    if (!ok) continue;
-    // primary axis distance, heavily penalise drift on the other axis
-    const d = dir === 'h' || dir === 'l' ? Math.abs(dx) + Math.abs(dy) * 2 : Math.abs(dy) + Math.abs(dx) * 2;
-    if (d < bestD) { bestD = d; best = t; }
-  }
-  if (best) activate(best);
-}
-
-document.addEventListener('focusin', (e) => {
-  const t = (e.target as HTMLElement).closest<HTMLElement>('[data-tile]');
-  if (t && t !== active) { active?.classList.remove('is-active'); active = null; }
-});
-
 // --- global keys ------------------------------------------------------------
 
 const WS: Record<string, string> = {};
@@ -194,36 +148,13 @@ document.addEventListener('keydown', (e) => {
   if (e.key === ':' || e.key === '/') { e.preventDefault(); return openCmd(); }
   if (e.key === '?') { e.preventDefault(); return openHelp(); }
   if (WS[e.key]) { location.href = WS[e.key]; return; }
-  if ('hjkl'.includes(e.key) && e.key.length === 1) { e.preventDefault(); return move(e.key as 'h'); }
-  if (e.key === 'Enter' && active && el === active) {
-    active.querySelector<HTMLAnchorElement>('[data-primary]')?.click();
+  // ← / → turn the page (the layout publishes rel=prev/next links)
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    const rel = e.key === 'ArrowRight' ? 'next' : 'prev';
+    const link = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+    if (link && document.documentElement.scrollWidth <= innerWidth) { e.preventDefault(); location.href = link.href; }
   }
-  if (e.key === 'Escape' && active) { active.classList.remove('is-active'); active.blur(); active = null; }
 });
-
-// --- cartridge tilt (fine pointer + motion allowed only) --------------------
-
-if (matchMedia('(pointer: fine) and (prefers-reduced-motion: no-preference)').matches) {
-  document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((stage) => {
-    const cart = stage.querySelector<HTMLElement>('.cart');
-    if (!cart) return;
-    let raf = 0;
-    stage.parentElement?.addEventListener('pointermove', (e) => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const r = stage.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width - 0.5;
-        const y = (e.clientY - r.top) / r.height - 0.5;
-        cart.style.setProperty('--ry', `${24 + x * 30}deg`);
-        cart.style.setProperty('--rx', `${-16 - y * 22}deg`);
-      });
-    });
-    stage.parentElement?.addEventListener('pointerleave', () => {
-      cart.style.removeProperty('--ry');
-      cart.style.removeProperty('--rx');
-    });
-  });
-}
 
 // `:print cv` lands on /cv/#print
 if (location.hash === '#print') {
@@ -234,3 +165,20 @@ if (location.hash === '#print') {
 // For whoever opens devtools.
 console.log('%cwhy not one more?', 'font: 700 14px monospace; background:#ff48b0; color:#111; padding:2px 6px');
 console.log('source: https://github.com/sambuaneesh/portfolio · press : on the page for commands');
+
+// Admin theme preview (?preview=<theme>, set up by the inline head script):
+// keep the parameter on internal links and say clearly that it's a preview.
+const preview = document.documentElement.dataset.preview;
+if (preview) {
+  document.querySelectorAll<HTMLAnchorElement>('a[href^="/"]').forEach((a) => {
+    const url = new URL(a.href);
+    if (url.origin === location.origin && !url.pathname.includes('/admin/')) {
+      url.searchParams.set('preview', preview);
+      a.href = url.href;
+    }
+  });
+  const flag = document.createElement('div');
+  flag.className = 'preview-flag';
+  flag.innerHTML = `<span>previewing theme: ${preview}</span><a href="${location.pathname}">exit</a>`;
+  document.body.append(flag);
+}

@@ -1,6 +1,5 @@
 ---
 import '../styles/global.css';
-import '../styles/zine.css';
 import archivo from '../assets/fonts/archivo-subset.woff2?url';
 import { WORKSPACES, BUILD, u, fmtDate, type WorkspaceKey } from '../lib/site';
 import { getPersonalInfo, getModules, getSiteSettings, THEMES } from '../lib/db';
@@ -9,26 +8,22 @@ interface Props {
   title?: string;
   description?: string;
   ws?: WorkspaceKey | null;
-  path?: string;
   noindex?: boolean;
   image?: string;
+  prevHref?: string;
+  nextHref?: string;
 }
 
-const { title, description, ws = null, path = '~', noindex = false, image } = Astro.props;
+const { title, description, ws = null, noindex = false, image, prevHref, nextHref } = Astro.props;
 const [me, modules, settings] = await Promise.all([getPersonalInfo(), getModules(), getSiteSettings()]);
 
-// One theme for everyone, picked in /admin and baked in at build.
-const theme = (THEMES as readonly string[]).includes(settings.theme) ? settings.theme : 'zine';
-const THEME_COLOR: Record<string, string> = {
-  zine: '#e8e4d8', 'zine-night': '#111111', putty: '#d9d2bf', nostromo: '#0d0c09', phosphor: '#050805', paper: '#ffffff', aero: '#2f8fd8',
-};
+// One cover colour for everyone, picked in /admin and baked in at build.
+const theme = (THEMES as readonly string[]).includes(settings.theme) ? settings.theme : 'trash';
 
 const fullTitle = title ? `${title} · ${me.name}` : `${me.name} · ${me.title}`;
 const desc = description ?? me.bio.split('. ').slice(0, 2).join('. ').replace(/\.?$/, '.');
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = image ?? me.avatar_url ?? undefined;
-
-const handle = me.name.split(' ')[0].toLowerCase();
 
 // Everything the `:` command line can do, baked into the page as JSON.
 const commands = [
@@ -68,10 +63,12 @@ const jsonLd = {
     <meta name="author" content={me.name} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
-    <meta name="theme-color" content={THEME_COLOR[theme]} />
+    <meta name="theme-color" content="#2a2926" />
     <link rel="icon" href={u('/favicon.svg')} type="image/svg+xml" />
     <link rel="sitemap" href={u('/sitemap-index.xml')} />
     <link rel="preload" href={archivo} as="font" type="font/woff2" crossorigin />
+    {prevHref && <link rel="prev" href={prevHref} />}
+    {nextHref && <link rel="next" href={nextHref} />}
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={fullTitle} />
@@ -80,7 +77,20 @@ const jsonLd = {
     {ogImage && <meta property="og:image" content={ogImage} />}
     <meta name="twitter:card" content="summary" />
 
-    <!-- Chromium prerenders same-site links on hover: navigation feels instant. -->
+    <!-- Theme preview for the admin (?preview=<theme>): only when signed in,
+         or on a local dev/preview server. Never changes the published site. -->
+    <script is:inline define:vars={{ themes: [...THEMES] }}>
+      (function () {
+        var t = new URLSearchParams(location.search).get('preview');
+        if (!t || themes.indexOf(t) < 0) return;
+        var admin = false;
+        try { admin = !!localStorage.getItem('admin_token'); } catch (e) {}
+        if (!admin && !/^(localhost|127\.|\[::1\])/.test(location.hostname)) return;
+        document.documentElement.dataset.theme = t;
+        document.documentElement.dataset.preview = t;
+      })();
+    </script>
+    <!-- Chromium prerenders same-site links on hover: page turns feel instant. -->
     <script type="speculationrules" is:inline set:html={JSON.stringify({
       prerender: [{ where: { and: [{ href_matches: `${u('/')}*` }, { not: { href_matches: `${u('/admin/')}*` } }] }, eagerness: 'moderate' }],
     })} />
@@ -91,40 +101,32 @@ const jsonLd = {
     <a class="skip" href="#main">Skip to content</a>
 
     <header class="bar">
-      <div class="bar__group">
-        <a class="bar__brand" href={u('/')}>
-          <span class="tape tape--accent">AS</span><span>{handle}</span>
-        </a>
-        <nav class="bar__group bar__ws" aria-label="Workspaces">
-          {WORKSPACES.map((w) => (
-            <a class="ws" href={u(w.href)} aria-current={ws === w.key ? 'page' : undefined} data-ws={w.n}>
-              <span class="ws__n">{w.n}</span><span>{w.label}</span>
-            </a>
-          ))}
-        </nav>
-      </div>
-      <div class="bar__group bar__group--right">
-        <span class="bar__path" title="current path">{handle}@iiith:{path}</span>
+      <a class="bar__brand" href={u('/')}><b>#{settings.zine_issue}</b>{settings.zine_title.toLowerCase()}</a>
+      <nav class="bar__nav" aria-label="Sections">
+        {WORKSPACES.map((w) => (
+          <a class="ws" href={u(w.href)} aria-current={ws === w.key ? 'page' : undefined} data-ws={w.n}>
+            <span class="ws__n">{w.n}</span><span>{w.label}</span>
+          </a>
+        ))}
+      </nav>
+      <div class="bar__right">
         <span class="clock" data-clock title="Local time in Hyderabad">HYD --:--</span>
         <button class="chip" type="button" data-cmd-open title="Command line"><kbd>:</kbd><span>cmd</span></button>
         <button class="chip chip--help" type="button" data-help-open title="Keyboard shortcuts"><kbd>?</kbd><span class="sr-only"> help</span></button>
       </div>
     </header>
 
-    <main id="main" class="desk" tabindex="-1">
+    <main id="main" class="zine" tabindex="-1">
       <slot />
     </main>
 
-    {settings.greetz?.length > 0 && (
-      <p class="greetz"><span class="greetz__k">greetz</span> {settings.greetz.join(' · ')}</p>
-    )}
     <footer class="statusline">
-      <span class="mode" data-mode>NORMAL</span>
-      <span class="grow">{settings.footer_text} · built {fmtDate(BUILD.at)} · <a href={settings.footer_github_url}>src@{BUILD.commit}</a></span>
-      <span class="no-print">press <kbd class="k">:</kbd> for commands</span>
+      <span data-mode>{settings.footer_text} · printed {fmtDate(BUILD.at)}</span>
+      <a href={settings.footer_github_url}>src@{BUILD.commit}</a>
+      <span class="no-print">← → turn pages · <kbd class="k">:</kbd> commands</span>
     </footer>
 
-    <nav class="dock" aria-label="Workspaces">
+    <nav class="dock" aria-label="Sections">
       {WORKSPACES.map((w) => (
         <a href={u(w.href)} aria-current={ws === w.key ? 'page' : undefined}><span>{w.n}</span><span>{w.label}</span></a>
       ))}
@@ -139,9 +141,8 @@ const jsonLd = {
     <dialog id="help" aria-label="Keyboard shortcuts">
       <div class="win__bar"><span class="win__title">keyboard</span></div>
       <dl class="keys">
-        <dt><kbd class="k">1</kbd>–<kbd class="k">5</kbd></dt><dd>switch workspace</dd>
-        <dt><kbd class="k">h</kbd><kbd class="k">j</kbd><kbd class="k">k</kbd><kbd class="k">l</kbd></dt><dd>move focus between tiles</dd>
-        <dt><kbd class="k">↵</kbd></dt><dd>open the focused tile</dd>
+        <dt><kbd class="k">←</kbd> <kbd class="k">→</kbd></dt><dd>turn the page</dd>
+        <dt><kbd class="k">1</kbd>–<kbd class="k">5</kbd></dt><dd>jump to a section</dd>
         <dt><kbd class="k">:</kbd> / <kbd class="k">ctrl</kbd><kbd class="k">k</kbd></dt><dd>command line</dd>
         <dt><kbd class="k">?</kbd></dt><dd>this help</dd>
         <dt><kbd class="k">esc</kbd></dt><dd>close</dd>

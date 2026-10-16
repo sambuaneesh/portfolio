@@ -286,7 +286,14 @@ export function mountAdmin(root: HTMLElement) {
       form.append(node);
     }
     const save = h('button', { class: 'btn btn--hot', type: 'submit' }, 'Save');
-    form.append(h('div', { class: 'btns' }, save), status);
+    // Preview: open the site with this theme without saving or publishing.
+    const preview = getters.theme
+      ? h('button', {
+        class: 'btn', type: 'button',
+        onclick: () => window.open(`${location.pathname.replace(/admin\/?$/, '')}?preview=${encodeURIComponent(String(getters.theme()))}`, '_blank', 'noopener'),
+      }, 'Preview theme ↗')
+      : null;
+    form.append(h('div', { class: 'btns' }, save, preview), status);
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       save.disabled = true;

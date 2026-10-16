@@ -1,30 +1,33 @@
 ---
 import Base from '../layouts/Base.astro';
-import Win from '../components/Win.astro';
-import { getPersonalInfo } from '../lib/db';
+import Spread from '../components/Spread.astro';
+import { getPersonalInfo, getModules, getBlogPosts, getSiteSettings } from '../lib/db';
+import { u } from '../lib/site';
+import { pageMap } from '../lib/zine';
 
-const me = await getPersonalInfo();
+const [me, modules, posts, settings] = await Promise.all([getPersonalInfo(), getModules(), getBlogPosts(), getSiteSettings()]);
+const P = pageMap(modules, posts.length);
 const supabase = { url: import.meta.env.PUBLIC_SUPABASE_URL, key: import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY };
 const channels = [
-  me.email && { k: 'email', v: me.email, href: `mailto:${me.email}` },
-  me.linkedin && { k: 'linkedin', v: 'linkedin.com/in/aneesh-sambu', href: me.linkedin },
-  me.github && { k: 'github', v: me.github.replace(/^https?:\/\//, ''), href: me.github },
+  me.email && { k: 'MAIL', v: me.email, href: `mailto:${me.email}` },
+  me.linkedin && { k: 'LNK', v: 'linkedin.com/in/aneesh-sambu', href: me.linkedin },
+  me.github && { k: 'GIT', v: me.github.replace(/^https?:\/\//, ''), href: me.github },
 ].filter(Boolean) as { k: string; v: string; href: string }[];
 ---
-<Base title="Contact" ws="contact" path="~/contact" description={`Send ${me.name} a message or a structured task request.`}>
-  <div class="tiles">
-    <Win title="contact" class="w2 boot" id="comms-head">
-      <h1 class="h-page">Contact</h1>
-      <p class="lede muted">Research, internships, or something you want built. Email works too.</p>
-    </Win>
-
-    <Win title="elsewhere" class="boot boot-2" id="lines">
-      <ul class="ports">
-        {channels.map((c) => <li><span class="tape">{c.k}</span><a href={c.href}>{c.v}</a></li>)}
-      </ul>
-    </Win>
-
-    <Win title="write" class="wfull reveal" id="transmit">
+<Base title="Contact" ws="contact" description={`Send ${me.name} a message or a task request.`} prevHref={u('/writing/')}>
+  <Spread page={P.contact} zine={settings.zine_title} runL="write to me" runR="write to me" label="Contact" prev={{ href: u('/writing/'), label: 'writing' }}>
+    <Fragment slot="left">
+      <p class="kicker">letters · classifieds</p>
+      <h1 class="hed hed--xl hed--wide">Write to me</h1>
+      <p class="copy dropcap">Research, internships, or something you want built. The form lands in my inbox; email works too.</p>
+      <div class="ad">
+        <p class="hed hed--s">direct lines</p>
+        <ul class="ports">
+          {channels.map((c) => <li><span class="lbl">{c.k}</span><a href={c.href}>{c.v}</a></li>)}
+        </ul>
+      </div>
+    </Fragment>
+    <Fragment slot="right">
       <div class="comms" data-comms data-url={supabase.url} data-key={supabase.key}>
         <div class="tabs" role="radiogroup" aria-label="Form type">
           <label><input type="radio" name="mode" value="message" checked /><span>Message</span></label>
@@ -78,8 +81,8 @@ const channels = [
         </form>
         <noscript><p class="notice">The forms need JavaScript. Email me instead: <a href={`mailto:${me.email}`}>{me.email}</a></p></noscript>
       </div>
-    </Win>
-  </div>
+    </Fragment>
+  </Spread>
 </Base>
 
 <script>
@@ -139,15 +142,15 @@ const channels = [
     font-family: var(--font-mono); font-size: 0.82rem; font-weight: 700; text-transform: uppercase;
     background: var(--tile-2); cursor: pointer;
   }
-  .tabs input:checked + span { background: var(--accent); color: var(--on-accent); }
+  .tabs input:checked + span { background: var(--black); color: var(--on-black); }
   .tabs input:focus-visible + span { outline: 3px solid var(--active); outline-offset: 2px; }
   .form { display: grid; gap: 0.9rem; }
   /* Tab switching is CSS-only. */
   .comms:has(input[value='message']:checked) .form--task,
   .comms:has(input[value='task']:checked) .form--message { display: none; }
   .ports { list-style: none; display: grid; gap: 0.55rem; }
-  .ports li { display: grid; grid-template-columns: 4.6rem 1fr; gap: 0.6rem; align-items: center; min-width: 0; }
+  .ad { display: grid; gap: 10px; padding: 14px 16px; border: 3px solid var(--ink); }
+  .ports li { display: grid; grid-template-columns: 3.6rem 1fr; gap: 0.6rem; align-items: center; min-width: 0; }
   .ports .tape { text-align: center; }
   .ports a { font-family: var(--font-mono); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  select.input { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%), linear-gradient(135deg, var(--ink) 50%, transparent 50%); background-position: calc(100% - 18px) 55%, calc(100% - 12px) 55%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 2rem; }
 </style>
