@@ -723,8 +723,12 @@ kbd.k {
    about to scroll into view (still searchable, still linkable by #id). */
 .spread + .spread + .spread {
   content-visibility: auto;
-  contain-intrinsic-size: auto 940px;
+  /* stand-in height until rendered: one spread = one digest page */
+  contain-intrinsic-size: auto calc(var(--pw) * 8.5 / 5.5 + 48px);
 }
 
 /* build used the archived snapshot (admin-only hint, see snapshot.ts) */
 .fallback { margin-left: 1px; color: var(--desk-ink); cursor: help; }
+
+/* a headline that must stay on one line, sized from the page width */
+.fit-line { white-space: nowrap; font-size: clamp(1.3rem, calc(var(--pw) * 0.072), 2.9rem); }

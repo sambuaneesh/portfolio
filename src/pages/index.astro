@@ -238,32 +238,39 @@ const ports = [
           ))}
         </ol>
         {typing && typing.best.length > 0 && (
-          <article class="ticket" aria-label={`Monkeytype: ${typing.best[0].wpm} words per minute`}>
-            <header class="ticket__head">
-              <p class="ticket__title">typing citation</p>
-              <p class="ticket__no mono">No. {typing.tests}</p>
-            </header>
-            <div class="ticket__body">
-              <svg class="gauge" viewBox="0 0 120 70" aria-hidden="true">
+          <article class="slip taped taped--top" aria-label={`Monkeytype: ${typing.best[0].wpm} words per minute`}>
+            <div class="slip__top">
+              <p class="slip__form mono">form 0x9E · no. {typing.tests} · via monkeytype.com</p>
+              <p class="stamp slip__stamp">typing citation</p>
+            </div>
+            <div class="slip__body">
+              <svg class="gauge" viewBox="0 0 120 72" aria-hidden="true">
                 <path class="gauge__arc" d="M10 64 A50 50 0 0 1 110 64" />
                 <path class="gauge__red" d={`M${60 + 50 * Math.cos(Math.PI * (1 - 140 / 200))} ${64 - 50 * Math.sin(Math.PI * (1 - 140 / 200))} A50 50 0 0 1 110 64`} />
                 {Array.from({ length: 11 }, (_, i) => {
                   const a = Math.PI * (1 - i / 10);
                   return <line class="gauge__tick" x1={60 + 44 * Math.cos(a)} y1={64 - 44 * Math.sin(a)} x2={60 + 50 * Math.cos(a)} y2={64 - 50 * Math.sin(a)} />;
                 })}
-                <line class="gauge__needle" x1="60" y1="64" x2={60 + 46 * Math.cos(Math.PI * (1 - Math.min(typing.best[0].wpm, 200) / 200))} y2={64 - 46 * Math.sin(Math.PI * (1 - Math.min(typing.best[0].wpm, 200) / 200))} />
-                <circle class="gauge__hub" cx="60" cy="64" r="4" />
-                <text class="gauge__val" x="60" y="50" text-anchor="middle">{typing.best[0].wpm}</text>
+                <line class="gauge__needle" x1="60" y1="64" x2={60 + 47 * Math.cos(Math.PI * (1 - Math.min(typing.best[0].wpm, 200) / 200))} y2={64 - 47 * Math.sin(Math.PI * (1 - Math.min(typing.best[0].wpm, 200) / 200))} />
+                <circle class="gauge__hub" cx="60" cy="64" r="3.5" />
+                <text class="gauge__unit" x="60" y="40" text-anchor="middle">wpm</text>
               </svg>
-              <dl class="ticket__rows">
+              <dl class="slip__rows">
                 <div><dt>offender</dt><dd><a href={typing.url} rel="noopener">{typing.name}</a></dd></div>
-                <div><dt>recorded</dt><dd><b>{typing.best[0].wpm} wpm</b> ({typing.best[0].label}) · {typing.best[0].acc}% acc</dd></div>
-                {typing.best.length > 1 && <div><dt>also clocked</dt><dd>{typing.best.slice(1).map((b) => `${b.wpm} / ${b.label}`).join(' · ')}</dd></div>}
-                <div><dt>priors</dt><dd>{typing.tests.toLocaleString('en-US')} tests · {typing.hours} h</dd></div>
-                {typing.rank && <div><dt>standing</dt><dd>top {typing.rank.pct}% ({typing.rank.mode})</dd></div>}
+                <div><dt>clocked at</dt><dd>{typing.best[0].wpm} wpm, {typing.best[0].acc}% ({typing.best[0].label})</dd></div>
+                {typing.best.length > 1 && <div><dt>also</dt><dd>{typing.best.slice(1).map((b) => `${b.wpm} (${b.label})`).join(', ')}</dd></div>}
+                <div><dt>priors</dt><dd>{typing.tests.toLocaleString('en-US')} tests, {typing.hours} h</dd></div>
+                {typing.rank && <div><dt>standing</dt><dd>top {typing.rank.pct}%</dd></div>}
               </dl>
             </div>
-            <footer class="ticket__foot"><span class="mono">issued by monkeytype.com</span><span class="ticket__sig" aria-hidden="true" set:html={signature} /></footer>
+            <svg class="mtstamp" viewBox="0 0 100 100" aria-hidden="true">
+              <defs><path id="mt-ring" d="M50 50 m-35 0 a35 35 0 1 1 70 0 a35 35 0 1 1 -70 0" /></defs>
+              <circle cx="50" cy="50" r="46" class="mtstamp__line" />
+              <circle cx="50" cy="50" r="27" class="mtstamp__line" />
+              <text class="mtstamp__ring"><textPath href="#mt-ring" textLength="214" lengthAdjust="spacing">monkeytype · verified · monkeytype · verified ·</textPath></text>
+              <text x="50" y="52" text-anchor="middle" class="mtstamp__n">{typing.best[0].wpm}</text>
+              <text x="50" y="64" text-anchor="middle" class="mtstamp__u">wpm</text>
+            </svg>
           </article>
         )}
         <div class="screenbox torn-top">
@@ -342,7 +349,7 @@ const ports = [
         <p class="kicker">classifieds</p>
         <div class="ad">
           <p class="ad__head"><span class="ringed"><Ransom text="WANTED" /><Scribble kind="ring" /></span> <span class="note note--tilt">yes, you</span></p>
-          <p class="copy">Collaborators, research ideas, internships, or just an interesting problem. Also co-op partners, for Stardew or anything with a lobby; Steam is in the ports below. Write in either way.</p>
+          <p class="copy">Collaborators, research ideas, internships, or just an interesting problem. Also teammates for whatever game you're on; send an invite and I'll hop in.</p>
           <a class="btn btn--hot" href={u('/contact/')}>write to me</a>
         </div>
         <div class="ad ad--ports">
@@ -465,10 +472,10 @@ const ports = [
     letter-spacing: 0.32em; font-size: 0.95rem; border-left: 2px solid var(--ink); padding-left: 8px;
   }
   .ps ul { list-style: none; display: grid; gap: 6px; margin-top: 8px; font-family: var(--font-mono); font-size: 0.76rem; }
+  /* signed off with the real signature (traced to SVG), in the edition's pen */
   .sign { align-self: flex-end; }
-  /* the real signature, traced to SVG; inked in the edition's pen colour */
-  .sig { display: block; width: 150px; color: var(--pen); rotate: -3deg; }
-  .sig :global(svg), .ticket__sig :global(svg) { display: block; width: 100%; height: auto; }
+  .sig { display: block; width: 170px; color: var(--pen); rotate: -3deg; }
+  .sig :global(svg) { display: block; width: 100%; height: auto; }
 
   /* this issue ----------------------------------------------------------------- */
   .feat { display: grid; gap: 12px; }
@@ -488,49 +495,55 @@ const ports = [
   .awards { list-style: none; display: grid; gap: 9px; }
   .awards li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; }
   .awards .copy { font-size: 0.84rem; margin-top: 1px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  /* typing citation (Monkeytype) */
-  .ticket {
+  /* typing citation (Monkeytype): a paper form taped into the zine, the
+     blanks filled in by hand in the edition's pen, stamped in red */
+  .slip {
     position: relative;
+    padding: 14px 14px 10px;
     background: var(--field);
-    border: 1.5px solid var(--ink);
+    color: var(--ink);
     font-family: var(--font-mono);
-    font-size: 0.68rem;
-    rotate: -0.6deg;
-    /* perforated tear-off edge on the left */
-    -webkit-mask: radial-gradient(circle at 0 9px, transparent 3.2px, #000 3.6px) 0 0 / 100% 18px repeat-y;
-    mask: radial-gradient(circle at 0 9px, transparent 3.2px, #000 3.6px) 0 0 / 100% 18px repeat-y;
+    font-size: 0.66rem;
+    rotate: -1.2deg;
+    clip-path: polygon(0 5px, 4% 0, 9% 4px, 15% 1px, 22% 5px, 30% 0, 38% 4px, 46% 1px, 54% 5px, 62% 0, 70% 4px, 78% 1px, 86% 5px, 93% 0, 100% 4px, 100% calc(100% - 4px), 94% 100%, 87% calc(100% - 5px), 79% 100%, 71% calc(100% - 4px), 63% 100%, 55% calc(100% - 5px), 47% 100%, 39% calc(100% - 4px), 31% 100%, 23% calc(100% - 5px), 15% 100%, 8% calc(100% - 4px), 0 100%);
   }
-  .ticket__head { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 12px 5px 16px; background: var(--black); color: var(--on-black); }
-  .ticket__title { font-family: var(--font-sans); font-weight: 900; font-stretch: 112%; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.82rem; }
-  .ticket__no { font-size: 0.7rem; opacity: 0.85; }
-  .ticket__body { display: grid; grid-template-columns: 88px 1fr; gap: 10px; align-items: center; padding: 6px 12px 2px 16px; }
-  .ticket__rows { margin: 0; display: grid; gap: 1px; }
-  .ticket__rows div { display: flex; align-items: baseline; gap: 6px; }
-  .ticket__rows div::after { content: ''; order: 1; flex: 1; border-bottom: 1px dotted var(--muted); translate: 0 -3px; }
-  .ticket__rows dt { order: 0; color: var(--muted); white-space: nowrap; }
-  .ticket__rows dd { order: 2; margin: 0; text-align: right; }
-  .ticket__rows b { font-weight: 700; }
-  .ticket__foot { display: flex; justify-content: space-between; align-items: end; padding: 0 12px 6px 16px; border-top: 1px dashed var(--ink); margin: 4px 0 0; color: var(--muted); font-size: 0.62rem; }
-  .ticket__sig { display: block; width: 84px; color: var(--pen); rotate: -4deg; margin-top: -6px; }
-  .gauge { width: 88px; height: auto; overflow: visible; }
-  .gauge__arc, .gauge__red { fill: none; stroke-width: 6; }
-  .gauge__arc { stroke: var(--paper-2); }
-  .gauge__red { stroke: var(--cover); }
+  .slip__top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .slip__form { text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-size: 0.62rem; }
+  .slip__stamp { color: var(--stamp); opacity: 0.85; font-size: 0.78rem; rotate: -5deg; margin: -6px 0 -4px; padding: 0.05rem 0.5rem; }
+  .slip__body { display: grid; grid-template-columns: 84px 1fr; gap: 10px; align-items: center; margin-top: 2px; }
+  .slip__rows { margin: 0; display: grid; gap: 1px; }
+  .slip__rows div { display: grid; grid-template-columns: 4.6rem 1fr; align-items: end; gap: 6px; }
+  .slip__rows dt { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.58rem; color: var(--muted); padding-bottom: 2px; }
+  /* the filled-in blank: handwriting on a printed rule */
+  .slip__rows dd { margin: 0; border-bottom: 1px solid var(--ink); font-family: var(--font-hand); font-size: 0.98rem; line-height: 1.05; color: var(--pen); padding: 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .slip__rows dd a { color: inherit !important; text-decoration: none !important; }
+  /* round rubber stamp from the "issuer" */
+  .mtstamp { position: absolute; right: 12px; bottom: 6px; width: 76px; height: 76px; rotate: -16deg; color: var(--stamp); opacity: 0.82; pointer-events: none; }
+  .mtstamp__line { fill: none; stroke: currentColor; stroke-width: 2.4; }
+  .mtstamp__ring { font-family: var(--font-sans); font-weight: 900; font-stretch: 70%; font-size: 8.6px; letter-spacing: 0; text-transform: uppercase; fill: currentColor; }
+  .mtstamp__n { font-family: var(--font-sans); font-weight: 900; font-stretch: 62%; font-size: 21px; fill: currentColor; }
+  .mtstamp__u { font-family: var(--font-mono); font-weight: 700; font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase; fill: currentColor; }
+  .slip__rows { padding-right: 70px; }
+  /* the gauge is printed in ink; the needle is drawn in pen */
+  .gauge { width: 84px; height: auto; overflow: visible; }
+  .gauge__arc { fill: none; stroke: var(--ink); stroke-width: 1.4; }
+  .gauge__red { fill: none; stroke: var(--stamp); stroke-width: 5; stroke-dasharray: 2 2; }
   .gauge__tick { stroke: var(--ink); stroke-width: 1.2; }
-  .gauge__needle { stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
-  .gauge__hub { fill: var(--ink); }
-  .gauge__val { font-family: var(--font-sans); font-weight: 900; font-stretch: 62%; font-size: 20px; fill: var(--ink); }
+  .gauge__needle { stroke: var(--pen); stroke-width: 2.6; stroke-linecap: round; }
+  .gauge__hub { fill: var(--pen); }
+  .gauge__unit { font-family: var(--font-mono); font-size: 9px; fill: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
   .chain { list-style: none; display: grid; gap: 4px; margin-top: 10px; font-size: 0.76rem; }
   .chain li { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px dotted var(--ink); }
   .small { font-size: 0.72rem; margin-top: 8px; }
 
   /* off hours -------------------------------------------------------------------- */
-  .subs { list-style: none; display: grid; gap: 14px; }
+  .subs { list-style: none; display: grid; gap: 11px; }
   .subs li { display: grid; grid-template-columns: 2.4rem 1fr; gap: 12px; align-items: start; }
   .subs__g { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; background: var(--black); color: var(--on-black); font-weight: 700; }
   .subs .copy { font-size: 0.88rem; margin-top: 2px; }
+  :global([data-theme='blueprint']) .subs .copy { font-size: 0.74rem; line-height: 1.45; }
   .off { display: grid; gap: 10px; margin-top: auto; }
-  .games { list-style: none; display: grid; gap: 7px; }
+  .games { list-style: none; display: grid; gap: 6px; }
   /* recently played / most played: CSS-only tabs */
   .gtabs__bar { display: flex; gap: 6px; margin-bottom: 8px; }
   .gtabs__bar label { padding: 0.1rem 0.55rem; border: 1.5px solid var(--ink); font-family: var(--font-mono); font-size: 0.72rem; cursor: var(--hand-cursor), pointer; }

@@ -41,7 +41,9 @@ const voices = ['hed--wide', 'hed--cond', 'hed--outline', 'hed--inverse'];
 const voice = voices[i % voices.length];
 // long names step down a size instead of breaking mid-word
 const longest = Math.max(...m.title.split(/\s+/).map((w) => w.length));
-const size = longest <= 7 ? 'hed--xl' : longest <= 11 ? 'hed--l' : 'hed--m';
+// the wide voice takes ~40% more room per letter
+const room = voice === 'hed--wide' ? longest * 1.4 : longest;
+const size = room <= 7 ? 'hed--xl' : room <= 11 ? 'hed--l' : 'hed--m';
 
 const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const spec: [string, string | null][] = [

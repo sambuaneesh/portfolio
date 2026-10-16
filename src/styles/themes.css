@@ -321,3 +321,6 @@
 :root[data-theme='hotline'] { --shot-bg: var(--hot); --shot-filter: grayscale(1) contrast(1.25) brightness(1.1); }
 :root[data-theme='acid'] { --shot-filter: grayscale(1) contrast(1.6) brightness(1.08); }
 :root[data-theme='blueprint'] .shot::after, :root[data-theme='toner'] .shot::after { mix-blend-mode: multiply; opacity: 0.5; }
+
+/* stamps on dark paper: light ink must not be multiplied away */
+:root[data-theme='toner'] .stamp, :root[data-theme='blueprint'] .stamp { mix-blend-mode: normal; }
