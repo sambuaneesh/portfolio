@@ -342,7 +342,7 @@ const ports = [
         <p class="kicker">classifieds</p>
         <div class="ad">
           <p class="ad__head"><span class="ringed"><Ransom text="WANTED" /><Scribble kind="ring" /></span> <span class="note note--tilt">yes, you</span></p>
-          <p class="copy">Collaborators, research ideas, internships, or just an interesting problem. If you think we could build something together, write in.</p>
+          <p class="copy">Collaborators, research ideas, internships, or just an interesting problem. Also co-op partners, for Stardew or anything with a lobby; Steam is in the ports below. Write in either way.</p>
           <a class="btn btn--hot" href={u('/contact/')}>write to me</a>
         </div>
         <div class="ad ad--ports">
@@ -546,7 +546,8 @@ const ports = [
   .games__name { font-family: var(--font-sans); font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* classifieds ------------------------------------------------------------------- */
-  .ad { display: grid; gap: 10px; padding: 14px 16px; border: 3px solid var(--ink); }
+  #classifieds { gap: 11px; }
+  .ad { display: grid; gap: 8px; padding: 12px 16px; border: 3px solid var(--ink); }
   .ad__head { font-family: var(--font-sans); font-weight: 900; font-stretch: 125%; font-size: 2rem; line-height: 0.9; letter-spacing: 0.02em; }
   .ad__head--s { font-size: 1.1rem; }
   .ad .btn { justify-self: start; }
