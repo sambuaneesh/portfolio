@@ -323,8 +323,8 @@ const ports = [
   /* contents --------------------------------------------------------------- */
   .credits { background: var(--black); color: var(--on-black); padding: 12px 14px; rotate: -1.5deg; }
   .credits dl { margin: 0; display: grid; gap: 4px; font-family: var(--font-mono); font-size: 0.74rem; }
-  .credits div { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px dotted #6a675f; padding-bottom: 3px; }
-  .credits dt { color: #a9a59a; text-transform: uppercase; letter-spacing: 0.08em; }
+  .credits div { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px dotted color-mix(in srgb, var(--on-black) 35%, transparent); padding-bottom: 3px; }
+  .credits dt { color: var(--on-black-muted); text-transform: uppercase; letter-spacing: 0.08em; }
   .credits dd { margin: 0; text-align: right; }
   .credits a { color: inherit; }
   .toc-wrap { columns: 2 12rem; column-gap: 22px; }

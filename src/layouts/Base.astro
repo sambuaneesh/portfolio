@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import '../styles/punk.css';
+import '../styles/themes.css';
 import archivo from '../assets/fonts/archivo-subset.woff2?url';
 import { WORKSPACES, BUILD, u, fmtDate, type WorkspaceKey } from '../lib/site';
 import { getPersonalInfo, getModules, getSiteSettings, THEMES } from '../lib/db';
@@ -21,7 +22,8 @@ const { title, description, ws = null, noindex = false, image, prevHref, nextHre
 const [me, modules, settings] = await Promise.all([getPersonalInfo(), getModules(), getSiteSettings()]);
 
 // One cover colour for everyone, picked in /admin and baked in at build.
-const theme = (THEMES as readonly string[]).includes(settings.theme) ? settings.theme : 'trash';
+const wanted = settings.theme === 'riso-blue' ? 'riso' : settings.theme; // retired name
+const theme = (THEMES as readonly string[]).includes(wanted) ? wanted : 'trash';
 
 const fullTitle = title ? `${title} · ${me.name}` : `${me.name} · ${me.title}`;
 const desc = description ?? me.bio.split('. ').slice(0, 2).join('. ').replace(/\.?$/, '.');

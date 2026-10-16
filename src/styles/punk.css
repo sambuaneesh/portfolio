@@ -6,13 +6,15 @@
    highlighter and torn paper. Flat CSS + tiny inline SVG, no images, no JS.
    ========================================================================== */
 
-:root[data-theme='hotline'] { --cover: #ff2e88; --on-cover: #141414; }
+
+:root {
+  --marker: #f2ea4c;
+}
 
 :root[data-punk] {
   --misprint-a: color-mix(in srgb, var(--cover) 85%, transparent);
-  --misprint-b: rgb(0 120 191 / 0.55);
+  --misprint-b: var(--misprint-2, rgb(0 120 191 / 0.55));
   --tape: rgb(244 236 186 / 0.78);
-  --marker: #f2ea4c;
 }
 
 /* --- saddle-stitch staples through the fold -------------------------------- */
@@ -105,7 +107,7 @@
 .punk-only { display: none !important; }
 :root[data-punk] .punk-only { display: revert !important; }
 :root[data-punk] .burst.punk-only { display: grid !important; place-items: center; }
-:root[data-punk] .stamp { color: #b3262b; opacity: 0.82; mix-blend-mode: multiply; }
+:root[data-punk] .stamp { color: var(--stamp); opacity: 0.82; mix-blend-mode: multiply; }
 
 .burst {
   position: absolute;
@@ -113,8 +115,8 @@
   place-items: center;
   width: 92px;
   height: 92px;
-  background: var(--marker);
-  color: var(--ink);
+  background: var(--sticker, #f2ea4c);
+  color: #141414;
   font-family: var(--font-sans);
   font-weight: 900;
   font-stretch: 80%;

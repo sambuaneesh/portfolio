@@ -65,6 +65,17 @@
   --black: #141414;
   --on-black: #e9e6df;
   --pen: #2440a8;         /* blue ballpoint for the scribbles */
+  --field: var(--field);       /* form fields, keycaps */
+  --edge-1: #d9d6cf;      /* stacked page edges, nearest first */
+  --edge-2: #c9c6be;
+  --edge-3: #b8b5ad;
+  --edge-4: #a9a69e;
+  --fold: rgb(0 0 0 / 0.2);      /* gutter shading */
+  --fold-soft: rgb(0 0 0 / 0.04);
+  --dot: rgb(0 0 0 / 0.5);       /* halftone screen */
+  --on-black-muted: #a9a59a;
+  --stamp: #b3262b;
+  --photo-filter: grayscale(1) contrast(1.3) brightness(1.05);
   --font-hand: 'Hand AS', 'Segoe Print', 'Bradley Hand', cursive;
   /* hand-drawn pointing hand, hotspot on the fingertip */
   --hand-cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 32 32'%3E%3Cpath d='M11 3c1.4 0 2.3 1 2.3 2.4V14l1-.2c.3-1.2 1.2-1.9 2.3-1.8 1.1.1 1.8.9 1.9 1.9l.8-.1c.4-1 1.3-1.5 2.3-1.3 1 .2 1.6 1 1.6 2l.6.1c.5-.8 1.4-1.1 2.2-.8.9.3 1.3 1.1 1.3 2.1v5.4c0 4.6-3.2 8.2-7.8 8.2h-2.2c-2.6 0-4.4-1-5.9-3.1L6.1 20.6c-.7-1-.5-2.3.5-3 1-.6 2.2-.4 2.9.5l1.2 1.6V5.4C8.7 4 9.6 3 11 3z' fill='%23fff' stroke='%23141414' stroke-width='1.7' stroke-linejoin='round'/%3E%3Cpath d='M13.3 14v5M17.2 13.6v5M21.2 14.4v4.6' stroke='%23141414' stroke-width='1.2' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 9 2;
@@ -83,11 +94,6 @@
   --bar-h: 2.4rem;
 }
 
-:root[data-theme='riso'] { --cover: #ff48b0; --on-cover: #141414; }
-:root[data-theme='toner'] { --cover: #161616; --on-cover: #f3f1ec; }
-:root[data-theme='blueprint'] { --cover: #1d4fa3; --on-cover: #f3f1ec; }
-:root[data-theme='acid'] { --cover: #d4f53c; --on-cover: #141414; }
-:root[data-theme='riso-blue'] { --cover: #0078bf; --on-cover: #f3f1ec; }
 
 /* --- base -------------------------------------------------------------- */
 
@@ -214,12 +220,13 @@ a:hover { text-decoration-thickness: 3px; }
 /* static photocopy grain, baked into the paper */
 .page {
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .7 -.28'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E");
+  --tex: linear-gradient(transparent, transparent); /* per-theme paper texture */
   position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
   padding: 40px clamp(20px, 3.4vw, 46px) 30px;
-  background: var(--grain), var(--paper);
+  background: var(--tex), var(--grain), var(--paper);
   color: var(--ink);
   box-shadow: 0 12px 30px rgb(0 0 0 / 0.38);
   container-type: inline-size;
@@ -235,15 +242,15 @@ a:hover { text-decoration-thickness: 3px; }
   .spread--wide .page { aspect-ratio: auto; min-height: 70vh; }
   /* the fold: shading into the gutter, and stacked page edges outside */
   .page--l {
-    background: linear-gradient(to left, rgb(0 0 0 / 0.2), rgb(0 0 0 / 0.04) 4%, transparent 9%), var(--grain), var(--paper);
-    box-shadow: -1px 1px 0 #d9d6cf, -2px 2px 0 #c9c6be, -3px 3px 0 #b8b5ad, -10px 14px 30px rgb(0 0 0 / 0.4);
+    background: linear-gradient(to left, var(--fold), var(--fold-soft) 4%, transparent 9%), var(--tex), var(--grain), var(--paper);
+    box-shadow: -1px 1px 0 var(--edge-1), -2px 2px 0 var(--edge-2), -3px 3px 0 var(--edge-3), -10px 14px 30px rgb(0 0 0 / 0.4);
   }
   .page--r {
-    background: linear-gradient(to right, rgb(0 0 0 / 0.17), rgb(0 0 0 / 0.03) 4%, transparent 9%), var(--grain), var(--paper);
-    box-shadow: 1px 1px 0 #d9d6cf, 2px 2px 0 #c9c6be, 3px 3px 0 #b8b5ad, 10px 14px 30px rgb(0 0 0 / 0.4);
+    background: linear-gradient(to right, var(--fold), var(--fold-soft) 4%, transparent 9%), var(--tex), var(--grain), var(--paper);
+    box-shadow: 1px 1px 0 var(--edge-1), 2px 2px 0 var(--edge-2), 3px 3px 0 var(--edge-3), 10px 14px 30px rgb(0 0 0 / 0.4);
   }
   .spread--single .page--r,
-  .spread--wide .page--r { background: var(--grain), var(--paper); box-shadow: 1px 1px 0 #d9d6cf, 2px 2px 0 #c9c6be, 3px 3px 0 #b8b5ad, 4px 4px 0 #a9a69e, 12px 16px 34px rgb(0 0 0 / 0.45); }
+  .spread--wide .page--r { background: var(--tex), var(--grain), var(--paper); box-shadow: 1px 1px 0 var(--edge-1), 2px 2px 0 var(--edge-2), 3px 3px 0 var(--edge-3), 4px 4px 0 var(--edge-4), 12px 16px 34px rgb(0 0 0 / 0.45); }
 }
 
 .run {
@@ -402,12 +409,12 @@ a:hover { text-decoration-thickness: 3px; }
 
 /* halftoned photo: grayscale + a dot screen laid over it */
 .halftone { position: relative; isolation: isolate; overflow: hidden; background: var(--paper); }
-.halftone img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.3) brightness(1.05); }
+.halftone img { width: 100%; height: 100%; object-fit: cover; filter: var(--photo-filter); }
 .halftone::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle, rgb(0 0 0 / 0.5) 0.9px, transparent 1.4px) 0 0 / 4px 4px;
+  background: radial-gradient(circle, var(--dot) 0.9px, transparent 1.4px) 0 0 / 4px 4px;
   mix-blend-mode: multiply;
   pointer-events: none;
 }
@@ -440,7 +447,7 @@ a:hover { text-decoration-thickness: 3px; }
 .prose li + li { margin-top: 0.25em; }
 .prose blockquote { margin: 0; padding: 0.6em 1em; background: var(--screen); }
 .prose img { max-width: 100%; height: auto; }
-.prose :not(pre) > code { font-family: var(--font-mono); font-size: 0.85em; padding: 0.05em 0.3em; background: var(--paper-2); border: 1px solid #c9c6be; }
+.prose :not(pre) > code { font-family: var(--font-mono); font-size: 0.85em; padding: 0.05em 0.3em; background: var(--paper-2); border: 1px solid var(--edge-2); }
 .prose pre { font-family: var(--font-mono); font-size: 0.78rem; padding: 0.9rem; overflow-x: auto; border: 1.5px solid var(--ink); background: #161616 !important; line-height: 1.5; }
 .prose table { border-collapse: collapse; width: 100%; font-size: 0.85rem; font-family: var(--font-mono); display: block; overflow-x: auto; }
 .prose th, .prose td { border: 1px solid var(--rule); padding: 0.35rem 0.55rem; text-align: left; }
@@ -488,7 +495,7 @@ a:hover { text-decoration-thickness: 3px; }
   width: 100%;
   min-height: 2.5rem;
   padding: 0.5rem 0.65rem;
-  background: #fbfaf7;
+  background: var(--field);
   color: var(--ink);
   border: 1.5px solid var(--ink);
   border-radius: 0;
@@ -508,7 +515,7 @@ select.input {
   padding-right: 2rem;
 }
 
-.notice { padding: 0.65rem 0.85rem; border: 1.5px solid var(--ink); font-family: var(--font-mono); font-size: 0.82rem; background: #fbfaf7; }
+.notice { padding: 0.65rem 0.85rem; border: 1.5px solid var(--ink); font-family: var(--font-mono); font-size: 0.82rem; background: var(--field); }
 .notice[data-kind='ok'] { border-left: 8px solid var(--ok); }
 .notice[data-kind='err'] { border-left: 8px solid #c2272d; }
 .label { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
@@ -546,7 +553,7 @@ dialog::backdrop { background: rgb(0 0 0 / 0.5); }
 kbd.k {
   display: inline-block; min-width: 1.6em; padding: 0 0.35em; text-align: center;
   border: 1.5px solid var(--ink); border-bottom-width: 3px; border-radius: 3px;
-  background: #fbfaf7; font-family: var(--font-mono); font-size: 0.8em;
+  background: var(--field); font-family: var(--font-mono); font-size: 0.8em;
 }
 
 /* --- desk footer --------------------------------------------------------------- */
@@ -624,7 +631,7 @@ kbd.k {
 }
 
 /* screenshots print grey; colour comes back on hover/focus */
-.shot img { filter: grayscale(1) contrast(1.15); transition: filter 200ms ease; }
+.shot img { filter: var(--photo-filter); transition: filter 200ms ease; }
 .shot:hover img, .shot:focus-visible img { filter: none; }
 
 /* Nothing on a page may push the page wider than the page (clamped blurbs
@@ -642,9 +649,10 @@ kbd.k {
 }
 .page a:not(.btn):not(.next):not(.prev):hover,
 .page a:not(.btn):not(.next):not(.prev):focus-visible {
-  text-decoration-color: transparent;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 8' preserveAspectRatio='none'%3E%3Cpath d='M1 5c8-3 14-3 20 0s13 3 19 0 13-3 19 0' fill='none' stroke='%232440a8' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") left 100% / 60px 7px repeat-x;
-  padding-bottom: 3px;
+  /* the pen goes over it: a wavy underline in the theme's pen colour */
+  text-decoration-style: wavy;
+  text-decoration-color: var(--pen);
+  text-decoration-thickness: 1.5px;
 }
 .page a, .page button, .page label, .btn { cursor: var(--hand-cursor), pointer; }
 .page--cover a:not(.btn) { color: var(--on-cover); }

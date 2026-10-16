@@ -1,0 +1,300 @@
+/* ==========================================================================
+   Themes. Each one is a different physical object, not a recolour:
+     trash      the EXAPUNKS photocopy (the defaults in global.css)
+     blueprint  cyanotype drafting sheets: grid, frame, title block, redlines
+     riso       a two-ink risograph: pink + federal blue, overprint, duotone
+     toner      a photocopy of a photocopy: inverted, white toner, streaks
+     hotline    a 1989 VHS sleeve: neon, scanlines, italic, cyan marker
+     acid       a rave flyer: acid yellow, checkerboard, newsprint dots
+   All flat CSS gradients; no images, no extra fonts.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   BLUEPRINT
+   -------------------------------------------------------------------------- */
+:root[data-theme='blueprint'] {
+  --desk: #0f2038;
+  --desk-ink: #cfe0ff;
+  --desk-muted: #7f9cc9;
+  --paper: #1e4c98;
+  --paper-2: #24569f;
+  --screen: #2a5ea9;
+  --ink: #eef4ff;
+  --muted: #b6cbee;
+  --rule: #dce8ff;
+  --black: #eef4ff;
+  --on-black: #173f80;
+  --on-black-muted: #4a6aa3;
+  --cover: #173f80;
+  --on-cover: #eef4ff;
+  --pen: #ff6b4a;               /* red-pencil corrections */
+  --field: #183f80;
+  --edge-1: #1a438a; --edge-2: #163a78; --edge-3: #123166; --edge-4: #0f2954;
+  --fold: rgb(0 10 40 / 0.45);
+  --fold-soft: rgb(0 10 40 / 0.1);
+  --dot: rgb(5 25 70 / 0.55);
+  --stamp: #ff6b4a;
+  --marker: rgb(255 255 255 / 0.2);
+  --sticker: #ffd23f;
+  --misprint-2: rgb(255 255 255 / 0.35);
+  --photo-filter: grayscale(1) contrast(1.25) sepia(1) hue-rotate(175deg) saturate(2.6) brightness(0.92);
+  --link: #eef4ff;
+}
+:root[data-theme='blueprint'] .page {
+  --grain: linear-gradient(transparent, transparent);
+  --tex:
+    linear-gradient(rgb(255 255 255 / 0.16) 1px, transparent 1px) 0 0 / 100% 60px,
+    linear-gradient(90deg, rgb(255 255 255 / 0.16) 1px, transparent 1px) 0 0 / 60px 100%,
+    linear-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1px) 0 0 / 100% 12px,
+    linear-gradient(90deg, rgb(255 255 255 / 0.06) 1px, transparent 1px) 0 0 / 12px 100%;
+}
+/* drawing frame with zone ticks */
+:root[data-theme='blueprint'] .page::before {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1.5px solid rgb(238 244 255 / 0.65);
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, rgb(238 244 255 / 0.65) 0 1.5px, transparent 1.5px 25%) 0 0 / 100% 8px no-repeat,
+    repeating-linear-gradient(90deg, rgb(238 244 255 / 0.65) 0 1.5px, transparent 1.5px 25%) 0 100% / 100% 8px no-repeat,
+    repeating-linear-gradient(rgb(238 244 255 / 0.65) 0 1.5px, transparent 1.5px 25%) 0 0 / 8px 100% no-repeat,
+    repeating-linear-gradient(rgb(238 244 255 / 0.65) 0 1.5px, transparent 1.5px 25%) 100% 0 / 8px 100% no-repeat;
+}
+/* lettering: single-stroke technical capitals */
+:root[data-theme='blueprint'] .hed { font-family: var(--font-mono); font-weight: 700; letter-spacing: 0.04em; font-stretch: 100%; }
+:root[data-theme='blueprint'] .hed--outline { color: transparent; -webkit-text-stroke: 1.2px var(--ink); }
+:root[data-theme='blueprint'] .copy, :root[data-theme='blueprint'] .prose { font-family: var(--font-mono); font-size: 0.86rem; text-align: left; }
+/* dimension line over the big headings: |<———————>| */
+:root[data-theme='blueprint'] :is(.hed--xl, .hed--l) { position: relative; padding-top: 16px; }
+:root[data-theme='blueprint'] :is(.hed--xl, .hed--l)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 9px;
+  border-inline: 1.5px solid var(--ink);
+  background: linear-gradient(var(--ink), var(--ink)) 0 50% / 100% 1.5px no-repeat;
+  opacity: 0.7;
+}
+/* title block instead of a page-number pill */
+:root[data-theme='blueprint'] .folio { justify-content: flex-end; }
+:root[data-theme='blueprint'] .folio__n {
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  padding: 0.2rem 0.6rem;
+  letter-spacing: 0.08em;
+}
+:root[data-theme='blueprint'] .folio__n::before { content: 'SHEET '; font-weight: 400; }
+:root[data-theme='blueprint'] .folio__n::after { content: ' · DWG AS-ZINE · SCALE 1:1'; font-weight: 400; opacity: 0.75; }
+:root[data-theme='blueprint'][data-punk] .folio__n::after { content: ' · DWG ' attr(data-hex) ' · SCALE 1:1'; }
+:root[data-theme='blueprint'] .page--l .folio { justify-content: flex-start; }
+:root[data-theme='blueprint'] .note { font-size: 1.35rem; }
+:root[data-theme='blueprint'] .pull, :root[data-theme='blueprint'] .credits { background: transparent; border: 1.5px solid var(--ink); color: var(--ink); }
+:root[data-theme='blueprint'] .credits dt { color: var(--muted); }
+:root[data-theme='blueprint'] .page--cover { background: var(--tex), var(--cover) !important; }
+:root[data-theme='blueprint'] .page--cover { --tex:
+    linear-gradient(rgb(255 255 255 / 0.13) 1px, transparent 1px) 0 0 / 100% 48px,
+    linear-gradient(90deg, rgb(255 255 255 / 0.13) 1px, transparent 1px) 0 0 / 48px 100%; }
+:root[data-theme='blueprint'] .mast__big { color: transparent !important; -webkit-text-stroke: 2px var(--on-cover) !important; font-family: var(--font-mono); font-weight: 700; letter-spacing: 0.06em; }
+:root[data-theme='blueprint'] .mast__small { background: transparent !important; color: var(--on-cover) !important; border-color: var(--on-cover) !important; }
+:root[data-theme='blueprint'] .barcode { background: transparent; color: var(--on-cover); border-color: var(--on-cover); }
+:root[data-theme='blueprint'] .barcode span { background: repeating-linear-gradient(90deg, var(--on-cover) 0 2px, transparent 2px 3px, var(--on-cover) 3px 4px, transparent 4px 7px, var(--on-cover) 7px 10px, transparent 10px 11px); }
+:root[data-theme='blueprint'] .prose pre { background: #0f2954 !important; border-color: var(--ink); }
+:root[data-theme='blueprint'] .run { border-bottom-style: dashed; }
+
+/* --------------------------------------------------------------------------
+   RISO: two inks only
+   -------------------------------------------------------------------------- */
+:root[data-theme='riso'] {
+  --riso-pink: #ff48b0;
+  --riso-blue: #3255a4;
+  --desk: #23202a;
+  --paper: #f6f1e6;
+  --paper-2: #efe6d8;
+  --screen: color-mix(in srgb, var(--riso-pink) 22%, var(--paper));
+  --ink: var(--riso-blue);
+  --muted: #6b7fbd;
+  --rule: var(--riso-blue);
+  --black: var(--riso-blue);
+  --on-black: #fde3f1;
+  --on-black-muted: #c5cff0;
+  --cover: var(--riso-pink);
+  --on-cover: #1d2f73;
+  --pen: #e8338f;
+  --field: #fbf7ef;
+  --edge-1: #e9e1d2; --edge-2: #ddd4c3; --edge-3: #d0c6b4; --edge-4: #c3b9a6;
+  --dot: rgb(50 85 164 / 0.55);
+  --stamp: var(--riso-pink);
+  --marker: rgb(50 85 164 / 0.2);
+  --sticker: #ffe14d;
+  --misprint-2: rgb(255 72 176 / 0.6);
+  --photo-filter: grayscale(1) contrast(1.4) brightness(1.08);
+  --link: var(--riso-blue);
+}
+:root[data-theme='riso'] .page {
+  /* coarse, uneven ink coverage */
+  --tex: radial-gradient(rgb(255 72 176 / 0.05) 1px, transparent 1.5px) 0 0 / 7px 7px;
+}
+/* pink is the headline ink, printed over the blue with a shift */
+:root[data-theme='riso'] .hed { color: var(--riso-pink); mix-blend-mode: multiply; text-shadow: 0.035em 0.03em 0 rgb(50 85 164 / 0.55); }
+:root[data-theme='riso'] .hed--outline { color: transparent; -webkit-text-stroke: 1.5px var(--riso-pink); }
+:root[data-theme='riso'] .hed--inverse { background: var(--riso-pink); color: var(--on-cover); text-shadow: none; mix-blend-mode: normal; }
+:root[data-theme='riso'] .lbl, :root[data-theme='riso'] .folio__n { background: var(--riso-pink); color: var(--on-cover); }
+/* duotone photos: pink paper ink under a blue screen */
+:root[data-theme='riso'] .halftone { background: var(--riso-pink); }
+:root[data-theme='riso'] .halftone img { mix-blend-mode: multiply; }
+:root[data-theme='riso'] .page--cover .mast__big { color: var(--paper) !important; -webkit-text-stroke: 3px var(--riso-blue) !important; text-shadow: 0.05em 0.04em 0 var(--riso-blue); }
+:root[data-theme='riso'] .page--cover .mast__small { border-color: var(--riso-blue); color: var(--riso-blue); }
+:root[data-theme='riso'] .page--cover { --tex: radial-gradient(rgb(50 85 164 / 0.12) 1px, transparent 1.6px) 0 0 / 6px 6px; }
+:root[data-theme='riso'] .page--cover { background: var(--tex), var(--cover) !important; }
+
+/* --------------------------------------------------------------------------
+   TONER: a photocopy of a photocopy, inverted
+   -------------------------------------------------------------------------- */
+:root[data-theme='toner'] {
+  color-scheme: dark;
+  --desk: #3b3b3a;
+  --desk-ink: #e6e3dc;
+  --desk-muted: #a8a49b;
+  --paper: #121212;
+  --paper-2: #1d1d1d;
+  --screen: #262626;
+  --ink: #edebe5;
+  --muted: #a9a59c;
+  --rule: #edebe5;
+  --black: #edebe5;
+  --on-black: #121212;
+  --on-black-muted: #4b4943;
+  --cover: #0b0b0b;
+  --on-cover: #f2f0ea;
+  --pen: #fbfbf6;               /* correction fluid */
+  --field: #1a1a1a;
+  --edge-1: #2b2b2b; --edge-2: #232323; --edge-3: #1b1b1b; --edge-4: #141414;
+  --fold: rgb(0 0 0 / 0.7);
+  --fold-soft: rgb(0 0 0 / 0.2);
+  --dot: rgb(0 0 0 / 0.6);
+  --stamp: #edebe5;
+  --marker: rgb(255 255 255 / 0.22);
+  --sticker: #f2f0ea;
+  --misprint-2: rgb(255 255 255 / 0.25);
+  --photo-filter: grayscale(1) contrast(1.7) brightness(0.92);
+  --link: #edebe5;
+}
+:root[data-theme='toner'] .page {
+  /* white toner specks + vertical streaks from a dirty drum */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.1 -.62'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  --tex:
+    repeating-linear-gradient(90deg, transparent 0 137px, rgb(255 255 255 / 0.045) 137px 139px, transparent 139px 211px, rgb(255 255 255 / 0.025) 211px 212px);
+}
+:root[data-theme='toner'] .note { font-size: 1.3rem; text-shadow: 0 0 1px #fff; }
+:root[data-theme='toner'] .scrib { stroke-width: 3.5; }
+:root[data-theme='toner'] .page--cover { background: var(--grain), var(--cover) !important; }
+:root[data-theme='toner'] .page--cover .mast__big { color: #0b0b0b !important; -webkit-text-stroke: 2.5px var(--on-cover) !important; }
+:root[data-theme='toner'] .prose pre { border-color: var(--ink); }
+:root[data-theme='toner'] .btn--hot { --face: var(--ink); --fg: #121212; }
+
+/* --------------------------------------------------------------------------
+   HOTLINE: a 1989 VHS sleeve
+   -------------------------------------------------------------------------- */
+:root[data-theme='hotline'] {
+  --hot: #ff2e88;
+  --cyan: #00c8e0;
+  --desk: #140a1f;
+  --desk-ink: #ffd6ea;
+  --desk-muted: #a77bbd;
+  --paper: #fbe8f0;
+  --paper-2: #f6d9e6;
+  --screen: #f3cfe0;
+  --ink: #2a0f3d;
+  --muted: #7a4b8f;
+  --rule: #2a0f3d;
+  --black: #2a0f3d;
+  --on-black: #ffe1ef;
+  --on-black-muted: #c39bd6;
+  --cover: var(--hot);
+  --on-cover: #1a0726;
+  --pen: #00a3c4;               /* cyan marker */
+  --field: #fff4f9;
+  --edge-1: #f0d4e1; --edge-2: #e6c3d4; --edge-3: #d9b1c5; --edge-4: #cc9fb6;
+  --dot: rgb(42 15 61 / 0.5);
+  --stamp: var(--hot);
+  --marker: rgb(0 200 224 / 0.35);
+  --sticker: #00e5ff;
+  --misprint-2: rgb(0 200 224 / 0.7);
+  --photo-filter: grayscale(1) contrast(1.35) brightness(1.05);
+  --link: #2a0f3d;
+}
+:root[data-theme='hotline'] .page {
+  /* scanlines + a VHS tracking band */
+  --tex:
+    repeating-linear-gradient(rgb(255 46 136 / 0.06) 0 1px, transparent 1px 3px),
+    linear-gradient(transparent 62%, rgb(0 200 224 / 0.07) 62% 64%, transparent 64%);
+}
+:root[data-theme='hotline'] .hed { font-style: italic; transform: skewX(-7deg); transform-origin: left; text-shadow: 0.04em 0.03em 0 var(--cyan); }
+:root[data-theme='hotline'] .hed--outline { -webkit-text-stroke: 1.5px var(--hot); color: transparent; }
+:root[data-theme='hotline'] .hed--inverse { background: var(--hot); color: #1a0726; text-shadow: none; }
+:root[data-theme='hotline'] .lbl, :root[data-theme='hotline'] .folio__n { background: var(--hot); color: #1a0726; }
+:root[data-theme='hotline'] .halftone { background: var(--hot); }
+:root[data-theme='hotline'] .halftone img { mix-blend-mode: multiply; }
+:root[data-theme='hotline'] .page--cover {
+  background:
+    repeating-linear-gradient(rgb(0 0 0 / 0.08) 0 1px, transparent 1px 3px),
+    linear-gradient(170deg, #ff2e88 0%, #c4237a 55%, #3b0f5e 100%) !important;
+  color: #fff;
+}
+:root[data-theme='hotline'] .page--cover .mast__big { color: #fff !important; -webkit-text-stroke: 3px #1a0726 !important; text-shadow: 0.05em 0.04em 0 var(--cyan); font-style: italic; }
+:root[data-theme='hotline'] .page--cover .mast__small { background: var(--cyan) !important; color: #1a0726 !important; }
+:root[data-theme='hotline'] .page--cover .mast__tag, :root[data-theme='hotline'] .page--cover .spine, :root[data-theme='hotline'] .page--cover .issue-line small { color: #fff; }
+
+/* --------------------------------------------------------------------------
+   ACID: rave flyer
+   -------------------------------------------------------------------------- */
+:root[data-theme='acid'] {
+  --acid: #d4f53c;
+  --desk: #0b0b0b;
+  --desk-ink: #e9f6b0;
+  --desk-muted: #8c9a52;
+  --paper: #f3f3ec;
+  --paper-2: #e7e7dd;
+  --screen: #e3ecb4;
+  --ink: #0d0d0d;
+  --muted: #47473f;
+  --rule: #0d0d0d;
+  --black: #0d0d0d;
+  --on-black: var(--acid);
+  --on-black-muted: #a8bf3c;
+  --cover: var(--acid);
+  --on-cover: #0d0d0d;
+  --pen: #0d0d0d;               /* fat black marker */
+  --stamp: #0d0d0d;
+  --marker: var(--acid);
+  --sticker: #0d0d0d;
+  --misprint-2: rgb(212 245 60 / 0.9);
+  --photo-filter: grayscale(1) contrast(2.1) brightness(1.12);
+}
+:root[data-theme='acid'] .page { --tex: radial-gradient(rgb(0 0 0 / 0.07) 0.7px, transparent 1px) 0 0 / 3px 3px; }
+:root[data-theme='acid'] .run { border-bottom: 0; padding-bottom: 14px; }
+:root[data-theme='acid'] .run { background: linear-gradient(var(--paper), var(--paper)) 0 0 / 100% calc(100% - 8px) no-repeat, repeating-conic-gradient(#0d0d0d 0 25%, var(--acid) 0 50%) 0 100% / 8px 8px; }
+:root[data-theme='acid'] .hed { font-stretch: 125%; letter-spacing: -0.02em; }
+:root[data-theme='acid'] .hed--cond { font-stretch: 62%; }
+:root[data-theme='acid'] .note { font-size: 1.35rem; font-weight: 700; }
+:root[data-theme='acid'] .scrib { stroke-width: 3; }
+:root[data-theme='acid'] .page--cover::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 26px;
+  background: repeating-conic-gradient(#0d0d0d 0 25%, var(--acid) 0 50%) 0 0 / 26px 26px;
+  pointer-events: none;
+}
+:root[data-theme='acid'] .page--cover { padding-bottom: 46px !important; }
+:root[data-theme='acid'] .page--cover .mast__big { color: #0d0d0d !important; -webkit-text-stroke: 0 !important; }
+:root[data-theme='acid'] .page--cover .mast__small { background: #0d0d0d !important; color: var(--acid) !important; }
+:root[data-theme='acid'] .burst { color: var(--acid); }
+:root[data-theme='acid'] .btn--hot { --face: #0d0d0d; --fg: var(--acid); }

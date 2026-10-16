@@ -156,7 +156,7 @@ const SETTINGS_DEFAULTS: SiteSettings = {
 };
 
 /** Cover colours. The interior is always the same photocopied grey. */
-export const THEMES = ['trash', 'riso', 'riso-blue', 'hotline', 'toner', 'blueprint', 'acid'] as const;
+export const THEMES = ['trash', 'blueprint', 'riso', 'toner', 'hotline', 'acid'] as const;
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   const rows = await rest<{ key: string; value: unknown }[]>('aneesh_site_settings?select=key,value');
