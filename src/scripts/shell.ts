@@ -252,23 +252,24 @@ renderTrail();
 addEventListener('pageshow', (e) => { if (e.persisted) renderTrail(); });
 
 // --- editions (easter egg: the sticker on the cover) -----------------------
-// A pick is remembered on this device; "surprise me" goes back to a new
-// random edition every visit. A shared ?edition= link wins for that visit.
+// A pick holds while turning pages (sessionStorage); a refresh rolls a new
+// random edition again. "surprise me" drops the pick right away.
 
 const THEMES = ['trash', 'blueprint', 'riso', 'toner', 'hotline', 'acid'];
 
 function setEdition(name: string) {
   const html = document.documentElement;
-  try {
-    sessionStorage.removeItem('zine-shared');
-    localStorage.setItem('zine-edition', name);
-  } catch { /* private mode: applies to this page only */ }
   let next = name;
-  if (name === 'random') {
-    const others = THEMES.filter((t) => t !== html.dataset.theme);
-    next = others[Math.floor(Math.random() * others.length)];
-    try { sessionStorage.setItem('zine-roll', next); } catch { /* ignore */ }
-  }
+  try {
+    if (name === 'random') {
+      sessionStorage.removeItem('zine-pin');
+      const others = THEMES.filter((t) => t !== html.dataset.theme);
+      next = others[Math.floor(Math.random() * others.length)];
+      sessionStorage.setItem('zine-roll', next);
+    } else {
+      sessionStorage.setItem('zine-pin', name);
+    }
+  } catch { /* private mode: applies to this page only */ }
   html.dataset.theme = next;
   markEditions();
   flash(`edition: ${name === 'random' ? `${next} (random)` : next}`);
@@ -276,7 +277,7 @@ function setEdition(name: string) {
 
 function markEditions() {
   let pick = 'random';
-  try { pick = localStorage.getItem('zine-edition') || 'random'; } catch { /* ignore */ }
+  try { pick = sessionStorage.getItem('zine-pin') || 'random'; } catch { /* ignore */ }
   document.querySelectorAll<HTMLButtonElement>('[data-edition]').forEach((b) => {
     b.setAttribute('aria-pressed', String(b.dataset.edition === pick));
   });

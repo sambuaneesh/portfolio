@@ -92,11 +92,11 @@ const jsonLd = {
 
     <!-- Which edition to print, decided before first paint (no flash):
          1. admin preview (?preview=, ?punk=): signed-in admin or localhost only
-         2. a shared link (?edition=acid): kept for the rest of the visit
-         3. an edition the visitor picked from the cover sticker (easter egg)
-         4. random mode (set in /admin): a new roll per visit and per refresh,
+         2. ?edition=acid in the URL (shareable), or an edition picked from
+            the cover sticker: held while turning pages, dropped on refresh
+         3. random mode (set in /admin): a new roll per visit and per refresh,
             but stable while turning pages
-         5. otherwise the edition baked into the HTML -->
+         4. otherwise the edition baked into the HTML -->
     <script is:inline define:vars={{ themes: [...THEMES], randomTheme }}>
       (function () {
         var d = document.documentElement;
@@ -113,18 +113,20 @@ const jsonLd = {
             if (t && themes.indexOf(t) >= 0) return;
           }
         }
-        var shared = q.get('edition');
-        try {
-          if (shared && themes.indexOf(shared) >= 0) sessionStorage.setItem('zine-shared', shared);
-          else shared = sessionStorage.getItem('zine-shared');
-        } catch (e) {}
-        if (shared && themes.indexOf(shared) >= 0) { d.dataset.theme = shared; return; }
-        var pick = null;
-        try { pick = localStorage.getItem('zine-edition'); } catch (e) {}
-        if (pick && themes.indexOf(pick) >= 0) { d.dataset.theme = pick; return; }
-        if (!randomTheme && pick !== 'random') return;
+        // A pick (sticker or ?edition= link) holds while turning pages; a
+        // refresh or a fresh visit drops it and rolls again.
         var nav = performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
         var fresh = !nav || nav.type === 'reload' || !document.referrer || document.referrer.indexOf(location.origin) !== 0;
+        var shared = q.get('edition');
+        var pin = null;
+        try {
+          try { localStorage.removeItem('zine-edition'); } catch (e) {} // older builds kept picks forever
+          if (shared && themes.indexOf(shared) >= 0) sessionStorage.setItem('zine-pin', shared);
+          else if (fresh) sessionStorage.removeItem('zine-pin');
+          pin = sessionStorage.getItem('zine-pin');
+        } catch (e) { pin = shared; }
+        if (pin && themes.indexOf(pin) >= 0) { d.dataset.theme = pin; return; }
+        if (!randomTheme) return;
         var cur = null;
         try { cur = sessionStorage.getItem('zine-roll'); } catch (e) {}
         if (fresh || themes.indexOf(cur) < 0) {

@@ -99,14 +99,20 @@ export interface SiteSettings {
 }
 
 const cache = new Map<string, Promise<unknown>>();
+const stamps = new Map<string, number>();
 
 async function rest<T>(path: string): Promise<T> {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     throw new Error('PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_PUBLISHABLE_KEY are not set. Copy .env.example to .env.');
   }
   // Pages share rows (every page needs personal_info, the nav needs projects),
-  // so memoise per build instead of refetching for each of them.
+  // so memoise per build instead of refetching for each of them. The dev
+  // server is one long-lived process, so there entries expire after a few
+  // seconds; otherwise admin edits would never show up locally.
+  const hit = cache.get(path);
+  if (hit && import.meta.env.DEV && Date.now() - (stamps.get(path) ?? 0) > 3000) cache.delete(path);
   if (!cache.has(path)) {
+    stamps.set(path, Date.now());
     cache.set(path, (async () => {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
         headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
@@ -205,7 +211,11 @@ async function fetchRepo(repo: { owner: string; name: string }): Promise<GhRepo 
 
 let modulesPromise: Promise<Module[]> | null = null;
 
+let modulesAt = 0;
+
 export function getModules(): Promise<Module[]> {
+  if (import.meta.env.DEV && Date.now() - modulesAt > 3000) modulesPromise = null;
+  modulesAt = modulesPromise ? modulesAt : Date.now();
   modulesPromise ??= (async () => {
     const projects = await ordered<Project>('projects');
     const seen = new Set<string>();
