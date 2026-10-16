@@ -765,3 +765,5 @@ kbd.k {
 
 /* a headline that must stay on one line, sized from the page width */
 .fit-line { white-space: nowrap; font-size: clamp(1.3rem, calc(var(--pw) * 0.072), 2.9rem); }
+/* pen marks are meant to stick out past what they mark: no width cap */
+.scrib { max-width: none; }
