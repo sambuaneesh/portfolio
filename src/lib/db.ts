@@ -145,7 +145,7 @@ const SETTINGS_DEFAULTS: SiteSettings = {
   badge_lab: { label: 'SA4S@SERC', url: 'https://sa4s-serc.github.io/' },
   extra_links: [{ label: 'steam', url: 'https://steamcommunity.com/id/phant0mble3d/' }],
   project_extras: {},
-  theme: 'trash',
+  theme: 'random',
   zine_title: 'The Boring Zine',
   zine_tagline: 'about things that did not need building',
   zine_issue_theme: 'the side-quest issue',

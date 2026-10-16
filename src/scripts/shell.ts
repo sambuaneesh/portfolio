@@ -120,6 +120,8 @@ input?.addEventListener('keydown', (e) => {
   else if (e.key === 'Enter') {
     e.preventDefault();
     const q = input.value.trim().replace(/^:/, '');
+    const ed = q.match(/^edition\s+(\w+)$/i)?.[1]?.toLowerCase();
+    if (ed && (THEMES.includes(ed) || ed === 'random')) { dlg?.close(); return setEdition(ed); }
     const egg = EGGS.find(([re]) => re.test(q));
     if (egg) { dlg?.close(); return flash(egg[1]); }
     if (shown[sel]) run(shown[sel]);
@@ -248,3 +250,57 @@ function renderTrail() {
 
 renderTrail();
 addEventListener('pageshow', (e) => { if (e.persisted) renderTrail(); });
+
+// --- editions (easter egg: the sticker on the cover) -----------------------
+// A pick is remembered on this device; "surprise me" goes back to a new
+// random edition every visit. A shared ?edition= link wins for that visit.
+
+const THEMES = ['trash', 'blueprint', 'riso', 'toner', 'hotline', 'acid'];
+
+function setEdition(name: string) {
+  const html = document.documentElement;
+  try {
+    sessionStorage.removeItem('zine-shared');
+    localStorage.setItem('zine-edition', name);
+  } catch { /* private mode: applies to this page only */ }
+  let next = name;
+  if (name === 'random') {
+    const others = THEMES.filter((t) => t !== html.dataset.theme);
+    next = others[Math.floor(Math.random() * others.length)];
+    try { sessionStorage.setItem('zine-roll', next); } catch { /* ignore */ }
+  }
+  html.dataset.theme = next;
+  markEditions();
+  flash(`edition: ${name === 'random' ? `${next} (random)` : next}`);
+}
+
+function markEditions() {
+  let pick = 'random';
+  try { pick = localStorage.getItem('zine-edition') || 'random'; } catch { /* ignore */ }
+  document.querySelectorAll<HTMLButtonElement>('[data-edition]').forEach((b) => {
+    b.setAttribute('aria-pressed', String(b.dataset.edition === pick));
+  });
+}
+
+document.querySelectorAll<HTMLButtonElement>('[data-edition]').forEach((b) => {
+  b.addEventListener('click', () => {
+    setEdition(b.dataset.edition!);
+    document.getElementById('editions')?.hidePopover?.();
+  });
+});
+markEditions();
+
+document.querySelectorAll<HTMLButtonElement>('[data-share-edition]').forEach((b) => {
+  b.addEventListener('click', async () => {
+    const url = new URL(location.href);
+    url.hash = '';
+    ['preview', 'punk'].forEach((k) => url.searchParams.delete(k));
+    url.searchParams.set('edition', document.documentElement.dataset.theme || 'trash');
+    try {
+      await navigator.clipboard.writeText(url.href);
+      b.textContent = 'link copied';
+    } catch {
+      prompt('Copy this link:', url.href);
+    }
+  });
+});

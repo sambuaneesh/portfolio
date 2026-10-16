@@ -222,7 +222,7 @@ export const TABLES: TableCfg[] = [
     key: 'appearance', table: 'aneesh_site_settings', label: 'Appearance', group: 'site', settings: true, order: 'key.asc',
     title: () => 'Appearance',
     fields: [
-      { k: 'theme', label: 'theme', type: 'select', options: THEMES, def: 'trash', help: 'Every visitor sees this. trash = the EXAPUNKS photocopy; blueprint = cyanotype drafting sheets; riso = two-ink risograph; toner = inverted photocopy; hotline = 1989 VHS sleeve; acid = rave flyer. Use Preview to look before saving.' },
+      { k: 'theme', label: 'theme', type: 'select', options: ['random', ...THEMES], def: 'random', help: 'random = a new edition on every visit and refresh (stable while turning pages). Visitors can also pick one by clicking the edition sticker on the cover.'+' Otherwise every visitor sees this. trash = the EXAPUNKS photocopy; blueprint = cyanotype drafting sheets; riso = two-ink risograph; toner = inverted photocopy; hotline = 1989 VHS sleeve; acid = rave flyer. Use Preview to look before saving.' },
       { k: 'zine_title', label: 'masthead', type: 'text', def: 'The Boring Zine', help: 'Last word prints huge, the rest goes in the box above it.' },
       { k: 'zine_tagline', label: 'masthead tagline', type: 'text', def: 'about things that did not need building' },
       { k: 'zine_issue_theme', label: 'cover line', type: 'text', def: 'the side-quest issue', help: '"the X issue": the middle word(s) print big on the cover.' },

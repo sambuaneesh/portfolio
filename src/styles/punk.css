@@ -9,7 +9,14 @@
 
 :root {
   --marker: #f2ea4c;
+  --edition: 'trash';
 }
+:root[data-theme='blueprint'] { --edition: 'blueprint'; }
+:root[data-theme='riso'] { --edition: 'riso'; }
+:root[data-theme='toner'] { --edition: 'toner'; }
+:root[data-theme='hotline'] { --edition: 'hotline'; }
+:root[data-theme='acid'] { --edition: 'acid'; }
+.burst__name::before { content: var(--edition); }
 
 :root[data-punk] {
   --misprint-a: color-mix(in srgb, var(--cover) 85%, transparent);
@@ -106,7 +113,6 @@
 /* --- rubber stamps & stickers -------------------------------------------------------- */
 .punk-only { display: none !important; }
 :root[data-punk] .punk-only { display: revert !important; }
-:root[data-punk] .burst.punk-only { display: grid !important; place-items: center; }
 :root[data-punk] .stamp { color: var(--stamp); opacity: 0.82; mix-blend-mode: multiply; }
 
 .burst {
@@ -125,10 +131,16 @@
   text-align: center;
   text-transform: uppercase;
   rotate: 12deg;
+  border: 0;
+  cursor: var(--hand-cursor), pointer;
+  transition: rotate 160ms ease, scale 160ms ease;
   clip-path: polygon(50% 0, 61% 14%, 79% 7%, 80% 25%, 98% 28%, 88% 44%, 100% 58%, 83% 66%, 88% 85%, 69% 83%, 59% 100%, 47% 87%, 31% 98%, 27% 80%, 8% 82%, 14% 64%, 0 52%, 13% 40%, 4% 22%, 22% 21%, 25% 3%, 39% 13%);
-  pointer-events: none;
   z-index: 3;
 }
+.burst > span { display: block; }
+.burst__name { font-size: 1.15em; }
+.burst:hover, .burst:focus-visible { rotate: 4deg; scale: 1.06; }
+.burst:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
 
 .pin { position: absolute; width: 74px; height: 26px; z-index: 4; pointer-events: none; }
 

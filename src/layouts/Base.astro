@@ -23,6 +23,8 @@ const [me, modules, settings] = await Promise.all([getPersonalInfo(), getModules
 
 // One cover colour for everyone, picked in /admin and baked in at build.
 const wanted = settings.theme === 'riso-blue' ? 'riso' : settings.theme; // retired name
+// 'random' is resolved in the browser (before first paint); the HTML ships trash.
+const randomTheme = wanted === 'random';
 const theme = (THEMES as readonly string[]).includes(wanted) ? wanted : 'trash';
 
 const fullTitle = title ? `${title} · ${me.name}` : `${me.name} · ${me.title}`;
@@ -88,21 +90,50 @@ const jsonLd = {
     {ogImage && <meta property="og:image" content={ogImage} />}
     <meta name="twitter:card" content="summary" />
 
-    <!-- Theme preview for the admin (?preview=<theme>): only when signed in,
-         or on a local dev/preview server. Never changes the published site. -->
-    <script is:inline define:vars={{ themes: [...THEMES] }}>
+    <!-- Which edition to print, decided before first paint (no flash):
+         1. admin preview (?preview=, ?punk=): signed-in admin or localhost only
+         2. a shared link (?edition=acid): kept for the rest of the visit
+         3. an edition the visitor picked from the cover sticker (easter egg)
+         4. random mode (set in /admin): a new roll per visit and per refresh,
+            but stable while turning pages
+         5. otherwise the edition baked into the HTML -->
+    <script is:inline define:vars={{ themes: [...THEMES], randomTheme }}>
       (function () {
+        var d = document.documentElement;
         var q = new URLSearchParams(location.search);
         var t = q.get('preview'), punk = q.get('punk');
-        if ((!t || themes.indexOf(t) < 0) && punk === null) return;
-        var admin = false;
-        try { admin = !!localStorage.getItem('admin_token'); } catch (e) {}
-        if (!admin && !/^(localhost|127\.|\[::1\])/.test(location.hostname)) return;
-        var d = document.documentElement;
-        if (t && themes.indexOf(t) >= 0) { d.dataset.theme = t; d.dataset.preview = t; }
-        if (punk === '0') delete d.dataset.punk;
-        if (punk === '1') d.dataset.punk = '';
-        if (punk !== null) d.dataset.previewPunk = punk;
+        if ((t && themes.indexOf(t) >= 0) || punk !== null) {
+          var admin = false;
+          try { admin = !!localStorage.getItem('admin_token'); } catch (e) {}
+          if (admin || /^(localhost|127\.|\[::1\])/.test(location.hostname)) {
+            if (t && themes.indexOf(t) >= 0) { d.dataset.theme = t; d.dataset.preview = t; }
+            if (punk === '0') delete d.dataset.punk;
+            if (punk === '1') d.dataset.punk = '';
+            if (punk !== null) d.dataset.previewPunk = punk;
+            if (t && themes.indexOf(t) >= 0) return;
+          }
+        }
+        var shared = q.get('edition');
+        try {
+          if (shared && themes.indexOf(shared) >= 0) sessionStorage.setItem('zine-shared', shared);
+          else shared = sessionStorage.getItem('zine-shared');
+        } catch (e) {}
+        if (shared && themes.indexOf(shared) >= 0) { d.dataset.theme = shared; return; }
+        var pick = null;
+        try { pick = localStorage.getItem('zine-edition'); } catch (e) {}
+        if (pick && themes.indexOf(pick) >= 0) { d.dataset.theme = pick; return; }
+        if (!randomTheme && pick !== 'random') return;
+        var nav = performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
+        var fresh = !nav || nav.type === 'reload' || !document.referrer || document.referrer.indexOf(location.origin) !== 0;
+        var cur = null;
+        try { cur = sessionStorage.getItem('zine-roll'); } catch (e) {}
+        if (fresh || themes.indexOf(cur) < 0) {
+          var others = themes.filter(function (x) { return x !== cur; });
+          cur = others[Math.floor(Math.random() * others.length)];
+          try { sessionStorage.setItem('zine-roll', cur); } catch (e) {}
+        }
+        d.dataset.theme = cur;
+        d.dataset.random = '';
       })();
     </script>
     <!-- Chromium prerenders same-site links on hover: page turns feel instant. -->

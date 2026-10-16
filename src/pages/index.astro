@@ -47,6 +47,15 @@ const issPost = iss.length >= 3 ? iss[iss.length - 1] : '';
 const printed = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date());
 const coverLines = [...featured.map((m) => m.title), achievements[0]?.title, '...and more'].filter(Boolean) as string[];
 
+const editions = [
+  { key: 'trash', sw: '#e4605b', blurb: 'the photocopy' },
+  { key: 'blueprint', sw: '#1e4c98', blurb: 'drafting sheets' },
+  { key: 'riso', sw: '#ff48b0', blurb: 'two inks' },
+  { key: 'toner', sw: '#121212', blurb: 'copy of a copy' },
+  { key: 'hotline', sw: '#ff2e88', blurb: 'vhs, 1989' },
+  { key: 'acid', sw: '#d4f53c', blurb: 'rave flyer' },
+];
+
 const ports = [
   me.github && { k: 'GIT', v: me.github.replace(/^https?:\/\/(www\.)?/, ''), href: me.github },
   me.linkedin && { k: 'LNK', v: 'linkedin/aneesh-sambu', href: me.linkedin },
@@ -78,7 +87,7 @@ const ports = [
           </div>
         )}
         <p class="issue-line" aria-hidden="true">{issPre && <small>{issPre}</small>}<b><Ransom text={issBig} /></b>{issPost && <small>{issPost}</small>}</p>
-        <span class="burst punk-only cover__burst" aria-hidden="true">now with<br />pen<br />marks</span>
+        <button class="burst cover__burst" type="button" popovertarget="editions" aria-label="Pick an edition"><span class="burst__name"></span><span>edition</span></button>
       </div>
       <div class="cover__foot">
         <div class="barcode" aria-hidden="true"><span></span><small>{me.name.toUpperCase()} · #{settings.zine_issue}</small></div>
@@ -89,6 +98,21 @@ const ports = [
       <p class="cover__open"><span class="note">psst.</span> <span class="ringed"><a href="#contents">open it</a><Scribble kind="ring" /></span></p>
     </div>
   </Spread>
+
+  <!-- the easter egg: a torn scrap listing the editions -->
+  <div id="editions" class="scrap" popover>
+    <p class="note">pick an edition</p>
+    <ul class="scrap__list">
+      {editions.map((e) => (
+        <li><button type="button" data-edition={e.key}><span class="scrap__sw" style={`--sw:${e.sw}`} aria-hidden="true"></span><b>{e.key}</b> <span class="muted">{e.blurb}</span></button></li>
+      ))}
+      <li><button type="button" data-edition="random"><span class="scrap__sw scrap__sw--rand" aria-hidden="true">?</span><b>surprise me</b> <span class="muted">new one every refresh</span></button></li>
+    </ul>
+    <div class="scrap__foot">
+      <button class="scrap__close" type="button" data-share-edition>copy a link to this edition</button>
+      <button class="scrap__close" type="button" popovertarget="editions" popovertargetaction="hide">close</button>
+    </div>
+  </div>
 
   <!-- 02-03 · contents | letter from the editor -->
   <Spread page={P.contents} zine={Z} runL="contents" runR="manifesto" id="contents" label="Contents and letter from the editor">
@@ -105,30 +129,38 @@ const ports = [
       </div>
       <p class="hint"><span class="note note--tilt">dotted = clickable. try it.</span><Scribble kind="arrow-down" /></p>
       <div class="toc-wrap">
-        <p class="toc__sec">manifesto</p>
-        <ul class="toc">
-          <li><span class="toc__n">{pad2(P.contents + 1)}</span><a href="#editor">Letter from the editor</a> <span class="note">← start here</span></li>
-        </ul>
-        <p class="toc__sec">this issue</p>
-        <ul class="toc">
-          <li><span class="toc__n">{pad2(P.issue)}</span><a href="#issue">Featured projects</a></li>
-          <li><span class="toc__n">{pad2(P.issue + 1)}</span><a href="#research">Research &amp; awards</a></li>
-          <li><span class="toc__n">{pad2(P.offHours)}</span><a href="#offhours">Subsystems, off hours</a></li>
-          <li><span class="toc__n">{pad2(P.offHours + 1)}</span><a href="#classifieds">Classifieds</a></li>
-        </ul>
-        <p class="toc__sec">workbench</p>
-        <ul class="toc">
-          <li><span class="toc__n">{pad2(P.workbench)}</span><a href={u('/projects/')}>The catalogue</a></li>
-          {modules.map((m) => (
-            <li><span class="toc__n">{pad2(P.projects[m.slug])}</span><a href={u(`/projects/${m.slug}/`)}>{m.title}</a></li>
-          ))}
-        </ul>
-        <p class="toc__sec">back of the book</p>
-        <ul class="toc">
-          <li><span class="toc__n">{pad2(P.log)}</span><a href={u('/cv/')}>Field log (cv)</a></li>
-          <li><span class="toc__n">{pad2(P.writing)}</span><a href={u('/writing/')}>Writing</a></li>
-          <li><span class="toc__n">{pad2(P.contact)}</span><a href={u('/contact/')}>Write to me</a></li>
-        </ul>
+        <section class="toc-group">
+          <p class="toc__sec">manifesto <span class="note">← start here</span></p>
+          <ul class="toc">
+            <li><span class="toc__n">{pad2(P.contents + 1)}</span><a href="#editor">Letter from the editor</a></li>
+          </ul>
+        </section>
+        <section class="toc-group">
+          <p class="toc__sec">this issue</p>
+          <ul class="toc">
+            <li><span class="toc__n">{pad2(P.issue)}</span><a href="#issue">Featured projects</a></li>
+            <li><span class="toc__n">{pad2(P.issue + 1)}</span><a href="#research">Research &amp; awards</a></li>
+            <li><span class="toc__n">{pad2(P.offHours)}</span><a href="#offhours">Subsystems, off hours</a></li>
+            <li><span class="toc__n">{pad2(P.offHours + 1)}</span><a href="#classifieds">Classifieds</a></li>
+          </ul>
+        </section>
+        <section class="toc-group">
+          <p class="toc__sec">workbench</p>
+          <ul class="toc">
+            <li><span class="toc__n">{pad2(P.workbench)}</span><a href={u('/projects/')}>The catalogue</a></li>
+            {modules.map((m) => (
+              <li><span class="toc__n">{pad2(P.projects[m.slug])}</span><a href={u(`/projects/${m.slug}/`)}>{m.title}</a></li>
+            ))}
+          </ul>
+        </section>
+        <section class="toc-group">
+          <p class="toc__sec">back of the book</p>
+          <ul class="toc">
+            <li><span class="toc__n">{pad2(P.log)}</span><a href={u('/cv/')}>Field log (cv)</a></li>
+            <li><span class="toc__n">{pad2(P.writing)}</span><a href={u('/writing/')}>Writing</a></li>
+            <li><span class="toc__n">{pad2(P.contact)}</span><a href={u('/contact/')}>Write to me</a></li>
+          </ul>
+        </section>
       </div>
     </Fragment>
 
@@ -310,8 +342,33 @@ const ports = [
     position: absolute; right: 4px; top: 4px; font-family: var(--font-mono); font-size: 0.72rem;
     color: var(--on-cover); text-transform: uppercase; letter-spacing: 0.1em;
   }
-  .cover__burst { left: 4%; bottom: 12%; width: 108px; height: 108px; padding: 14px; font-size: 0.78rem; }
-  @media (max-width: 47.99rem) { .cover__burst { display: none !important; } }
+  /* the edition scrap (popover) */
+  .scrap {
+    margin: auto;
+    padding: 28px 26px 22px;
+    width: min(22rem, calc(100vw - 32px));
+    border: 0;
+    background: #f7f4ea;
+    color: #141414;
+    rotate: -2deg;
+    box-shadow: 8px 10px 0 rgb(0 0 0 / 0.35);
+    clip-path: polygon(0 4%, 6% 0, 13% 3%, 21% 0, 30% 4%, 38% 1%, 47% 4%, 55% 0, 64% 3%, 72% 0, 81% 4%, 90% 1%, 100% 3%, 100% 97%, 93% 100%, 85% 96%, 76% 100%, 67% 97%, 58% 100%, 49% 96%, 40% 100%, 31% 97%, 22% 100%, 13% 96%, 5% 100%, 0 96%);
+  }
+  .scrap::backdrop { background: rgb(0 0 0 / 0.45); }
+  .scrap .note { font-size: 1.6rem; color: #2440a8; margin-bottom: 10px; }
+  .scrap__list { list-style: none; display: grid; gap: 4px; }
+  .scrap__list button {
+    display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 4px;
+    background: none; border: 0; border-bottom: 1px dotted #141414; color: #141414;
+    font-family: var(--font-mono); font-size: 0.85rem; text-align: left; cursor: var(--hand-cursor), pointer;
+  }
+  .scrap__list button:hover, .scrap__list button[aria-pressed='true'] { background: rgb(242 234 76 / 0.6); }
+  .scrap__list .muted { color: #55524b; font-size: 0.72rem; }
+  .scrap__sw { width: 18px; height: 18px; flex: none; background: var(--sw); border: 1.5px solid #141414; }
+  .scrap__sw--rand { display: grid; place-items: center; background: repeating-conic-gradient(#e4605b 0 25%, #1e4c98 0 50%, #ff48b0 0 75%, #d4f53c 0); font-weight: 700; font-size: 0.7rem; }
+  .scrap__foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; }
+  .scrap__close { background: none; border: 0; padding: 0; font-family: var(--font-mono); font-size: 0.75rem; text-decoration: underline dotted; color: #141414; cursor: pointer; }
+  .cover__burst { left: 4%; bottom: 12%; width: 116px; height: 116px; padding: 16px; font-size: 0.8rem; }
   .hint { display: flex; align-items: flex-start; gap: 4px; margin: -4px 0 -10px 30%; }
   .hint .scrib--arrow-down { margin-top: 10px; rotate: 20deg; }
   .off__note { justify-self: end; margin-top: -6px; }
@@ -328,7 +385,9 @@ const ports = [
   .credits dd { margin: 0; text-align: right; }
   .credits a { color: inherit; }
   .toc-wrap { columns: 2 12rem; column-gap: 22px; }
-  .toc-wrap > * { break-inside: avoid; }
+  /* a section heading never gets separated from its list */
+  .toc-group { break-inside: avoid; margin-bottom: 10px; }
+  .toc-group .note { font-size: 1.05rem; margin-left: 6px; letter-spacing: 0; }
 
   /* letter ------------------------------------------------------------------ */
   .letter { display: grid; grid-template-columns: 1fr auto; gap: 16px; flex: 1; }
