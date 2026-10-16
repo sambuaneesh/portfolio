@@ -7,6 +7,7 @@ import { glyph } from '../lib/glyphs';
 import { optimize } from '../lib/images';
 import { toolchain } from '../lib/toolchain';
 import { getSteam, getSteamReviews } from '../lib/steam';
+import { getMonkeytype } from '../lib/monkeytype';
 import Scribble from '../components/Scribble.astro';
 import Ransom from '../components/Ransom.astro';
 import { pageMap, pad2 } from '../lib/zine';
@@ -39,6 +40,9 @@ for (const r of reviews) {
   }
 }
 const games = await Promise.all(played.slice(0, 5).map(async (g) => ({ ...g, img: g.capsule ? await optimize(g.capsule, 184, 69) : null })));
+
+const mtUrl = (settings.extra_links ?? []).find((l) => /monkeytype\.com\/profile\//.test(l.url))?.url;
+const typing = mtUrl ? await getMonkeytype(mtUrl) : null;
 
 const photo = me.avatar_url ? await optimize(me.avatar_url, 520, 620) : null;
 
@@ -302,14 +306,22 @@ const ports = [
             {ports.map((p) => <li><span class="lbl">{p.k}</span><a href={p.href} rel={p.href.startsWith('http') ? 'me noopener' : undefined}>{p.v}</a></li>)}
           </ul>
         </div>
+      {typing && typing.best.length > 0 && (
+          <div class="receipt" aria-label={`Monkeytype stats for ${typing.name}`}>
+            <p class="receipt__head"><a href={typing.url} rel="noopener">monkeytype</a> · {typing.name}</p>
+            <dl class="receipt__rows">
+              {typing.best.map((b, i) => (
+                <div><dt>{b.label}</dt><dd>{b.wpm} wpm · {b.acc}%{i === 0 && <span class="note receipt__note">not a typo</span>}</dd></div>
+              ))}
+              <div><dt>logged</dt><dd>{typing.tests.toLocaleString('en-US')} tests · {typing.hours} h</dd></div>
+              {typing.rank && <div><dt>rank</dt><dd>top {typing.rank.pct}% ({typing.rank.mode})</dd></div>}
+            </dl>
+          </div>
+        )}
         <div class="coupon">
           <span class="coupon__cut" aria-hidden="true">✂</span>
           <p><b class="hed hed--s">resume.pdf</b> <span class="mono muted">· one page · no postage</span></p>
           <a class="btn" href={u('/resume.pdf')}>download</a>
-        </div>
-        <div class="screenbox writing-ad">
-          <p class="mono"><b>writing</b> · {posts.length ? `${posts.length} posts, see p. ${pad2(P.writing)}` : 'nothing here yet.'}</p>
-          {!posts.length && me.website && <p class="copy">The older, louder stuff is on <a href={me.website}>The Boring Blog</a>.</p>}
         </div>
       </div>
     </Fragment>
@@ -450,6 +462,25 @@ const ports = [
   .games__name { font-family: var(--font-sans); font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* classifieds ------------------------------------------------------------------- */
+  /* typing receipt: a till slip of the Monkeytype personal bests */
+  .receipt {
+    position: relative;
+    padding: 10px 14px 12px;
+    background: var(--field);
+    border: 1px dashed var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    rotate: 0.6deg;
+  }
+  .receipt__head { text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px dashed var(--ink); }
+  .receipt__rows { margin: 0; display: grid; gap: 3px; }
+  .receipt__rows div { display: flex; align-items: baseline; gap: 6px; }
+  .receipt__rows dt { color: var(--muted); white-space: nowrap; }
+  .receipt__rows dt::after { content: ''; }
+  .receipt__rows div::before { content: ''; order: 1; flex: 1; border-bottom: 1px dotted var(--muted); transform: translateY(-3px); }
+  .receipt__rows dd { order: 2; margin: 0; white-space: nowrap; position: relative; }
+  .receipt__note { position: absolute; right: calc(100% + 10px); top: -8px; font-size: 1.1rem; rotate: -6deg; white-space: nowrap; }
+  #classifieds { gap: 14px; }
   .ad { display: grid; gap: 10px; padding: 14px 16px; border: 3px solid var(--ink); }
   .ad__head { font-family: var(--font-sans); font-weight: 900; font-stretch: 125%; font-size: 2rem; line-height: 0.9; letter-spacing: 0.02em; }
   .ad__head--s { font-size: 1.1rem; }
@@ -460,7 +491,6 @@ const ports = [
   .ports a { font-family: var(--font-mono); font-size: 0.78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .coupon { position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border: 2px dashed var(--ink); }
   .coupon__cut { position: absolute; top: -0.8rem; left: 10px; background: var(--paper); padding: 0 4px; font-size: 1rem; }
-  .writing-ad .copy { margin-top: 6px; font-size: 0.88rem; }
 
   @media (max-width: 61.99rem) {
     .cover__photo { width: 70%; }
