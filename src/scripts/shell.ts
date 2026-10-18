@@ -319,3 +319,7 @@ document.addEventListener('click', (e) => {
     window.open(a.href, '_blank', 'noopener');
   }
 });
+
+// phone menu: running a tool from the sheet closes the sheet first
+document.querySelectorAll('#navsheet [data-cmd-open], #navsheet [popovertarget="editions"]').forEach((b) =>
+  b.addEventListener('click', () => document.getElementById('navsheet')?.hidePopover?.()));

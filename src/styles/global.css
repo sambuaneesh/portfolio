@@ -767,3 +767,108 @@ kbd.k {
 .fit-line { white-space: nowrap; font-size: clamp(1.3rem, calc(var(--pw) * 0.072), 2.9rem); }
 /* pen marks are meant to stick out past what they mark: no width cap */
 .scrib { max-width: none; }
+
+  /* the edition picker: a torn scrap (popover) */
+  .scrap {
+    margin: auto;
+    padding: 28px 26px 22px;
+    width: min(22rem, calc(100vw - 32px));
+    border: 0;
+    background: #f7f4ea;
+    color: #141414;
+    rotate: -2deg;
+    box-shadow: 8px 10px 0 rgb(0 0 0 / 0.35);
+    clip-path: polygon(0 4%, 6% 0, 13% 3%, 21% 0, 30% 4%, 38% 1%, 47% 4%, 55% 0, 64% 3%, 72% 0, 81% 4%, 90% 1%, 100% 3%, 100% 97%, 93% 100%, 85% 96%, 76% 100%, 67% 97%, 58% 100%, 49% 96%, 40% 100%, 31% 97%, 22% 100%, 13% 96%, 5% 100%, 0 96%);
+  }
+  .scrap::backdrop { background: rgb(0 0 0 / 0.45); }
+  .scrap .note { font-size: 1.6rem; color: #2440a8; margin-bottom: 10px; }
+  .scrap__list { list-style: none; display: grid; gap: 4px; }
+  .scrap__list button {
+    display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 4px;
+    background: none; border: 0; border-bottom: 1px dotted #141414; color: #141414;
+    font-family: var(--font-mono); font-size: 0.85rem; text-align: left; cursor: var(--hand-cursor), pointer;
+  }
+  .scrap__list button:hover, .scrap__list button[aria-pressed='true'] { background: rgb(242 234 76 / 0.6); }
+  .scrap__list .muted { color: #55524b; font-size: 0.72rem; }
+  .scrap__sw { width: 18px; height: 18px; flex: none; background: var(--sw); border: 1.5px solid #141414; }
+  .scrap__sw--rand { display: grid; place-items: center; background: repeating-conic-gradient(#e4605b 0 25%, #1e4c98 0 50%, #ff48b0 0 75%, #d4f53c 0); font-weight: 700; font-size: 0.7rem; }
+  .scrap__foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; }
+  .scrap__close { background: none; border: 0; padding: 0; font-family: var(--font-mono); font-size: 0.75rem; text-decoration: underline dotted; color: #141414; cursor: pointer; }
+
+/* --- phones: floating menu + phone-sized sheets ------------------------------
+   The zine stays zoomed out exactly as on desktop; only the chrome on top is
+   drawn at real phone size (zoom: var(--ui) undoes the page's zoom-out). */
+.fab, .navsheet { display: none; }
+:root[data-phone] .bar { display: none; }
+:root[data-phone] .fab {
+  display: grid;
+  place-items: center;
+  position: fixed;
+  right: 14px;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  z-index: 90;
+  width: 54px;
+  height: 54px;
+  zoom: var(--ui, 3);
+  border: 2px solid #141414;
+  background: var(--paper);
+  box-shadow: 4px 4px 0 #141414;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+:root[data-phone] .fab:active { translate: 3px 3px; box-shadow: 1px 1px 0 #141414; }
+.fab span, .fab span::before, .fab span::after { display: block; width: 24px; height: 3px; background: #141414; position: relative; }
+.fab span::before, .fab span::after { content: ''; position: absolute; left: 0; }
+.fab span::before { top: -8px; rotate: -2deg; }
+.fab span::after { top: 8px; width: 18px; }
+
+:root[data-phone] .navsheet {
+  display: none;
+  zoom: var(--ui, 3);
+  position: fixed;
+  inset: auto 0 0 0;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  max-height: 85vh;
+  overflow: auto;
+  padding: 26px 22px calc(18px + env(safe-area-inset-bottom));
+  border: 0;
+  background: #f7f4ea;
+  color: #141414;
+  font-family: var(--font-mono);
+  clip-path: polygon(0 10px, 5% 2px, 12% 9px, 20% 1px, 28% 8px, 37% 0, 46% 7px, 55% 1px, 64% 9px, 73% 2px, 82% 8px, 91% 1px, 100% 7px, 100% 100%, 0 100%);
+}
+:root[data-phone] .navsheet:popover-open { display: block; }
+.navsheet::backdrop { background: rgb(0 0 0 / 0.45); }
+.navsheet__head { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; color: #55524b; margin-bottom: 10px; }
+.navsheet__head b { background: #141414; color: #f7f4ea; padding: 0 0.35rem; margin-right: 4px; }
+.navsheet__list { list-style: none; display: grid; }
+.navsheet__list a {
+  display: flex; align-items: baseline; gap: 14px; min-height: 52px; padding: 12px 4px;
+  border-bottom: 1px dotted #141414; color: #141414; text-decoration: none;
+  font-family: var(--font-sans); font-weight: 900; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 0.01em;
+}
+.navsheet__list a[aria-current='page'] { background: rgb(242 234 76 / 0.7); }
+.navsheet__n { font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem; color: #55524b; min-width: 1.2rem; }
+.navsheet__tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.navsheet__tools button {
+  min-height: 48px; border: 2px solid #141414; background: #fff; color: #141414; box-shadow: 3px 3px 0 #141414;
+  font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem; cursor: pointer;
+}
+.navsheet__close { display: block; margin: 16px auto 0; background: none; border: 0; font-family: var(--font-mono); font-size: 0.85rem; text-decoration: underline dotted; color: #141414; padding: 10px; }
+
+/* the edition picker as a proper phone modal */
+:root[data-phone] .scrap {
+  zoom: var(--ui, 3);
+  width: calc(100vw / var(--ui, 3) - 28px);
+  max-width: 26rem;
+  rotate: -1deg;
+  padding: 30px 22px 24px;
+}
+:root[data-phone] .scrap .note { font-size: 2rem; }
+:root[data-phone] .scrap__list button { min-height: 52px; font-size: 1rem; gap: 12px; }
+:root[data-phone] .scrap__list .muted { font-size: 0.8rem; }
+:root[data-phone] .scrap__sw { width: 24px; height: 24px; }
+:root[data-phone] .scrap__foot { flex-direction: column; align-items: center; gap: 6px; margin-top: 16px; }
+:root[data-phone] .scrap__close { font-size: 0.95rem; padding: 10px; }
