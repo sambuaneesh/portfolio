@@ -67,7 +67,14 @@ try { barcodeSvg = code128Svg(barcodeText || 'src', 40); } catch { barcodeSvg = 
 const printed = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date());
 const coverLines = [...featured.map((m) => m.title), achievements[0]?.title, '...and more'].filter(Boolean) as string[];
 
-
+const editions = [
+  { key: 'trash', sw: '#e4605b', blurb: 'the photocopy' },
+  { key: 'blueprint', sw: '#1e4c98', blurb: 'drafting sheets' },
+  { key: 'riso', sw: '#ff48b0', blurb: 'two inks' },
+  { key: 'toner', sw: '#121212', blurb: 'copy of a copy' },
+  { key: 'hotline', sw: '#ff2e88', blurb: 'vhs, 1989' },
+  { key: 'acid', sw: '#d4f53c', blurb: 'rave flyer' },
+];
 
 const ports = [
   me.github && { k: 'GIT', v: me.github.replace(/^https?:\/\/(www\.)?/, ''), href: me.github },
@@ -116,6 +123,21 @@ const ports = [
       <p class="cover__open"><span class="note">psst.</span> <span class="ringed"><a href="#contents">open it</a><Scribble kind="ring" /></span></p>
     </div>
   </Spread>
+
+  <!-- the easter egg: a torn scrap listing the editions -->
+  <div id="editions" class="scrap" popover>
+    <p class="note">pick an edition</p>
+    <ul class="scrap__list">
+      {editions.map((e) => (
+        <li><button type="button" data-edition={e.key}><span class="scrap__sw" style={`--sw:${e.sw}`} aria-hidden="true"></span><b>{e.key}</b> <span class="muted">{e.blurb}</span></button></li>
+      ))}
+      <li><button type="button" data-edition="random"><span class="scrap__sw scrap__sw--rand" aria-hidden="true">?</span><b>surprise me</b> <span class="muted">new one every refresh</span></button></li>
+    </ul>
+    <div class="scrap__foot">
+      <button class="scrap__close" type="button" data-share-edition>copy a link to this edition</button>
+      <button class="scrap__close" type="button" popovertarget="editions" popovertargetaction="hide">close</button>
+    </div>
+  </div>
 
   <!-- 02-03 · contents | letter from the editor -->
   <Spread page={P.contents} zine={Z} runL="contents" runR="manifesto" id="contents" label="Contents and letter from the editor">
@@ -396,6 +418,32 @@ const ports = [
     position: absolute; right: 4px; top: 4px; font-family: var(--font-mono); font-size: 0.72rem;
     color: var(--on-cover); text-transform: uppercase; letter-spacing: 0.1em;
   }
+  /* the edition scrap (popover) */
+  .scrap {
+    margin: auto;
+    padding: 28px 26px 22px;
+    width: min(22rem, calc(100vw - 32px));
+    border: 0;
+    background: #f7f4ea;
+    color: #141414;
+    rotate: -2deg;
+    box-shadow: 8px 10px 0 rgb(0 0 0 / 0.35);
+    clip-path: polygon(0 4%, 6% 0, 13% 3%, 21% 0, 30% 4%, 38% 1%, 47% 4%, 55% 0, 64% 3%, 72% 0, 81% 4%, 90% 1%, 100% 3%, 100% 97%, 93% 100%, 85% 96%, 76% 100%, 67% 97%, 58% 100%, 49% 96%, 40% 100%, 31% 97%, 22% 100%, 13% 96%, 5% 100%, 0 96%);
+  }
+  .scrap::backdrop { background: rgb(0 0 0 / 0.45); }
+  .scrap .note { font-size: 1.6rem; color: #2440a8; margin-bottom: 10px; }
+  .scrap__list { list-style: none; display: grid; gap: 4px; }
+  .scrap__list button {
+    display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 4px;
+    background: none; border: 0; border-bottom: 1px dotted #141414; color: #141414;
+    font-family: var(--font-mono); font-size: 0.85rem; text-align: left; cursor: var(--hand-cursor), pointer;
+  }
+  .scrap__list button:hover, .scrap__list button[aria-pressed='true'] { background: rgb(242 234 76 / 0.6); }
+  .scrap__list .muted { color: #55524b; font-size: 0.72rem; }
+  .scrap__sw { width: 18px; height: 18px; flex: none; background: var(--sw); border: 1.5px solid #141414; }
+  .scrap__sw--rand { display: grid; place-items: center; background: repeating-conic-gradient(#e4605b 0 25%, #1e4c98 0 50%, #ff48b0 0 75%, #d4f53c 0); font-weight: 700; font-size: 0.7rem; }
+  .scrap__foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; }
+  .scrap__close { background: none; border: 0; padding: 0; font-family: var(--font-mono); font-size: 0.75rem; text-decoration: underline dotted; color: #141414; cursor: pointer; }
   .cover__burst { left: 4%; bottom: 12%; width: 124px; height: 124px; }
   .hint { display: flex; align-items: flex-start; gap: 4px; margin: -4px 0 -10px 30%; }
   .hint .scrib--arrow-down { margin-top: 10px; rotate: 20deg; }

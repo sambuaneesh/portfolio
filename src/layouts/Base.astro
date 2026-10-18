@@ -49,15 +49,6 @@ const commands = [
   { l: 'help', h: '?', a: 'help' },
 ].filter(Boolean);
 
-const editions = [
-  { key: 'trash', sw: '#e4605b', blurb: 'the photocopy' },
-  { key: 'blueprint', sw: '#1e4c98', blurb: 'drafting sheets' },
-  { key: 'riso', sw: '#ff48b0', blurb: 'two inks' },
-  { key: 'toner', sw: '#121212', blurb: 'copy of a copy' },
-  { key: 'hotline', sw: '#ff2e88', blurb: 'vhs, 1989' },
-  { key: 'acid', sw: '#d4f53c', blurb: 'rave flyer' },
-];
-
 const sameAs = [me.github, me.linkedin, me.website, me.twitter, me.medium, me.instagram, me.youtube, me.codeforces, ...(settings.extra_links ?? []).map((l) => l.url)].filter(Boolean);
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -81,17 +72,6 @@ const jsonLd = {
     <script is:inline define:vars={{ mobileLayout: settings.mobile_layout }}>
       if (mobileLayout === 'desktop' && Math.min(screen.width, screen.height) < 900) {
         document.getElementById('vp').setAttribute('content', 'width=1280, viewport-fit=cover');
-        // phone chrome (menu button, sheets) is drawn at real phone size on
-        // top of the zoomed-out zine: scale = layout px per device px
-        var d = document.documentElement;
-        d.dataset.phone = '';
-        var setScale = function () {
-          var land = matchMedia('(orientation: landscape)').matches;
-          var w = land ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
-          d.style.setProperty('--ui', String(1280 / w));
-        };
-        setScale();
-        addEventListener('orientationchange', function () { setTimeout(setScale, 200); });
       }
     </script>
     <title>{fullTitle}</title>
@@ -220,39 +200,6 @@ const jsonLd = {
         <a href={u(w.href)} aria-current={ws === w.key ? 'page' : undefined}><span>{w.n}</span><span>{w.label}</span></a>
       ))}
     </nav>
-
-    <!-- phones: a floating menu instead of the top bar -->
-    <button class="fab" type="button" popovertarget="navsheet" aria-label="Menu"><span aria-hidden="true"></span></button>
-    <div id="navsheet" class="navsheet" popover>
-      <p class="navsheet__head"><b>#{settings.zine_issue}</b> {settings.zine_title.toLowerCase()}</p>
-      <nav aria-label="Sections">
-        <ol class="navsheet__list">
-          {WORKSPACES.map((w) => (
-            <li><a href={u(w.href)} aria-current={ws === w.key ? 'page' : undefined}><span class="navsheet__n">{w.n}</span>{w.label}</a></li>
-          ))}
-        </ol>
-      </nav>
-      <div class="navsheet__tools">
-        <button type="button" popovertarget="editions">change edition</button>
-        <button type="button" data-cmd-open>command line</button>
-      </div>
-      <button class="navsheet__close" type="button" popovertarget="navsheet" popovertargetaction="hide">close</button>
-    </div>
-
-  <!-- the easter egg: a torn scrap listing the editions -->
-  <div id="editions" class="scrap" popover>
-    <p class="note">pick an edition</p>
-    <ul class="scrap__list">
-      {editions.map((e) => (
-        <li><button type="button" data-edition={e.key}><span class="scrap__sw" style={`--sw:${e.sw}`} aria-hidden="true"></span><b>{e.key}</b> <span class="muted">{e.blurb}</span></button></li>
-      ))}
-      <li><button type="button" data-edition="random"><span class="scrap__sw scrap__sw--rand" aria-hidden="true">?</span><b>surprise me</b> <span class="muted">new one every refresh</span></button></li>
-    </ul>
-    <div class="scrap__foot">
-      <button class="scrap__close" type="button" data-share-edition>copy a link to this edition</button>
-      <button class="scrap__close" type="button" popovertarget="editions" popovertargetaction="hide">close</button>
-    </div>
-  </div>
 
     <dialog id="cmd" aria-label="Command line">
       <div class="cmd__in"><span aria-hidden="true">:</span><input id="cmd-q" type="text" autocomplete="off" spellcheck="false" placeholder="go to a page or project" aria-controls="cmd-list" role="combobox" aria-expanded="true" /></div>
