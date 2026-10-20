@@ -112,6 +112,7 @@ const ports = [
           </div>
         )}
         <p class="issue-line" aria-hidden="true">{issPre && <small>{issPre}</small>}<b><Ransom text={issBig} /></b>{issPost && <small>{issPost}</small>}</p>
+        <p class="burst-doodle" aria-hidden="true"><span class="note">click me! <span class="doodle-face">&gt;_&lt;</span></span><Scribble kind="arrow-down" /></p>
         <button class="burst cover__burst" type="button" popovertarget="editions" aria-label="Pick an edition"><span class="burst__name"></span><span class="burst__ed">edition</span></button>
       </div>
       <div class="cover__foot">
@@ -173,11 +174,22 @@ const ports = [
           <p class="toc__sec">workbench</p>
           <ul class="toc">
             <li><span class="toc__n">{pg(P.workbench)}</span><a href={u('/projects/')}>The catalogue</a></li>
-            {modules.map((m) => (
+            {modules.filter((m) => !m.vibe).map((m) => (
               <li><span class="toc__n">{pg(P.projects[m.slug])}</span><a href={u(`/projects/${m.slug}/`)}>{m.title}</a></li>
             ))}
           </ul>
         </section>
+        {P.supplement > 0 && (
+          <section class="toc-group">
+            <p class="toc__sec">vibe coded</p>
+            <ul class="toc">
+              <li><span class="toc__n">{pg(P.supplement)}</span><a href={u('/projects/vibe/')}>The supplement</a></li>
+              {modules.filter((m) => m.vibe).map((m) => (
+                <li><span class="toc__n">{pg(P.projects[m.slug])}</span><a href={u(`/projects/${m.slug}/`)}>{m.title}</a></li>
+              ))}
+            </ul>
+          </section>
+        )}
         <section class="toc-group">
           <p class="toc__sec">back of the book</p>
           <ul class="toc">
@@ -445,6 +457,11 @@ const ports = [
   .scrap__foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; }
   .scrap__close { background: none; border: 0; padding: 0; font-family: var(--font-mono); font-size: 0.75rem; text-decoration: underline dotted; color: #141414; cursor: pointer; }
   .cover__burst { left: 4%; bottom: 12%; width: 124px; height: 124px; }
+  /* a pen doodle pointing at the sticker */
+  .burst-doodle { position: absolute; left: 1%; bottom: calc(12% + 132px); display: flex; flex-direction: column; align-items: center; gap: 0; z-index: 4; pointer-events: none; rotate: -8deg; }
+  .burst-doodle .note { font-size: 1.45rem; }
+  .doodle-face { display: inline-block; margin-left: 4px; padding: 0 5px; border: 1.8px solid currentColor; border-radius: 50%; font-size: 1.1rem; rotate: 6deg; }
+  .burst-doodle :global(.scrib--arrow-down) { width: 1.7rem; height: 2.6rem; margin-left: 30px; rotate: 18deg; }
   .hint { display: flex; align-items: flex-start; gap: 4px; margin: -4px 0 -10px 30%; }
   .hint .scrib--arrow-down { margin-top: 10px; rotate: 20deg; }
   .off__note { justify-self: end; margin-top: -6px; }

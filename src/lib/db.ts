@@ -194,8 +194,10 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 
 export interface Module extends Project {
   slug: string;
-  /** Hardware-style part number, e.g. AS-03. Stable as long as order_index is. */
+  /** Hardware-style part number, e.g. AS-03 (VC-02 for vibe-coded ones). */
   part: string;
+  /** In the "vibe coded" supplement (category contains "vibe"). */
+  vibe: boolean;
   repo: { owner: string; name: string } | null;
   pushedAt: string | null;
   license: string | null;
@@ -236,9 +238,16 @@ export function getModules(): Promise<Module[]> {
   if (import.meta.env.DEV && Date.now() - modulesAt > 3000) modulesPromise = null;
   modulesAt = modulesPromise ? modulesAt : Date.now();
   modulesPromise ??= (async () => {
-    const projects = await ordered<Project>('projects');
+    const all = await ordered<Project>('projects');
+    // main workbench first, then the vibe-coded supplement (each keeps its order)
+    const isVibe = (p: Project) => /vibe/i.test(p.category ?? '');
+    const projects = [...all.filter((p) => !isVibe(p)), ...all.filter(isVibe)];
     const seen = new Set<string>();
+    const counters = { AS: 0, VC: 0 };
     return Promise.all(projects.map(async (p, i) => {
+      const vibe = isVibe(p);
+      const prefix = vibe ? 'VC' : 'AS';
+      const n = ++counters[prefix];
       let slug = slugify(p.title) || `module-${i + 1}`;
       while (seen.has(slug)) slug += '-x';
       seen.add(slug);
@@ -247,7 +256,8 @@ export function getModules(): Promise<Module[]> {
       return {
         ...p,
         slug,
-        part: `AS-${String(i + 1).padStart(2, '0')}`,
+        part: `${prefix}-${String(n).padStart(2, '0')}`,
+        vibe,
         repo,
         stars: gh?.stargazers_count ?? p.stars,
         forks: gh?.forks_count ?? p.forks,

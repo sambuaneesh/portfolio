@@ -82,7 +82,7 @@ export const TABLES: TableCfg[] = [
       { k: 'images', label: 'more screenshots', type: 'images' },
       { k: 'language', type: 'text' },
       { k: 'language_color', type: 'color' },
-      { k: 'category', type: 'text' },
+      { k: 'category', type: 'text', help: 'Set to "vibe coded" to put it in the vibe-coded supplement.' },
       { k: 'tags', type: 'list' },
       { k: 'featured', type: 'bool', help: 'shown on the home page (first 4)' },
       { k: 'is_contributed', label: 'team project', type: 'bool' },

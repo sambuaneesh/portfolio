@@ -6,8 +6,9 @@ import { getModules, getBlogPosts, getSiteSettings, slugify } from '../../lib/db
 import { u } from '../../lib/site';
 import { pageMap } from '../../lib/zine';
 
-const [modules, posts, settings] = await Promise.all([getModules(), getBlogPosts(), getSiteSettings()]);
-const P = pageMap(modules, posts.length);
+const [all, posts, settings] = await Promise.all([getModules(), getBlogPosts(), getSiteSettings()]);
+const P = pageMap(all, posts.length);
+const modules = all.filter((m) => !m.vibe);
 const langs = [...new Map(modules.filter((m) => m.language).map((m) => [m.language!, m.language_color])).entries()];
 const half = Math.ceil(modules.length / 2);
 const first = modules[0];

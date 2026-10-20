@@ -319,3 +319,22 @@ document.addEventListener('click', (e) => {
     window.open(a.href, '_blank', 'noopener');
   }
 });
+
+// Pages restored from the back/forward cache, or activated after being
+// prerendered in the background, still carry the edition they were made
+// with. Re-apply the current one (no new roll): a pick wins, then the
+// session's random roll, then the edition baked into the HTML.
+function syncEdition() {
+  const d = document.documentElement;
+  if (d.dataset.preview) return;
+  let pin: string | null = null, roll: string | null = null;
+  try { pin = sessionStorage.getItem('zine-pin'); roll = sessionStorage.getItem('zine-roll'); } catch { /* ignore */ }
+  const want = (pin && THEMES.includes(pin)) ? pin
+    : (d.dataset.random !== undefined && roll && THEMES.includes(roll)) ? roll
+    : d.dataset.baked;
+  if (want && d.dataset.theme !== want) d.dataset.theme = want;
+  markEditions();
+}
+addEventListener('pageshow', (e) => { if (e.persisted) syncEdition(); });
+document.addEventListener('prerenderingchange', syncEdition);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) syncEdition(); });

@@ -1,0 +1,49 @@
+---
+import Base from '../../layouts/Base.astro';
+import Spread from '../../components/Spread.astro';
+import Entry from '../../components/Entry.astro';
+import Ransom from '../../components/Ransom.astro';
+import Scribble from '../../components/Scribble.astro';
+import { getModules, getBlogPosts, getSiteSettings } from '../../lib/db';
+import { u } from '../../lib/site';
+import { pageMap } from '../../lib/zine';
+import { around } from '../../lib/order';
+
+const [all, posts, settings] = await Promise.all([getModules(), getBlogPosts(), getSiteSettings()]);
+const P = pageMap(all, posts.length);
+const vibe = all.filter((m) => m.vibe);
+const half = Math.floor(vibe.length / 2);
+const { prev, next } = around(all, u('/projects/vibe/'));
+---
+<Base title="Vibe coded" crumb="vibe coded" ws="projects" description={`${vibe.length} vibe-coded tools by Aneesh Sambu.`} prevHref={prev?.href} nextHref={next?.href}>
+  <Spread page={P.supplement} zine={settings.zine_title} runL="supplement" runR="vibe coded" label="Vibe-coded supplement"
+    prev={prev ? { href: prev.href, label: prev.label } : null} next={next ? { href: next.href, label: next.label } : null}>
+    <Fragment slot="left">
+      <p class="kicker">supplement · not peer reviewed</p>
+      <div class="vc-top">
+        <h1 class="hed hed--xl vc-head"><Ransom text="Vibe coded" /></h1>
+        <span class="stamp vc-stamp" aria-hidden="true">no warranty</span>
+      </div>
+      <div class="vc-intro">
+        <p class="copy">Tools I wanted to exist by the weekend. An LLM wrote a good part of the code; I wrote the bug reports, and I use all of them daily.</p>
+        <p class="vc-note"><span class="note">handle with care</span><Scribble kind="arrow-down" /></p>
+      </div>
+      <div class="list">{vibe.slice(0, half).map((m) => <Entry m={m} page={P.projects[m.slug]} />)}</div>
+    </Fragment>
+    <Fragment slot="right">
+      <div class="list">{vibe.slice(half).map((m) => <Entry m={m} page={P.projects[m.slug]} />)}</div>
+      <p class="vc-foot mono">issues and PRs welcome · <a href={u('/projects/')}>back to the serious stuff</a></p>
+    </Fragment>
+  </Spread>
+</Base>
+
+<style>
+  .list { display: grid; gap: 12px; }
+  .vc-head { line-height: 1.15; }
+  .vc-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .vc-intro { display: grid; gap: 4px; }
+  .vc-note { display: flex; align-items: flex-start; gap: 4px; margin-left: 30%; }
+  .vc-note :global(.scrib--arrow-down) { margin-top: 8px; rotate: -14deg; }
+  .vc-stamp { flex: none; rotate: 9deg; align-self: center; }
+  .vc-foot { margin-top: auto; font-size: 0.72rem; color: var(--muted); }
+</style>

@@ -7,6 +7,7 @@ import { optimize } from '../../lib/images';
 import { getReadme } from '../../lib/readme';
 import { renderMarkdown } from '../../lib/markdown';
 import { pageMap } from '../../lib/zine';
+import { around } from '../../lib/order';
 
 export async function getStaticPaths() {
   const modules = await getModules();
@@ -56,20 +57,21 @@ const spec: [string, string | null][] = [
   ['license', m.license],
   ['last push', m.pushedAt ? fmtDate(m.pushedAt) : null],
 ];
-const prevHref = prev ? u(`/projects/${prev.slug}/`) : u('/projects/');
-const nextHref = next ? u(`/projects/${next.slug}/`) : u('/cv/');
+const stops = around(modules, u(`/projects/${m.slug}/`));
+const prevHref = stops.prev!.href;
+const nextHref = stops.next!.href;
 ---
 <Base title={m.title} ws="projects" description={m.description} image={ogImage} prevHref={prevHref} nextHref={nextHref}>
-  <Spread fixed page={P.projects[m.slug]} zine={settings.zine_title} runL={`workbench · ${m.part}`} runR={m.title} label={m.title}
-    prev={{ href: prevHref, label: prev ? prev.title : 'catalogue' }}
-    next={{ href: nextHref, label: next ? next.title : 'field log' }}>
+  <Spread fixed page={P.projects[m.slug]} zine={settings.zine_title} runL={`${m.vibe ? 'vibe coded' : 'workbench'} · ${m.part}`} runR={m.title} label={m.title}
+    prev={{ href: prevHref, label: stops.prev!.label }}
+    next={{ href: nextHref, label: stops.next!.label }}>
     <Fragment slot="left">
-      <p class="kicker">workbench · {m.part}</p>
+      <p class="kicker">{m.vibe ? 'supplement · vibe coded' : 'workbench'} · {m.part}</p>
       <h1 class:list={['hed', size, voice, 'proj-title']}>{m.title}</h1>
       <p class="copy dropcap">{m.description}</p>
       {m.tags?.length ? <ul class="tags" aria-label="Tags">{m.tags.map((t) => <li>{t}</li>)}</ul> : null}
       <div class="btns">
-        <span class="stamp punk-only push-stamp" aria-hidden="true">{m.pushedAt ? `last push ${new Date(m.pushedAt).getFullYear()}` : m.github_url ? 'source on github' : 'unreleased'}</span>
+        <span class="stamp punk-only push-stamp" aria-hidden="true">{m.vibe ? 'vibe coded' : m.pushedAt ? `last push ${new Date(m.pushedAt).getFullYear()}` : m.github_url ? 'source on github' : 'unreleased'}</span>
         {m.github_url && <a class="btn btn--hot" href={m.github_url} rel="noopener">source</a>}
         {m.live_url && <a class="btn" href={m.live_url} rel="noopener">live</a>}
       </div>

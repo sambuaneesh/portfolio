@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Spread from '../components/Spread.astro';
 import { getPersonalInfo, getExperience, getEducation, getAchievements, getSkills, getCourses, getLanguages, getModules, getBlogPosts, getSiteSettings } from '../lib/db';
 import { u } from '../lib/site';
+import { workbenchOrder } from '../lib/order';
 import { localeOf } from '../lib/toolchain';
 import { pageMap, pad2 } from '../lib/zine';
 
@@ -11,7 +12,7 @@ const [me, experience, education, achievements, skills, courses, languages, modu
 ]);
 const P = pageMap(modules, posts.length);
 const Z = settings.zine_title;
-const lastProject = modules[modules.length - 1];
+const lastStop = workbenchOrder(modules).at(-2)!;
 
 const skillGroups = [...skills.reduce((map, s) => {
   map.set(s.category, [...(map.get(s.category) ?? []), s]);
@@ -19,7 +20,7 @@ const skillGroups = [...skills.reduce((map, s) => {
 }, new Map<string, typeof skills>())];
 const sortedCourses = [...courses].sort((a, b) => Number(!!b.is_favorite) - Number(!!a.is_favorite));
 const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
-const prevHref = lastProject ? u(`/projects/${lastProject.slug}/`) : u('/projects/');
+const prevHref = lastStop.href;
 ---
 <Base title="CV" crumb="field log" ws="cv" description={`Experience, education, research, skills and coursework of ${me.name}.`} prevHref={prevHref} nextHref={u('/writing/')}>
   <Spread page={P.log} zine={Z} runL="field log" runR="field log · education" label="CV: experience and education"
