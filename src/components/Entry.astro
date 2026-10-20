@@ -22,13 +22,13 @@ const img = shot ? await optimize(shot, 360, 200) : null;
 </article>
 
 <style>
-  .entry { display: grid; grid-template-columns: 7.5rem 1fr; gap: 12px; padding-bottom: 12px; border-bottom: 2px dotted var(--ink); }
+  .entry { display: grid; grid-template-columns: 6.5rem 1fr; gap: 10px; padding-bottom: 9px; border-bottom: 2px dotted var(--ink); }
   .entry:not(:has(.entry__img)) { grid-template-columns: 1fr; }
   .entry__img { display: block; align-self: start; border: 1.5px solid var(--ink); aspect-ratio: 9 / 5; overflow: hidden; }
   .entry__img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
   .entry__txt { display: grid; gap: 4px; min-width: 0; }
   .entry__meta { font-size: 0.72rem; }
   .entry h3 a { text-decoration: none; }
-  .entry .copy { font-size: 0.86rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .entry .copy { font-size: 0.86rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .entry__turn { font-size: 0.7rem; font-weight: 700; }
 </style>

@@ -1,7 +1,7 @@
 // Service worker: make every visit after the first one feel instant.
 // - /_astro/* (fonts, CSS, JS, images): content-hashed names, cache-first.
-// - pages: served from cache straight away and refreshed in the background
-//   (stale-while-revalidate); network only when a page isn't cached yet.
+// - pages: network first with a 1.5 s timeout, then the cached copy (so a
+//   new publish is never hidden behind a stale page, and offline still works).
 // - once the first page is idle, the page tells us to precache the whole
 //   zine (skipped on data-saver / 2G), so later page turns never wait.
 // Each build registers sw.js?v=<build time>; activating it drops the old
@@ -39,16 +39,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // pages and everything else: cached copy now, fresh copy for next time
+  // pages: network first (a publish shows up immediately); if the network is
+  // slow (>1.5 s) or down, the cached copy instead, so it still opens offline
+  if (req.mode === 'navigate') {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE);
+      const key = new Request(url.origin + url.pathname); // ignore ?edition= etc.
+      const fresh = refresh(cache, key);
+      const timeout = new Promise((r) => setTimeout(() => r(null), 1500));
+      const first = await Promise.race([fresh.catch(() => null), timeout]);
+      if (first) return first;
+      const hit = await cache.match(key);
+      if (hit) { event.waitUntil(fresh.catch(() => null)); return hit; }
+      try { return await fresh; } catch { /* offline, never cached */ }
+      return (await cache.match(new URL('./', self.registration.scope).href)) || Response.error();
+    })());
+    return;
+  }
+
+  // other same-origin files: cached copy now, fresh copy for next time
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const key = req.mode === 'navigate' ? new Request(url.origin + url.pathname) : req; // ignore ?edition= etc.
-    const hit = await cache.match(key);
-    const update = refresh(cache, key).catch(() => null);
+    const hit = await cache.match(req);
+    const update = refresh(cache, req).catch(() => null);
     if (hit) { event.waitUntil(update); return hit; }
-    const res = await update;
-    if (res) return res;
-    return (await cache.match(new URL('./', self.registration.scope).href)) || Response.error();
+    return (await update) || Response.error();
   })());
 });
 
