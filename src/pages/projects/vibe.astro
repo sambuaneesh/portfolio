@@ -12,7 +12,9 @@ import { around } from '../../lib/order';
 const [all, posts, settings] = await Promise.all([getModules(), getBlogPosts(), getSiteSettings()]);
 const P = pageMap(all, posts.length);
 const vibe = all.filter((m) => m.vibe);
-const half = Math.floor(vibe.length / 2);
+// the headline and intro fill most of the left page: two entries there,
+// the rest on the right
+const half = Math.min(2, vibe.length);
 const { prev, next } = around(all, u('/projects/vibe/'));
 ---
 <Base title="Vibe coded" crumb="vibe coded" ws="projects" description={`${vibe.length} vibe-coded tools by Aneesh Sambu.`} prevHref={prev?.href} nextHref={next?.href}>
