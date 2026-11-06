@@ -66,7 +66,7 @@ const nextHref = stops.next!.href;
     prev={{ href: prevHref, label: stops.prev!.label }}
     next={{ href: nextHref, label: stops.next!.label }}>
     <Fragment slot="left">
-      <p class="kicker">{m.vibe ? 'supplement · vibe coded' : 'workbench'} · {m.part}</p>
+      <p class="kicker">{m.vibe ? 'workbench · vibe coded' : 'workbench'} · {m.part}</p>
       <h1 class:list={['hed', size, voice, 'proj-title']}>{m.title}</h1>
       <p class="copy dropcap">{m.description}</p>
       {m.tags?.length ? <ul class="tags" aria-label="Tags">{m.tags.map((t) => <li>{t}</li>)}</ul> : null}

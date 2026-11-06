@@ -1,5 +1,5 @@
-// Reading order of the workbench: catalogue -> main projects -> the
-// vibe-coded supplement -> vibe projects -> field log. Page turns and
+// Reading order of the workbench: catalogue -> main projects -> vibe-coded
+// projects -> field log. Page turns and
 // prev/next links all follow this one list.
 import type { Module } from './db';
 import { u } from './site';
@@ -11,7 +11,6 @@ export function workbenchOrder(modules: Module[]): Stop[] {
   return [
     { href: u('/projects/'), label: 'catalogue' },
     ...main.map((m) => ({ href: u(`/projects/${m.slug}/`), label: m.title })),
-    ...(vibe.length ? [{ href: u('/projects/vibe/'), label: 'vibe coded' }] : []),
     ...vibe.map((m) => ({ href: u(`/projects/${m.slug}/`), label: m.title })),
     { href: u('/cv/'), label: 'field log' },
   ];

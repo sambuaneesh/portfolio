@@ -53,7 +53,7 @@ export default defineConfig({
   base: '/portfolio',
   trailingSlash: 'always',
   output: 'static',
-  integrations: [sitemap({ filter: (page) => !page.includes('/admin/') }), snapshot, externalLinks],
+  integrations: [sitemap({ filter: (page) => !page.includes('/admin/') && !page.includes('/projects/vibe/') }), snapshot, externalLinks],
   build: {
     // Every page's CSS is small enough to inline: zero render-blocking requests.
     inlineStylesheets: 'always',

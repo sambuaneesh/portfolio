@@ -179,11 +179,10 @@ const ports = [
             ))}
           </ul>
         </section>
-        {P.supplement > 0 && (
+        {P.vibeCoded > 0 && (
           <section class="toc-group">
             <p class="toc__sec">vibe coded</p>
             <ul class="toc">
-              <li><span class="toc__n">{pg(P.supplement)}</span><a href={u('/projects/vibe/')}>The supplement</a></li>
               {modules.filter((m) => m.vibe).map((m) => (
                 <li><span class="toc__n">{pg(P.projects[m.slug])}</span><a href={u(`/projects/${m.slug}/`)}>{m.title}</a></li>
               ))}
@@ -235,6 +234,7 @@ const ports = [
           </article>
         ))}
       </div>
+      <p class="feat__more mono"><a href={u('/projects/')}>all {modules.length} projects in the catalogue, p. {pg(P.workbench)}</a></p>
     </Fragment>
     <Fragment slot="right">
       <div id="research" class="stack">
@@ -501,6 +501,8 @@ const ports = [
   .feat__item:last-child { border-bottom: 0; }
   .feat__item a { text-decoration: none; }
   .feat__item .copy { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .feat__more { font-size: 0.74rem; font-weight: 700; text-align: right; }
+  .feat__more a::after { content: ' ▸▸▸'; letter-spacing: -0.1em; }
   .feat__meta { display: flex; align-items: baseline; gap: 6px; }
   .feat__meta .turn { margin-left: auto; }
   .one-line { white-space: nowrap; font-size: clamp(1.6rem, calc(var(--pw) * 0.085), 3.6rem); }

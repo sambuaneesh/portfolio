@@ -12,15 +12,14 @@ export function pageMap(modules: Module[], posts: number) {
   const contents = take(2);       // 2-3  contents | letter from the editor
   const issue = take(2);          // 4-5  this issue | research
   const offHours = take(2);       // 6-7  subsystems & off hours | classifieds
-  const workbench = take(2);      // 8-9  project catalogue
   const main = modules.filter((m) => !m.vibe), vibe = modules.filter((m) => m.vibe);
-  const projects: Record<string, number> = Object.fromEntries(main.map((m) => [m.slug, take(2)]));
-  const supplement = vibe.length ? take(2) : 0;   // the vibe-coded supplement
-  for (const m of vibe) projects[m.slug] = take(2);
+  const workbench = take(vibe.length ? 4 : 2);   // 8-9  project catalogue (10-11: its vibe-coded part)
+  const vibeCoded = vibe.length ? workbench + 2 : 0;
+  const projects: Record<string, number> = Object.fromEntries([...main, ...vibe].map((m) => [m.slug, take(2)]));
   const log = take(4);            // cv: two spreads
   const writing = take(2 + posts * 2);
   const contact = take(2);
-  return { cover, contents, issue, offHours, workbench, supplement, projects, log, writing, contact, total: p - 1 };
+  return { cover, contents, issue, offHours, workbench, vibeCoded, projects, log, writing, contact, total: p - 1 };
 }
 
 export const pad2 = (n: number) => String(n).padStart(2, '0');
