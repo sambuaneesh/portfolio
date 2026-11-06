@@ -1,4 +1,4 @@
-import { getImage } from 'astro:assets';
+import { getImage, inferRemoteSize } from 'astro:assets';
 
 export interface Img { src: string; width?: number; height?: number }
 
@@ -15,7 +15,16 @@ export function optimize(src: string, width: number, height?: number): Promise<I
   if (!memo.has(key)) {
     memo.set(key, (async () => {
       try {
-        const img = await getImage({ src, width, ...(height ? { height, fit: 'cover' } : {}), format: 'avif', quality: 60, inferSize: true });
+        // Without a height, keep the source's aspect ratio (and never upscale).
+        // Passing inferSize alone would keep the original height and crop.
+        let size: { width: number; height: number; fit?: 'cover' };
+        if (height) size = { width, height, fit: 'cover' };
+        else {
+          const orig = await inferRemoteSize(src);
+          const w = Math.min(width, orig.width);
+          size = { width: w, height: Math.round((w * orig.height) / orig.width) };
+        }
+        const img = await getImage({ src, ...size, format: 'avif', quality: 60 });
         const w = Number(img.attributes.width) || undefined;
         const h = Number(img.attributes.height) || undefined;
         return { src: img.src, width: w, height: h };

@@ -12,8 +12,8 @@ import { around } from '../../lib/order';
 const [all, posts, settings] = await Promise.all([getModules(), getBlogPosts(), getSiteSettings()]);
 const P = pageMap(all, posts.length);
 const vibe = all.filter((m) => m.vibe);
-// the headline and intro fill most of the left page: two entries there,
-// the rest on the right
+// the headline and intro fill most of the left page: two entries and the
+// footer line there, the rest (five fit) on the right
 const half = Math.min(2, vibe.length);
 const { prev, next } = around(all, u('/projects/vibe/'));
 ---
@@ -31,10 +31,10 @@ const { prev, next } = around(all, u('/projects/vibe/'));
         <p class="vc-note"><span class="note">handle with care</span><Scribble kind="arrow-down" /></p>
       </div>
       <div class="list">{vibe.slice(0, half).map((m) => <Entry m={m} page={P.projects[m.slug]} />)}</div>
+      <p class="vc-foot mono">issues and PRs welcome · <a href={u('/projects/')}>back to the serious stuff</a></p>
     </Fragment>
     <Fragment slot="right">
       <div class="list">{vibe.slice(half).map((m) => <Entry m={m} page={P.projects[m.slug]} />)}</div>
-      <p class="vc-foot mono">issues and PRs welcome · <a href={u('/projects/')}>back to the serious stuff</a></p>
     </Fragment>
   </Spread>
 </Base>
@@ -42,6 +42,8 @@ const { prev, next } = around(all, u('/projects/vibe/'));
 <style>
   .list { display: grid; gap: 12px; }
   .vc-head { line-height: 1.15; }
+  /* acid's extra-wide face pushes the stamp onto its own line otherwise */
+  :global(:root[data-theme='acid']) .vc-head { font-size: clamp(2.1rem, calc(var(--pw) * 0.11), 4.2rem); }
   .vc-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .vc-intro { display: grid; gap: 4px; }
   .vc-note { display: flex; align-items: flex-start; gap: 4px; margin-left: 30%; }
