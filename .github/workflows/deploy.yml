@@ -4,7 +4,8 @@ name: Deploy
 # content can have changed:
 #   - code pushed to main
 #   - "Publish site" in /admin (repository_dispatch: content-update)
-#   - every 6 hours as a safety net (also keeps the Supabase project awake)
+#   - every 6 hours, which refreshes Steam, Monkeytype and GitHub numbers
+#     (and keeps the Supabase project awake)
 #   - manually from the Actions tab
 on:
   push:

@@ -33,8 +33,8 @@ const steamUrl = (settings.extra_links ?? []).find((l) => /steamcommunity\.com/.
 const steam = steamUrl ? await getSteam(steamUrl) : null;
 // only the games I'd recommend make it into the zine
 const reviews = steamUrl ? (await getSteamReviews(steamUrl)).filter((r) => r.recommended).slice(0, 3) : [];
-// Two lists for off hours: recently played (public feed, the default tab)
-// and most played across the whole library (needs STEAM_API_KEY).
+// Two lists for off hours: recently played (the default tab; Steam only
+// counts the last two weeks, so it can be empty) and most played overall.
 const withImg = <T extends { capsule: string }>(list: T[]) =>
   Promise.all(list.slice(0, 5).map(async (g) => ({ ...g, img: g.capsule ? await optimize(g.capsule, 184, 69) : null })));
 const games = steam ? await withImg(steam.games) : [];
@@ -311,18 +311,18 @@ const ports = [
           </li>
         ))}
       </ul>
-      {games.length > 0 && steam && (
+      {(games.length > 0 || topGames.length > 0) && steam && (
         <div class="off">
           <p class="boxhead">off hours · <a href={steam.url} rel="noopener">{steam.handle}</a></p>
           <p class="note note--tilt off__note">research, obviously →</p>
           <div class="gtabs">
-            <input type="radio" name="games" id="g-recent" class="sr-only" checked />
-            {topGames.length > 0 && <input type="radio" name="games" id="g-top" class="sr-only" />}
+            {games.length > 0 && <input type="radio" name="games" id="g-recent" class="sr-only" checked />}
+            {topGames.length > 0 && <input type="radio" name="games" id="g-top" class="sr-only" checked={games.length === 0} />}
             <div class="gtabs__bar" role="radiogroup" aria-label="Games list">
-              <label for="g-recent">recently played</label>
+              {games.length > 0 && <label for="g-recent">recently played</label>}
               {topGames.length > 0 && <label for="g-top">most played</label>}
             </div>
-            <ul class="games games--recent taped taped--top">
+            {games.length > 0 && <ul class="games games--recent taped taped--top">
               {games.map((g) => (
                 <li>
                   {g.img && <span class="games__img"><img src={g.img.src} width="92" height="35" alt="" loading="lazy" decoding="async" /></span>}
@@ -330,7 +330,7 @@ const ports = [
                   <span class="mono">{g.hoursTotal} h</span>
                 </li>
               ))}
-            </ul>
+            </ul>}
             {topGames.length > 0 && (
               <ul class="games games--top taped taped--top">
                 {topGames.map((g, i) => (
